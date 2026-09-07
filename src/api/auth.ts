@@ -1,5 +1,7 @@
-import { apiRequest } from "@/api/client"
-import { getAuthToken } from "@/auth/token"
+import {
+  apiRequest,
+  authenticatedApiRequest,
+} from "@/api/client"
 
 export type RegisterRequest = {
   login: string
@@ -47,7 +49,9 @@ export async function authenticate(
   })
 }
 
-export async function activateAccount(key: string): Promise<null> {
+export async function activateAccount(
+  key: string
+): Promise<null> {
   await apiRequest<void>(
     `/api/activate?key=${encodeURIComponent(key)}`
   )
@@ -56,17 +60,5 @@ export async function activateAccount(key: string): Promise<null> {
 }
 
 export async function getAccount(): Promise<AccountResponse> {
-  const token = getAuthToken()
-
-  if (!token) {
-    throw new Error("Cannot load account without an authentication token")
-  }
-
-  return apiRequest<AccountResponse>("/api/account", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
+  return authenticatedApiRequest<AccountResponse>("/api/account")
 }
-
-
