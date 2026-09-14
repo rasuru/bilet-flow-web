@@ -10,7 +10,7 @@ import {
 } from "@/auth/token"
 import { ActivateAccountPage } from "@/pages/account/ActivateAccountPage"
 import { AuthPage } from "@/pages/auth/AuthPage"
-import { HomePage } from "@/pages/home/HomePage"
+import { Dashboard } from "@/pages/organizer/Dashboard.tsx"
 
 function RootPage() {
   const [authRevision, authChanged] = useReducer(
@@ -75,7 +75,7 @@ function RootPage() {
     )
   }
 
-  return <HomePage />
+  return <Dashboard />
 }
 
 export function App() {
