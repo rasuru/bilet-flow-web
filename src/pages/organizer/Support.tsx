@@ -15,6 +15,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart.tsx"
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts" //fix color of bar
 
 //Authorized staff shall be able to assign a case and change its status among Open, In Progress, Waiting for Customer, and Resolved.
 type SupportStatus = "open" | "inProgress" | "waiting" | "resolved"
@@ -79,8 +86,97 @@ function StatusBadge({ status }: { status: SupportStatus }) {
   )
 }
 
+const summaryChartConfig = {
+  value: {
+    label: "Cases",
+  },
+  open: {
+    label: "Open",
+    color: "hsl(var(--chart-1))",
+  },
+  inProgress: {
+    label: "In progress",
+    color: "hsl(var(--chart-2))",
+  },
+  waiting: {
+    label: "Waiting for you",
+    color: "hsl(var(--chart-3))",
+  },
+  resolved: {
+    label: "Resolved",
+    color: "hsl(var(--chart-4))",
+  },
+} satisfies ChartConfig
 
+function SummaryChart({
+  summary,
+}: {
+  summary: {
+    open: number
+    inProgress: number
+    waiting: number
+    resolved: number
+  }
+}) {
+  const data = [
+    {
+      status: "open",
+      label: "Open",
+      value: summary.open,
+      fill: "var(--color-open)",
+    },
+    {
+      status: "inProgress",
+      label: "In progress",
+      value: summary.inProgress,
+      fill: "var(--color-inProgress)",
+    },
+    {
+      status: "waiting",
+      label: "Waiting",
+      value: summary.waiting,
+      fill: "var(--color-waiting)",
+    },
+    {
+      status: "resolved",
+      label: "Resolved",
+      value: summary.resolved,
+      fill: "var(--color-resolved)",
+    },
+  ]
+  return (
+    <Card className="shadow-none">
+      <CardHeader>
+        <CardTitle className="text-base font-semibold tracking-tight">
+          Event summary
+        </CardTitle>
+        <CardDescription>Upcoming, active, and drafted events</CardDescription>
+      </CardHeader>
 
+      <CardContent>
+        <ChartContainer
+          config={summaryChartConfig}
+          className="h-[220px] w-full"
+        >
+          <BarChart data={data} margin={{ left: 0, right: 0 }}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="label"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Bar dataKey="value" radius={4} />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  )
+}
 function SupportCaseCard({ supportCase }: { supportCase: SupportCase }) {
   return (
     <Card className="group shadow-none transition-colors hover:border-foreground/20">
@@ -152,6 +248,7 @@ export function Support() {
       ).length,
     }
   }, [])
+
   const filteredCases = useMemo(() => {
     return supportCases.filter(
       (supportCase) => supportCase.status === activeTab
@@ -177,35 +274,9 @@ export function Support() {
             </Button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="shadow-none">
-              <CardHeader className="pb-2">
-                <CardDescription>Open</CardDescription>
-                <CardTitle className="text-2xl">{summary.open}</CardTitle>
-              </CardHeader>
-            </Card>
-
-            <Card className="shadow-none">
-              <CardHeader className="pb-2">
-                <CardDescription>In progress</CardDescription>
-                <CardTitle className="text-2xl">{summary.inProgress}</CardTitle>
-              </CardHeader>
-            </Card>
-
-            <Card className="shadow-none">
-              <CardHeader className="pb-2">
-                <CardDescription>Waiting for you</CardDescription>
-                <CardTitle className="text-2xl">{summary.waiting}</CardTitle>
-              </CardHeader>
-            </Card>
-
-            <Card className="shadow-none">
-              <CardHeader className="pb-2">
-                <CardDescription>Resolved</CardDescription>
-                <CardTitle className="text-2xl">{summary.resolved}</CardTitle>
-              </CardHeader>
-            </Card>
-          </div>
+          <section>
+            <SummaryChart summary={summary} />
+          </section>
 
           <section className="space-y-4">
             <div>
@@ -214,18 +285,45 @@ export function Support() {
               </h2>
             </div>
 
-            <div className="flex gap-1 overflow-x-auto rounded-lg border bg-muted/30 p-1">
-              {tabs.map((tab) => (
-                <Button
-                  key={tab}
-                  variant={activeTab === tab ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setActiveTab(tab)}
-                  className="shrink-0"
-                >
-                  {statusLabels[tab]}
-                </Button>
-              ))}
+            <div className="overflow-x-auto border-b">
+              <div className="flex min-w-max gap-1">
+                {tabs.map((tab) => {
+                  const count = supportCases.filter(
+                    (supportCase) => supportCase.status === tab
+                  ).length
+
+                  const isActive = activeTab === tab
+
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveTab(tab)}
+                      className={`relative px-3 py-3 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {statusLabels[tab]}
+
+                      <span
+                        className={`ml-2 rounded-full px-1.5 py-0.5 text-xs ${
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {count}
+                      </span>
+
+                      {isActive && (
+                        <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {filteredCases.length > 0 ? (
