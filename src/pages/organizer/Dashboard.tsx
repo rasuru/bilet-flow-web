@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts" //change color of chart
 import {
   AlertCircle,
   ArrowRight,

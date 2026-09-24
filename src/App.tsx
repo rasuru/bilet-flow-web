@@ -11,9 +11,10 @@ import {
 import { ActivateAccountPage } from "@/pages/account/ActivateAccountPage"
 import { AuthPage } from "@/pages/auth/AuthPage"
 import { Dashboard } from "@/pages/organizer/Dashboard.tsx"
+import { Support } from "@/pages/organizer/Support.tsx"
 
 function RootPage() {
-  const [authRevision, authChanged] = useReducer(
+  /* const [authRevision, authChanged] = useReducer(
     (revision: number) => revision + 1,
     0
   )
@@ -73,9 +74,10 @@ function RootPage() {
         </div>
       </main>
     )
-  }
+  } */
 
-  return <Dashboard />
+  //return <Dashboard />
+  return <Support />
 }
 
 export function App() {
