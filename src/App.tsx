@@ -12,6 +12,8 @@ import { ActivateAccountPage } from "@/pages/account/ActivateAccountPage"
 import { AuthPage } from "@/pages/auth/AuthPage"
 import { Dashboard } from "@/pages/organizer/Dashboard.tsx"
 import { Support } from "@/pages/organizer/Support.tsx"
+import { OrganizerProfile } from "@/pages/organizer/OrganizerProfile.tsx"
+import Events from "@/pages/organizer/Events.tsx"
 
 function RootPage() {
   /* const [authRevision, authChanged] = useReducer(
@@ -77,7 +79,9 @@ function RootPage() {
   } */
 
   //return <Dashboard />
-  return <Support />
+  //return <Support />
+  //return <OrganizerProfile />
+  return <Events />
 }
 
 export function App() {
