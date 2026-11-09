@@ -1,8 +1,3 @@
-import {
-  clearAuthToken,
-  getAuthToken,
-} from "@/auth/token"
-
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"
 
@@ -27,11 +22,7 @@ export class ApiError extends Error {
   readonly status: number
   readonly body: ApiErrorBody | undefined
 
-  constructor(
-    status: number,
-    message: string,
-    body: ApiErrorBody | undefined
-  ) {
+  constructor(status: number, message: string, body: ApiErrorBody | undefined) {
     super(message)
     this.name = "ApiError"
     this.status = status
@@ -43,10 +34,7 @@ function isApiErrorBody(value: unknown): value is ApiErrorBody {
   return typeof value === "object" && value !== null
 }
 
-function errorMessage(
-  status: number,
-  body: unknown
-): string {
+function errorMessage(status: number, body: unknown): string {
   if (isApiErrorBody(body)) {
     if (body.detail) {
       return body.detail
@@ -117,33 +105,12 @@ export async function apiRequest<T>(
   return body as T
 }
 
-export async function authenticatedApiRequest<T>(
+export function authenticatedApiRequest<T>(
   path: string,
+  token: string,
   init: RequestInit = {}
 ): Promise<T> {
-  const token = getAuthToken()
-
-  if (!token) {
-    throw new ApiError(
-      401,
-      "Authentication required",
-      undefined
-    )
-  }
-
   const headers = new Headers(init.headers)
   headers.set("Authorization", `Bearer ${token}`)
-
-  try {
-    return await apiRequest<T>(path, {
-      ...init,
-      headers,
-    })
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      clearAuthToken()
-    }
-
-    throw error
-  }
+  return apiRequest<T>(path, { ...init, headers })
 }

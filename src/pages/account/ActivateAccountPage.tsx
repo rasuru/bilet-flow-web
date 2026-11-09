@@ -1,40 +1,21 @@
-import { useQuery } from "@tanstack/react-query"
-
-import { activateAccount } from "@/api/auth"
 import { buttonVariants } from "@/components/ui/button"
+import { useActivateAccountViewModel } from "./useActivateAccountViewModel"
 
-function PageContainer({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function PageContainer({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex min-h-svh items-center justify-center p-6">
-      <section className="w-full max-w-sm">
-        {children}
-      </section>
+      <section className="w-full max-w-sm">{children}</section>
     </main>
   )
 }
 
 export function ActivateAccountPage() {
-  const key = new URLSearchParams(
-    window.location.search
-  ).get("key")
+  const { hasKey, isActivating, errorMessage } = useActivateAccountViewModel()
 
-  const activationQuery = useQuery({
-    queryKey: ["account-activation", key],
-    queryFn: () => activateAccount(key!),
-    enabled: Boolean(key),
-    retry: false,
-  })
-
-  if (!key) {
+  if (!hasKey) {
     return (
       <PageContainer>
-        <h1 className="text-2xl font-semibold">
-          Invalid activation link
-        </h1>
+        <h1 className="text-2xl font-semibold">Invalid activation link</h1>
 
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           This activation link does not contain an activation key.
@@ -52,28 +33,24 @@ export function ActivateAccountPage() {
     )
   }
 
-  if (activationQuery.isPending) {
+  if (isActivating) {
     return (
       <PageContainer>
-        <p className="text-sm text-muted-foreground">
-          Activating account…
-        </p>
+        <p className="text-sm text-muted-foreground">Activating account…</p>
       </PageContainer>
     )
   }
 
-  if (activationQuery.isError) {
+  if (errorMessage !== undefined) {
     return (
       <PageContainer>
-        <h1 className="text-2xl font-semibold">
-          Account activation failed
-        </h1>
+        <h1 className="text-2xl font-semibold">Account activation failed</h1>
 
         <p
           className="mt-2 text-sm leading-relaxed text-destructive"
           role="alert"
         >
-          {activationQuery.error.message}
+          {errorMessage}
         </p>
 
         <a
@@ -91,9 +68,7 @@ export function ActivateAccountPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold">
-        Account verified
-      </h1>
+      <h1 className="text-2xl font-semibold">Account verified</h1>
 
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
         Your account has been activated. You can now log in.
@@ -110,5 +85,3 @@ export function ActivateAccountPage() {
     </PageContainer>
   )
 }
-
-

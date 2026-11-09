@@ -1,7 +1,4 @@
-import {
-  apiRequest,
-  authenticatedApiRequest,
-} from "@/api/client"
+import { apiRequest, authenticatedApiRequest } from "@/api/client"
 
 export type RegisterRequest = {
   login: string
@@ -31,9 +28,7 @@ export type AccountResponse = {
   authorities: string[]
 }
 
-export async function registerAccount(
-  request: RegisterRequest
-): Promise<void> {
+export async function registerAccount(request: RegisterRequest): Promise<void> {
   await apiRequest<void>("/api/register", {
     method: "POST",
     body: JSON.stringify(request),
@@ -49,16 +44,10 @@ export async function authenticate(
   })
 }
 
-export async function activateAccount(
-  key: string
-): Promise<null> {
-  await apiRequest<void>(
-    `/api/activate?key=${encodeURIComponent(key)}`
-  )
-
-  return null
+export async function activateAccount(key: string): Promise<void> {
+  await apiRequest<void>(`/api/activate?key=${encodeURIComponent(key)}`)
 }
 
-export async function getAccount(): Promise<AccountResponse> {
-  return authenticatedApiRequest<AccountResponse>("/api/account")
+export async function getAccount(token: string): Promise<AccountResponse> {
+  return authenticatedApiRequest<AccountResponse>("/api/account", token)
 }
