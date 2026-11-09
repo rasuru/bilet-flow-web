@@ -1,149 +1,97 @@
-import {
-  clearAuthToken,
-  getAuthToken,
-} from "@/auth/token"
+import { ApiError } from "@/api/problems"
 
-const API_BASE_URL =
+export { ApiError, problemTypes } from "@/api/problems"
+export type { ApiErrorBody, ApiFieldError } from "@/api/problems"
+
+const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"
+).replace(/\/+$/, "")
 
-export type ApiFieldError = {
-  objectName?: string
-  field?: string
-  message?: string
+type ApiOptions = {
+  method?: "GET" | "POST" | "PUT" | "DELETE"
+  token?: string
+  json?: object
+  headers?: HeadersInit
 }
 
-export type ApiErrorBody = {
-  type?: string
-  title?: string
-  status?: number
-  detail?: string
-  message?: string
-  path?: string
-  errorKey?: string
-  fieldErrors?: ApiFieldError[]
-}
+type QueryValue = string | number | boolean | readonly string[] | undefined
 
-export class ApiError extends Error {
-  readonly status: number
-  readonly body: ApiErrorBody | undefined
+export function withQuery(path: string, query: Record<string, QueryValue>) {
+  const params = new URLSearchParams()
 
-  constructor(
-    status: number,
-    message: string,
-    body: ApiErrorBody | undefined
-  ) {
-    super(message)
-    this.name = "ApiError"
-    this.status = status
-    this.body = body
-  }
-}
-
-function isApiErrorBody(value: unknown): value is ApiErrorBody {
-  return typeof value === "object" && value !== null
-}
-
-function errorMessage(
-  status: number,
-  body: unknown
-): string {
-  if (isApiErrorBody(body)) {
-    if (body.detail) {
-      return body.detail
-    }
-
-    if (body.title) {
-      return body.title
-    }
-
-    if (body.message) {
-      return body.message
+  for (const [name, value] of Object.entries(query)) {
+    if (value === undefined) continue
+    if (typeof value === "object") {
+      for (const item of value) params.append(name, item)
+    } else {
+      params.set(name, String(value))
     }
   }
 
-  return `Request failed with status ${status}`
+  const search = params.toString()
+  return search ? `${path}?${search}` : path
 }
 
-async function readBody(response: Response): Promise<unknown> {
-  const text = await response.text()
-
-  if (!text) {
-    return undefined
-  }
-
-  const contentType = response.headers.get("content-type")
-
-  if (
-    contentType?.includes("application/json") ||
-    contentType?.includes("application/problem+json")
-  ) {
-    try {
-      return JSON.parse(text) as unknown
-    } catch {
-      return text
-    }
-  }
-
-  return text
-}
-
-export async function apiRequest<T>(
+async function request(
   path: string,
-  init: RequestInit = {}
-): Promise<T> {
-  const headers = new Headers(init.headers)
-
-  if (init.body !== undefined && !headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json")
-  }
+  options: ApiOptions = {}
+): Promise<Response> {
+  const { method, token, json } = options
+  const headers = new Headers(options.headers)
+  if (token !== undefined) headers.set("Authorization", `Bearer ${token}`)
+  if (json !== undefined) headers.set("Content-Type", "application/json")
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
+    method,
     headers,
+    body: json === undefined ? undefined : JSON.stringify(json),
   })
 
-  const body = await readBody(response)
-
   if (!response.ok) {
-    const errorBody = isApiErrorBody(body) ? body : undefined
-
-    throw new ApiError(
-      response.status,
-      errorMessage(response.status, body),
-      errorBody
-    )
+    // Error bodies are JSON even when the successful response is a file.
+    const problem: unknown = await response.json().catch(() => undefined)
+    throw new ApiError(response.status, problem)
   }
 
-  return body as T
+  return response
 }
 
-export async function authenticatedApiRequest<T>(
+export async function requestJson<T>(
   path: string,
-  init: RequestInit = {}
+  options?: ApiOptions
 ): Promise<T> {
-  const token = getAuthToken()
+  const response = await request(path, options)
+  return response.json() as Promise<T>
+}
 
-  if (!token) {
-    throw new ApiError(
-      401,
-      "Authentication required",
-      undefined
-    )
-  }
+export async function requestEmpty(
+  path: string,
+  options?: ApiOptions
+): Promise<void> {
+  await request(path, options)
+}
 
-  const headers = new Headers(init.headers)
-  headers.set("Authorization", `Bearer ${token}`)
+export async function requestFile(path: string, token: string): Promise<Blob> {
+  return (await request(path, { token })).blob()
+}
 
-  try {
-    return await apiRequest<T>(path, {
-      ...init,
-      headers,
-    })
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      clearAuthToken()
-    }
+export type Page<T> = {
+  items: T[]
+  totalCount: number | null
+  linkHeader: string | null
+}
 
-    throw error
+export async function requestPage<T>(
+  path: string,
+  token: string
+): Promise<Page<T>> {
+  const response = await request(path, { token })
+  const count = response.headers.get("X-Total-Count")
+  const total = count !== null && /^\d+$/.test(count) ? Number(count) : NaN
+
+  return {
+    items: (await response.json()) as T[],
+    totalCount: Number.isSafeInteger(total) ? total : null,
+    linkHeader: response.headers.get("Link"),
   }
 }
