@@ -3,7 +3,10 @@ import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { sessionRepository } from "@/auth/sessionRepository"
+import {
+  AccountRequestError,
+  sessionRepository,
+} from "@/auth/sessionRepository"
 
 const schema = z.object({
   username: z
@@ -31,6 +34,15 @@ export function useSignInViewModel() {
 
   const mutation = useMutation({
     mutationFn: sessionRepository.signIn,
+    onError: (error) => {
+      if (!(error instanceof AccountRequestError)) return
+
+      for (const { field, message, code } of error.fieldErrors) {
+        if (field === "username" || field === "password") {
+          form.setError(field, { type: code ?? "server", message })
+        }
+      }
+    },
   })
 
   return {

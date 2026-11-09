@@ -4,6 +4,9 @@ import { authenticate, getAccount } from "@/api/auth"
 import type { AccountResponse, AuthenticateRequest } from "@/api/auth"
 import { ApiError } from "@/api/client"
 import { clearAuthToken, getAuthToken, storeAuthToken } from "@/auth/token"
+import { accountRequest } from "./accountRequestError"
+
+export { AccountRequestError } from "./accountRequestError"
 
 type SessionState =
   | { status: "restoring" }
@@ -64,8 +67,8 @@ function restoreSession() {
 async function signIn(request: AuthenticateRequest) {
   const attempt = ++revision
   restoration = undefined
-  const { id_token: token } = await authenticate(request)
-  const account = await getAccount(token)
+  const { id_token: token } = await accountRequest(() => authenticate(request))
+  const account = await accountRequest(() => getAccount(token))
   if (attempt !== revision) return
 
   storeAuthToken(token, request.rememberMe)

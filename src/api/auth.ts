@@ -1,9 +1,12 @@
-import { apiRequest, authenticatedApiRequest } from "@/api/client"
+import { ApiError, requestEmpty, requestJson, withQuery } from "@/api/client"
 
 export type RegisterRequest = {
   login: string
   email: string
   password: string
+  firstName?: string
+  lastName?: string
+  langKey?: string
 }
 
 export type AuthenticateRequest = {
@@ -19,35 +22,84 @@ export type AuthenticateResponse = {
 export type AccountResponse = {
   id: number
   login: string
-  firstName?: string
-  lastName?: string
-  email?: string
-  imageUrl?: string
+  firstName: string | null
+  lastName: string | null
+  email: string | null
+  imageUrl: string | null
   activated: boolean
-  langKey?: string
+  langKey: string | null
   authorities: string[]
 }
 
-export async function registerAccount(request: RegisterRequest): Promise<void> {
-  await apiRequest<void>("/api/register", {
+export type UpdateAccountRequest = {
+  firstName?: string | null
+  lastName?: string | null
+  email?: string | null
+  imageUrl?: string | null
+  langKey?: string | null
+}
+
+export function registerAccount(json: RegisterRequest) {
+  return requestEmpty("/api/register", { method: "POST", json })
+}
+
+export function authenticate(json: AuthenticateRequest) {
+  return requestJson<AuthenticateResponse>("/api/authenticate", {
     method: "POST",
-    body: JSON.stringify(request),
+    json,
   })
 }
 
-export async function authenticate(
-  request: AuthenticateRequest
-): Promise<AuthenticateResponse> {
-  return apiRequest<AuthenticateResponse>("/api/authenticate", {
+export async function isAuthenticated(token?: string): Promise<boolean> {
+  try {
+    await requestEmpty("/api/authenticate", { token })
+    return true
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return false
+    throw error
+  }
+}
+
+export function activateAccount(key: string) {
+  return requestEmpty(withQuery("/api/activate", { key }))
+}
+
+export function getAccount(token: string) {
+  return requestJson<AccountResponse>("/api/account", { token })
+}
+
+/** Include the current values for fields the user wants to keep. */
+export function updateAccount(token: string, json: UpdateAccountRequest) {
+  return requestEmpty("/api/account", { token, method: "POST", json })
+}
+
+export function changePassword(
+  token: string,
+  json: {
+    currentPassword: string
+    newPassword: string
+  }
+) {
+  return requestEmpty("/api/account/change-password", {
+    token,
     method: "POST",
-    body: JSON.stringify(request),
+    json,
   })
 }
 
-export async function activateAccount(key: string): Promise<void> {
-  await apiRequest<void>(`/api/activate?key=${encodeURIComponent(key)}`)
+export function requestPasswordReset(email: string) {
+  return requestEmpty("/api/account/reset-password/init", {
+    method: "POST",
+    json: { email },
+  })
 }
 
-export async function getAccount(token: string): Promise<AccountResponse> {
-  return authenticatedApiRequest<AccountResponse>("/api/account", token)
+export function finishPasswordReset(json: {
+  key: string
+  newPassword: string
+}) {
+  return requestEmpty("/api/account/reset-password/finish", {
+    method: "POST",
+    json,
+  })
 }

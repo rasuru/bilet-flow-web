@@ -3,7 +3,10 @@ import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { registerAccount } from "@/api/auth"
+import {
+  AccountRequestError,
+  accountRepository,
+} from "@/auth/accountRepository"
 
 const schema = z
   .object({
@@ -12,9 +15,6 @@ const schema = z
       .min(1, "Username is required")
       .max(50, "Username must be at most 50 characters"),
     email: z
-      .string()
-      .min(5, "Email is too short")
-      .max(254, "Email is too long")
       .email("Enter a valid email address"),
     password: z
       .string()
@@ -42,12 +42,34 @@ export function useRegisterViewModel() {
 
   const mutation = useMutation({
     mutationFn: (values: RegisterFormValues) =>
-      registerAccount({
+      accountRepository.register({
         login: values.login,
         email: values.email,
         password: values.password,
       }),
+    onError: (error) => {
+      if (!(error instanceof AccountRequestError)) return
+
+      const { duplicateField } = error
+
+      if (duplicateField) {
+        form.setError(duplicateField, {
+          type: "server",
+          message: error.message,
+        })
+      }
+
+      for (const { field, message, code } of error.fieldErrors) {
+        if (field === "login" || field === "email" || field === "password") {
+          form.setError(field, { type: code ?? "server", message })
+        }
+      }
+    },
   })
+
+  const error = mutation.error
+  const isDuplicate =
+    error instanceof AccountRequestError && error.duplicateField !== undefined
 
   return {
     register: form.register,
@@ -56,7 +78,7 @@ export function useRegisterViewModel() {
       if (!mutation.isPending) mutation.mutate(values)
     }),
     isSubmitting: mutation.isPending,
-    formError: mutation.error?.message,
+    formError: isDuplicate ? undefined : error?.message,
     isRegistered: mutation.isSuccess,
   }
 }
