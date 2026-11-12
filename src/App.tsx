@@ -1,13 +1,30 @@
+import type { ReactNode } from "react"
 import { Route, Switch } from "wouter"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { Button } from "@/components/ui/button"
 import { ActivateAccountPage } from "@/pages/account/ActivateAccountPage"
+import {
+  FinishPasswordResetPage,
+  RequestPasswordResetPage,
+} from "@/pages/account/PasswordResetPages"
 import { AuthPage } from "@/pages/auth/AuthPage"
 import { HomePage } from "@/pages/home/HomePage"
 
-function RootPage() {
-  const { status, errorMessage, retry } = useSessionViewModel()
+import { SettingsPage } from "@/pages/settings/SettingsPage"
+
+type SignedInSession = Extract<
+  ReturnType<typeof useSessionViewModel>,
+  { status: "signedIn" }
+>
+
+function SignedInRoute({
+  children,
+}: {
+  children: (session: SignedInSession) => ReactNode
+}) {
+  const session = useSessionViewModel()
+  const { status, errorMessage, retry } = session
 
   if (status === "signedOut") {
     return <AuthPage />
@@ -38,7 +55,7 @@ function RootPage() {
     )
   }
 
-  return <HomePage />
+  return children(session)
 }
 
 export function App() {
@@ -46,7 +63,25 @@ export function App() {
     <Switch>
       <Route path="/account/activate" component={ActivateAccountPage} />
 
-      <Route path="/" component={RootPage} />
+      <Route
+        path="/account/reset/request"
+        component={RequestPasswordResetPage}
+      />
+      <Route path="/account/reset/finish" component={FinishPasswordResetPage} />
+      <Route path="/account/settings">
+        <SignedInRoute>
+          {({ account, sessionId }) => (
+            <SettingsPage
+              key={sessionId}
+              account={account}
+              sessionId={sessionId}
+            />
+          )}
+        </SignedInRoute>
+      </Route>
+      <Route path="/">
+        <SignedInRoute>{() => <HomePage />}</SignedInRoute>
+      </Route>
 
       <Route>
         <main className="p-6">

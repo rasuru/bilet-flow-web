@@ -1,12 +1,14 @@
+import { Link } from "wouter"
+
 import { Button } from "@/components/ui/button"
 import { useSignInViewModel } from "./useSignInViewModel"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 
 type LoginFormProps = {
   onRegister: () => void
 }
-
-const inputClassName =
-  "mt-1 h-9 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-shadow focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 
 export function LoginForm({ onRegister }: LoginFormProps) {
   const { register, fieldErrors, submit, isSubmitting, formError } =
@@ -14,51 +16,50 @@ export function LoginForm({ onRegister }: LoginFormProps) {
 
   return (
     <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
-      <div>
-        <label className="text-sm font-medium" htmlFor="login-username">
-          Username or email
-        </label>
+      <Field>
+        <FieldLabel htmlFor="login-username">Username or email</FieldLabel>
 
-        <input
+        <Input
           id="login-username"
           autoComplete="username"
           aria-invalid={fieldErrors.username ? true : undefined}
-          className={inputClassName}
           {...register("username")}
         />
 
         {fieldErrors.username && (
-          <p className="mt-1 text-sm text-destructive">
-            {fieldErrors.username.message}
-          </p>
+          <FieldDescription>{fieldErrors.username.message}</FieldDescription>
         )}
-      </div>
+      </Field>
 
-      <div>
-        <label className="text-sm font-medium" htmlFor="login-password">
-          Password
-        </label>
+      <Field>
+        <FieldLabel htmlFor="login-password">Password</FieldLabel>
 
-        <input
+        <Input
           id="login-password"
           type="password"
           autoComplete="current-password"
           aria-invalid={fieldErrors.password ? true : undefined}
-          className={inputClassName}
           {...register("password")}
         />
 
         {fieldErrors.password && (
-          <p className="mt-1 text-sm text-destructive">
-            {fieldErrors.password.message}
-          </p>
+          <FieldDescription>{fieldErrors.password.message}</FieldDescription>
         )}
-      </div>
+      </Field>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" {...register("rememberMe")} />
-        Remember me
-      </label>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <Field orientation="horizontal" className="w-auto">
+          <Checkbox id="remember-me" {...register("rememberMe")} />
+          <FieldLabel htmlFor="remember-me">Remember me</FieldLabel>
+        </Field>
+
+        <Link
+          to="/account/reset/request"
+          className="underline underline-offset-4"
+        >
+          Forgot password?
+        </Link>
+      </div>
 
       {formError && (
         <p className="text-sm text-destructive" role="alert">
@@ -72,13 +73,13 @@ export function LoginForm({ onRegister }: LoginFormProps) {
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <button
-          type="button"
-          className="font-medium text-foreground underline underline-offset-4"
+        <Button
+          variant={"link"}
+          className="text-foreground"
           onClick={onRegister}
         >
           Sign up
-        </button>
+        </Button>
       </p>
     </form>
   )

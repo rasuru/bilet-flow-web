@@ -15,7 +15,7 @@ export function useSessionViewModel() {
   }, [])
 
   return {
-    status: session.status,
+    ...session,
     errorMessage:
       session.status === "restoreFailed"
         ? session.error instanceof Error

@@ -14,8 +14,7 @@ const schema = z
       .string()
       .min(1, "Username is required")
       .max(50, "Username must be at most 50 characters"),
-    email: z
-      .email("Enter a valid email address"),
+    email: z.email("Enter a valid email address"),
     password: z
       .string()
       .min(4, "Password must be at least 4 characters")
