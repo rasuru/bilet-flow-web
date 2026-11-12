@@ -15,12 +15,6 @@ export function AuthPage() {
           <h1 className="text-2xl font-semibold">
             {mode === "login" ? "Log in" : "Create an account"}
           </h1>
-
-          <p className="mt-2 text-sm text-muted-foreground">
-            {mode === "login"
-              ? "Log in to continue to BiletFlow."
-              : "Create your BiletFlow account."}
-          </p>
         </header>
 
         {mode === "login" ? (

@@ -47,6 +47,7 @@ export function useSignInViewModel() {
 
   return {
     register: form.register,
+    control: form.control,
     fieldErrors: form.formState.errors,
     submit: form.handleSubmit((values) => {
       if (!mutation.isPending) mutation.mutate(values)

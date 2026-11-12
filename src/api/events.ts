@@ -79,8 +79,60 @@ export function eventPath(eventId: string) {
   return `${eventsPath}/${encodeURIComponent(eventId)}`
 }
 
-export function listPublicEvents() {
-  return requestJson<PublicEvent[]>(eventsPath)
+export type EventSalesStatus =
+  | "AVAILABLE"
+  | "SOLD_OUT"
+  | "COMING_SOON"
+  | "REGISTRATION_CLOSED"
+  | "UNAVAILABLE"
+
+export type EventDiscoveryItem = Pick<
+  PublicEvent,
+  "id" | "title" | "category" | "startAt" | "imageUrl"
+> & {
+  salesStatus: EventSalesStatus
+}
+
+export type EventDiscoveryPage = {
+  items: EventDiscoveryItem[]
+  page: number
+  size: number
+  totalItems: number
+  totalPages: number
+}
+
+export type EventDiscoveryParams = {
+  page?: number
+  size?: number
+  query?: string
+  category?: string
+  availableOnly?: boolean
+  sort?: "startAt,asc" | "startAt,desc"
+}
+
+export function listPublicEvents({
+  page,
+  size,
+  query,
+  category,
+  availableOnly,
+  sort,
+}: EventDiscoveryParams = {}) {
+  const params = new URLSearchParams()
+
+  if (page !== undefined) params.set("page", String(page))
+  if (size !== undefined) params.set("size", String(size))
+  if (query?.trim()) params.set("query", query.trim())
+  if (category?.trim()) params.set("category", category.trim())
+  if (availableOnly !== undefined) {
+    params.set("availableOnly", String(availableOnly))
+  }
+  if (sort !== undefined) params.set("sort", sort)
+
+  const search = params.toString()
+  return requestJson<EventDiscoveryPage>(
+    search ? `${eventsPath}?${search}` : eventsPath
+  )
 }
 
 export function getPublicEvent(eventId: string) {

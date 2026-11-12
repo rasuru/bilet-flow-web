@@ -8,10 +8,7 @@ export function getAuthToken(): string | null {
   )
 }
 
-export function storeAuthToken(
-  token: string,
-  rememberMe: boolean
-): void {
+export function storeAuthToken(token: string, rememberMe: boolean): void {
   clearAuthToken()
 
   if (rememberMe) {
@@ -26,5 +23,3 @@ export function clearAuthToken(): void {
   localStorage.removeItem(LOCAL_TOKEN_KEY)
   sessionStorage.removeItem(SESSION_TOKEN_KEY)
 }
-
-
