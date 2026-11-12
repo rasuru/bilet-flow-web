@@ -1,55 +1,52 @@
+import { Controller } from "react-hook-form"
 import { Link } from "wouter"
 
 import { Button } from "@/components/ui/button"
-import { useSignInViewModel } from "./useSignInViewModel"
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { AccountFormField } from "@/pages/account/AccountFormField"
+import { useSignInViewModel } from "./useSignInViewModel"
 
 type LoginFormProps = {
   onRegister: () => void
 }
 
 export function LoginForm({ onRegister }: LoginFormProps) {
-  const { register, fieldErrors, submit, isSubmitting, formError } =
+  const { register, control, fieldErrors, submit, isSubmitting, formError } =
     useSignInViewModel()
 
   return (
     <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
-      <Field>
-        <FieldLabel htmlFor="login-username">Username or email</FieldLabel>
-
-        <Input
-          id="login-username"
-          autoComplete="username"
-          aria-invalid={fieldErrors.username ? true : undefined}
-          {...register("username")}
-        />
-
-        {fieldErrors.username && (
-          <FieldDescription>{fieldErrors.username.message}</FieldDescription>
-        )}
-      </Field>
-
-      <Field>
-        <FieldLabel htmlFor="login-password">Password</FieldLabel>
-
-        <Input
-          id="login-password"
-          type="password"
-          autoComplete="current-password"
-          aria-invalid={fieldErrors.password ? true : undefined}
-          {...register("password")}
-        />
-
-        {fieldErrors.password && (
-          <FieldDescription>{fieldErrors.password.message}</FieldDescription>
-        )}
-      </Field>
+      <AccountFormField
+        label="Username or email"
+        autoComplete="username"
+        error={fieldErrors.username?.message}
+        {...register("username")}
+      />
+      <AccountFormField
+        label="Password"
+        type="password"
+        autoComplete="current-password"
+        error={fieldErrors.password?.message}
+        {...register("password")}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <Field orientation="horizontal" className="w-auto">
-          <Checkbox id="remember-me" {...register("rememberMe")} />
+          <Controller
+            name="rememberMe"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                id="remember-me"
+                name={field.name}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+            )}
+          />
           <FieldLabel htmlFor="remember-me">Remember me</FieldLabel>
         </Field>
 
@@ -74,8 +71,9 @@ export function LoginForm({ onRegister }: LoginFormProps) {
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
         <Button
-          variant={"link"}
-          className="text-foreground"
+          type="button"
+          variant="link"
+          className="h-auto px-0 text-foreground"
           onClick={onRegister}
         >
           Sign up

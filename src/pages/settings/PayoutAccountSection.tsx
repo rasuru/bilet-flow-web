@@ -1,6 +1,14 @@
 import { useId, useState } from "react"
+import { Controller } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 import { AccountFormField } from "@/pages/account/AccountFormField"
 import {
   usePayoutAccountViewModel,
@@ -19,7 +27,8 @@ function PayoutAccountForm({
   onCancel: () => void
 }) {
   const model = useSavePayoutAccountViewModel(sessionId, holderName, onSaved)
-  const consentErrorId = useId()
+  const consentId = useId()
+  const consentErrorId = `${consentId}-error`
 
   return (
     <form noValidate onSubmit={model.submit}>
@@ -36,25 +45,31 @@ function PayoutAccountForm({
           error={model.errors.iban?.message}
           {...model.register("iban")}
         />
-        <div>
-          <label className="flex items-start gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="mt-0.5"
-              aria-invalid={model.errors.acceptSimulation ? true : undefined}
-              aria-describedby={
-                model.errors.acceptSimulation ? consentErrorId : undefined
-              }
-              {...model.register("acceptSimulation")}
-            />
-            I agree to use this account for simulated payouts.
-          </label>
-          {model.errors.acceptSimulation && (
-            <p id={consentErrorId} className="mt-1 text-sm text-destructive">
-              {model.errors.acceptSimulation.message}
-            </p>
+        <Controller
+          name="acceptSimulation"
+          control={model.control}
+          render={({ field, fieldState }) => (
+            <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+              <Checkbox
+                id={consentId}
+                name={field.name}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+                disabled={model.isSubmitting}
+                aria-invalid={fieldState.invalid}
+                aria-describedby={fieldState.error ? consentErrorId : undefined}
+              />
+              <FieldContent>
+                <FieldLabel htmlFor={consentId}>
+                  I agree to use this account for simulated payouts.
+                </FieldLabel>
+                <FieldError id={consentErrorId} errors={[fieldState.error]} />
+              </FieldContent>
+            </Field>
           )}
-        </div>
+        />
         {model.errors.root?.message && (
           <p role="alert" className="text-sm text-destructive">
             {model.errors.root.message}

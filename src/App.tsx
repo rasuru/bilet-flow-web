@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Route, Switch } from "wouter"
+import { Redirect, Route, Switch } from "wouter"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import {
   RequestPasswordResetPage,
 } from "@/pages/account/PasswordResetPages"
 import { AuthPage } from "@/pages/auth/AuthPage"
-import { HomePage } from "@/pages/home/HomePage"
+import { EventDiscoveryPage, HomePage } from "@/pages/home/HomePage"
 
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 
@@ -61,6 +61,12 @@ function SignedInRoute({
 export function App() {
   return (
     <Switch>
+      <Route path="/" component={HomePage} />
+      <Route path="/events" component={EventDiscoveryPage} />
+      <Route path="/sign-in">
+        <SignedInRoute>{() => <Redirect to="/" />}</SignedInRoute>
+      </Route>
+
       <Route path="/account/activate" component={ActivateAccountPage} />
 
       <Route
@@ -78,9 +84,6 @@ export function App() {
             />
           )}
         </SignedInRoute>
-      </Route>
-      <Route path="/">
-        <SignedInRoute>{() => <HomePage />}</SignedInRoute>
       </Route>
 
       <Route>

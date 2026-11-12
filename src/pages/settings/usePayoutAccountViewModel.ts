@@ -64,6 +64,7 @@ export function useSavePayoutAccountViewModel(
 
   return {
     register: form.register,
+    control: form.control,
     errors: form.formState.errors,
     isSubmitting: form.formState.isSubmitting,
     submit: form.handleSubmit(async (values) => {
