@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 
 import { ApiError } from "@/api/client"
-import type { PublicEvent, VenueLayout } from "@/api/events"
-import type { EventInventory, TicketType } from "@/api/inventory"
+import type { PublicEvent } from "@/api/events"
+import type { TicketType } from "@/api/inventory"
 import { publicEventRepository } from "@/events/publicEventRepository"
 
 const dateTime = new Intl.DateTimeFormat(undefined, {
@@ -25,24 +25,6 @@ function eventSalesMessage(event: PublicEvent, now: number) {
   }
   if (endAt && Date.parse(endAt) <= now) return "Registration is closed."
   return null
-}
-
-function availableByCategory(inventory: EventInventory, layout: VenueLayout) {
-  const availableIds = new Set(
-    inventory.seatAvailability
-      .filter((seat) => seat.status === "AVAILABLE")
-      .map((seat) => seat.seatId)
-  )
-  const counts = new Map<string, number>()
-
-  for (const seat of layout.seats) {
-    const category = seat.priceCategory
-    if (category !== null && availableIds.has(seat.seatId)) {
-      counts.set(category, (counts.get(category) ?? 0) + 1)
-    }
-  }
-
-  return counts
 }
 
 function ticketAvailabilityLabel(
@@ -109,8 +91,14 @@ export function useEventDetailsViewModel(eventId: string) {
     ? undefined
     : availability.data?.inventory
   const layout = availability.data?.layout
-  const byCategory =
-    inventory && layout ? availableByCategory(inventory, layout) : undefined
+  const availableSeatIds = new Set(
+    inventory?.seatAvailability
+      .filter((seat) => seat.status === "AVAILABLE")
+      .map((seat) => seat.seatId)
+  )
+  const availableSeats = inventory
+    ? layout?.seats.filter((seat) => availableSeatIds.has(seat.seatId))
+    : undefined
   const byTicketType = new Map(
     inventory?.gaAvailability.map((item) => [item.ticketTypeId, item.available])
   )
@@ -139,10 +127,19 @@ export function useEventDetailsViewModel(eventId: string) {
     availabilityError: loadAvailability && availability.isError,
     retryAvailability: () => void availability.refetch(),
     tickets: (ticketTypes ?? []).map((ticket) => {
-      const remaining =
-        ticket.priceCategory === null
-          ? byTicketType.get(ticket.id)
-          : byCategory && (byCategory.get(ticket.priceCategory) ?? 0)
+      const assigned = event.venue?.seatingMode === "ASSIGNED_SEATING"
+      const seats =
+        assigned && ticket.priceCategory !== null
+          ? availableSeats?.filter(
+              (seat) => seat.priceCategory === ticket.priceCategory
+            )
+          : undefined
+      const remaining = assigned ? seats?.length : byTicketType.get(ticket.id)
+      const active =
+        !salesMessage &&
+        ticket.status === "ACTIVE" &&
+        Date.parse(ticket.salesStartAt) <= now &&
+        Date.parse(ticket.salesEndAt) > now
       return {
         id: ticket.id,
         name: ticket.name,
@@ -155,6 +152,16 @@ export function useEventDetailsViewModel(eventId: string) {
                 currency: ticket.price.currency,
               }).format(ticket.price.amount),
         maxPerOrder: ticket.maxPerOrder,
+        orderLimit: active
+          ? Math.min(remaining ?? 0, ticket.maxPerOrder, 100)
+          : 0,
+        amount: ticket.price.amount,
+        seats: assigned
+          ? (seats ?? []).map((seat) => ({
+              id: seat.seatId,
+              label: `${seat.section} · Row ${seat.row} · Seat ${seat.seatNumber}${seat.accessible ? " · Accessible" : ""}`,
+            }))
+          : null,
         availability:
           salesMessage || (availability.isPending && loadAvailability)
             ? null

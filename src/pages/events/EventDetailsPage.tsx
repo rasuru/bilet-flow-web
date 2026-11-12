@@ -54,7 +54,9 @@ export function EventDetailsPage({ eventId }: { eventId: string }) {
         </Card>
       )}
 
-      {model.status === "ready" && <EventDetails model={model} />}
+      {model.status === "ready" && (
+        <EventDetails model={model} eventId={eventId} />
+      )}
     </main>
   )
 }
@@ -76,7 +78,13 @@ function Loading({ children }: { children: string }) {
   )
 }
 
-function EventDetails({ model }: { model: ReadyModel }) {
+function EventDetails({
+  model,
+  eventId,
+}: {
+  model: ReadyModel
+  eventId: string
+}) {
   const { event } = model
 
   return (
@@ -213,11 +221,8 @@ function EventDetails({ model }: { model: ReadyModel }) {
             {!model.ticketError && model.tickets.length > 0 && (
               <ul className="divide-y">
                 {model.tickets.map((ticket) => (
-                  <li
-                    key={ticket.id}
-                    className="space-y-1 py-3 first:pt-0 last:pb-0"
-                  >
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                  <li key={ticket.id} className="space-y-1 py-3 first:pt-0">
+                    <div className="flex flex-wrap justify-between gap-x-3">
                       <h3 className="font-semibold">{ticket.name}</h3>
                       <p className="font-semibold tabular-nums">
                         {ticket.price}
@@ -228,14 +233,27 @@ function EventDetails({ model }: { model: ReadyModel }) {
                         {ticket.description}
                       </p>
                     )}
-                    <p className="text-muted-foreground">
-                      Limit {ticket.maxPerOrder} per order
-                    </p>
-                    {ticket.availability && <p>{ticket.availability}</p>}
+                    {ticket.availability && (
+                      <p className="text-muted-foreground">
+                        {ticket.availability}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
+            {!model.ticketError &&
+              model.tickets.some((ticket) => ticket.orderLimit > 0) && (
+                <Link
+                  href={`/events/${encodeURIComponent(eventId)}/buy`}
+                  className={buttonVariants({
+                    size: "lg",
+                    className: "w-full",
+                  })}
+                >
+                  Get tickets
+                </Link>
+              )}
           </CardContent>
         </Card>
       </section>

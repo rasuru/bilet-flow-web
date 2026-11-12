@@ -3,9 +3,7 @@ import { LucideClock, LucideMapPin } from "lucide-react"
 import { useState, type ChangeEvent, type FormEvent } from "react"
 import { Link } from "wouter"
 
-import { ApiError } from "@/api/client"
 import {
-  getPublicEvent,
   listMyEvents,
   listPublicEvents,
   type EventDiscoveryPage as DiscoveryPageResponse,
@@ -13,7 +11,6 @@ import {
   type EventSalesStatus,
   type PublicEvent,
 } from "@/api/events"
-import { listMyTickets } from "@/api/tickets"
 import { sessionRepository } from "@/auth/sessionRepository"
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
@@ -24,6 +21,7 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
+import { attendanceRepository } from "@/tickets/attendanceRepository"
 
 const discoveryPath = "/events"
 const organizerDashboardPath = "/organizer"
@@ -447,32 +445,6 @@ function toOrganizerOverview(events: PublicEvent[]) {
   }
 }
 
-async function loadAttendeeEvents(sessionId: number) {
-  const tickets = await sessionRepository.authenticatedRequest(
-    sessionId,
-    listMyTickets
-  )
-  const eventIds = new Set(
-    tickets
-      .filter(
-        (ticket) => ticket.status === "VALID" || ticket.status === "CHECKED_IN"
-      )
-      .map((ticket) => ticket.eventId)
-  )
-
-  const events = await Promise.all(
-    [...eventIds].map(async (id) => {
-      try {
-        return await getPublicEvent(id)
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 404) return null
-        throw error
-      }
-    })
-  )
-  return events.filter((event) => event !== null)
-}
-
 function toAttendeeOverview(events: PublicEvent[]) {
   const now = Date.now()
   return events
@@ -500,9 +472,12 @@ function useHomeViewModel() {
     select: toOrganizerOverview,
   })
   const attending = useQuery({
-    queryKey: ["home", "attendee-events", sessionId],
-    queryFn:
-      sessionId === null ? skipToken : () => loadAttendeeEvents(sessionId),
+    ...attendanceRepository.eventsQuery(
+      sessionId,
+      session.status === "signedIn" && session.account.activated
+        ? session.account.email
+        : null
+    ),
     select: toAttendeeOverview,
   })
   const discovery = useQuery({
