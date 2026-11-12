@@ -4,11 +4,11 @@ import {
   type QueryClient,
 } from "@tanstack/react-query"
 
-import { listMyCheckouts, type Checkout } from "@/api/checkouts"
+import type { Checkout } from "@/api/checkouts"
 import { ApiError } from "@/api/client"
 import { getPublicEvent, type PublicEvent } from "@/api/events"
-import { listMyTickets, type Ticket, type TicketStatus } from "@/api/tickets"
-import { sessionRepository } from "@/auth/sessionRepository"
+import type { Ticket, TicketStatus } from "@/api/tickets"
+import { loadTicketRecords } from "./ticketRepository"
 
 export type AttendanceActivity = {
   tickets: Ticket[]
@@ -25,13 +25,30 @@ function canAttend(status: TicketStatus) {
   return status === "VALID" || status === "CHECKED_IN"
 }
 
-async function loadRecords(sessionId: number, includeOrders: boolean) {
-  return Promise.all([
-    sessionRepository.authenticatedRequest(sessionId, listMyTickets),
-    includeOrders
-      ? sessionRepository.authenticatedRequest(sessionId, listMyCheckouts)
-      : [],
-  ])
+function attendingTickets(
+  tickets: Ticket[],
+  orders: Checkout[],
+  email: string | null
+) {
+  const byId = new Map<
+    string,
+    {
+      id: string
+      eventId: string
+      attendeeEmail: string
+      status: TicketStatus
+    }
+  >()
+  for (const order of orders) {
+    if (order.status !== "COMPLETED") continue
+    for (const ticket of order.tickets) {
+      if (ticket.attendeeEmail.trim().toLowerCase() === email) {
+        byId.set(ticket.id, { ...ticket, eventId: order.eventId })
+      }
+    }
+  }
+  for (const ticket of tickets) byId.set(ticket.id, ticket)
+  return [...byId.values()].filter((ticket) => canAttend(ticket.status))
 }
 
 function attendingEventIds(
@@ -39,24 +56,9 @@ function attendingEventIds(
   orders: Checkout[],
   email: string | null
 ) {
-  const eventIds = new Set(
-    tickets
-      .filter((ticket) => canAttend(ticket.status))
-      .map((ticket) => ticket.eventId)
+  return new Set(
+    attendingTickets(tickets, orders, email).map(({ eventId }) => eventId)
   )
-  for (const order of orders) {
-    if (
-      order.status === "COMPLETED" &&
-      order.tickets.some(
-        (ticket) =>
-          canAttend(ticket.status) &&
-          ticket.attendeeEmail.trim().toLowerCase() === email
-      )
-    ) {
-      eventIds.add(order.eventId)
-    }
-  }
-  return eventIds
 }
 
 async function loadEvents(eventIds: Iterable<string>) {
@@ -83,8 +85,34 @@ export const attendanceRepository = {
         sessionId === null
           ? skipToken
           : async () => {
-              const [tickets, orders] = await loadRecords(sessionId, !!email)
+              const [tickets, orders] = await loadTicketRecords(
+                sessionId,
+                !!email
+              )
               return loadEvents(attendingEventIds(tickets, orders, email))
+            },
+    })
+  },
+
+  eventTicketsQuery(
+    sessionId: number | null,
+    verifiedEmail: string | null,
+    eventId: string
+  ) {
+    const email = verifiedEmail?.trim().toLowerCase() || null
+    return queryOptions({
+      queryKey: [...attendanceKey(sessionId), "event-tickets", email, eventId],
+      queryFn:
+        sessionId === null
+          ? skipToken
+          : async () => {
+              const [tickets, orders] = await loadTicketRecords(
+                sessionId,
+                !!email
+              )
+              return attendingTickets(tickets, orders, email).filter(
+                (ticket) => ticket.eventId === eventId
+              )
             },
     })
   },
@@ -94,7 +122,7 @@ export const attendanceRepository = {
     return queryOptions({
       queryKey: [...attendanceKey(sessionId), "activity", email],
       queryFn: async (): Promise<AttendanceActivity> => {
-        const [tickets, orders] = await loadRecords(sessionId, true)
+        const [tickets, orders] = await loadTicketRecords(sessionId, true)
         const attending = attendingEventIds(tickets, orders, email)
         const eventIds = new Set([
           ...attending,

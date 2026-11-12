@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 
-import type { TicketStatus } from "@/api/tickets"
 import {
   attendanceRepository,
   type AttendanceActivity,
 } from "@/tickets/attendanceRepository"
+
+import {
+  ticketDetailsPath,
+  ticketStatusLabels,
+} from "@/tickets/ticketPresentation"
 
 const dateTime = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -14,14 +18,6 @@ const currency = new Intl.NumberFormat(undefined, {
   style: "currency",
   currency: "KZT",
 })
-
-const ticketStatus: Record<TicketStatus, string> = {
-  VALID: "Valid",
-  CHECKED_IN: "Checked in",
-  CANCELLED: "Cancelled",
-  REFUNDED: "Refunded",
-  REFUND_PENDING: "Refund pending",
-}
 
 function toActivity(data: AttendanceActivity) {
   const now = Date.now()
@@ -73,7 +69,8 @@ function toActivity(data: AttendanceActivity) {
         tickets: order.tickets.map((ticket) => ({
           id: ticket.id,
           attendee: ticket.attendeeEmail,
-          status: ticketStatus[ticket.status],
+          href: ticketDetailsPath(ticket.id),
+          status: ticketStatusLabels[ticket.status],
         })),
       })),
     linkedTickets: data.tickets
@@ -83,9 +80,9 @@ function toActivity(data: AttendanceActivity) {
         return {
           id: ticket.id,
           title: event?.title ?? "Event unavailable",
-          href: event ? `/events/${encodeURIComponent(event.id)}` : null,
+          href: ticketDetailsPath(ticket.id),
           code: ticket.ticketCode,
-          status: ticketStatus[ticket.status],
+          status: ticketStatusLabels[ticket.status],
         }
       }),
   }

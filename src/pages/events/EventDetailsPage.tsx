@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 
+import { useEventTicketsViewModel } from "./useEventTicketsViewModel"
 import { useEventDetailsViewModel } from "./useEventDetailsViewModel"
 
 export function EventDetailsPage({ eventId }: { eventId: string }) {
@@ -86,6 +87,7 @@ function EventDetails({
   eventId: string
 }) {
   const { event } = model
+  const yourTickets = useEventTicketsViewModel(eventId)
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
@@ -168,95 +170,140 @@ function EventDetails({
         )}
       </article>
 
-      <section aria-labelledby="event-tickets">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <h2 id="event-tickets">Tickets</h2>
-            </CardTitle>
-            {event.venue && model.showTickets && (
-              <CardDescription>{event.seatingLabel}</CardDescription>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {model.salesMessage && (
-              <p className="font-medium">{model.salesMessage}</p>
-            )}
-            {model.loadingTickets && <Loading>Loading tickets…</Loading>}
-            {model.ticketError && (
-              <div className="space-y-2">
-                <p role="alert">Couldn’t load ticket types.</p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={model.retryTickets}
-                >
-                  Try again
-                </Button>
-              </div>
-            )}
-            {model.showTickets &&
-              !model.loadingTickets &&
-              !model.ticketError &&
-              !model.tickets.length && (
-                <p className="text-muted-foreground">
-                  There are no tickets listed for this event.
-                </p>
+      <aside className="space-y-4">
+        {yourTickets.length > 0 && (
+          <section aria-labelledby="your-event-tickets">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <h2 id="your-event-tickets">Your tickets</h2>
+                </CardTitle>
+                <CardDescription>
+                  {yourTickets.length === 1
+                    ? "You have a ticket for this event."
+                    : `You have ${yourTickets.length} tickets for this event.`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="divide-y">
+                  {yourTickets.map((ticket) => (
+                    <li
+                      key={ticket.id}
+                      className="flex flex-wrap items-start justify-between gap-2 py-3 first:pt-0 last:pb-0"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium break-all">
+                          {ticket.attendee}
+                        </p>
+                        <p className="text-muted-foreground">{ticket.status}</p>
+                      </div>
+                      <Link
+                        href={ticket.href}
+                        aria-label={`Open ticket for ${ticket.attendee}`}
+                        className={buttonVariants({
+                          variant: "outline",
+                          size: "sm",
+                        })}
+                      >
+                        Open ticket
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+        <section aria-labelledby="event-tickets">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2 id="event-tickets">Tickets</h2>
+              </CardTitle>
+              {event.venue && model.showTickets && (
+                <CardDescription>{event.seatingLabel}</CardDescription>
               )}
-            {model.loadingAvailability && (
-              <Loading>Checking availability…</Loading>
-            )}
-            {model.availabilityError && (
-              <div className="space-y-2">
-                <p role="alert">Couldn’t check ticket availability.</p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={model.retryAvailability}
-                >
-                  Try again
-                </Button>
-              </div>
-            )}
-            {!model.ticketError && model.tickets.length > 0 && (
-              <ul className="divide-y">
-                {model.tickets.map((ticket) => (
-                  <li key={ticket.id} className="space-y-1 py-3 first:pt-0">
-                    <div className="flex flex-wrap justify-between gap-x-3">
-                      <h3 className="font-semibold">{ticket.name}</h3>
-                      <p className="font-semibold tabular-nums">
-                        {ticket.price}
-                      </p>
-                    </div>
-                    {ticket.description && (
-                      <p className="break-words text-muted-foreground">
-                        {ticket.description}
-                      </p>
-                    )}
-                    {ticket.availability && (
-                      <p className="text-muted-foreground">
-                        {ticket.availability}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {!model.ticketError &&
-              model.tickets.some((ticket) => ticket.orderLimit > 0) && (
-                <Link
-                  href={`/events/${encodeURIComponent(eventId)}/buy`}
-                  className={buttonVariants({
-                    size: "lg",
-                    className: "w-full",
-                  })}
-                >
-                  Get tickets
-                </Link>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {model.salesMessage && (
+                <p className="font-medium">{model.salesMessage}</p>
               )}
-          </CardContent>
-        </Card>
-      </section>
+              {model.loadingTickets && <Loading>Loading tickets…</Loading>}
+              {model.ticketError && (
+                <div className="space-y-2">
+                  <p role="alert">Couldn’t load ticket types.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={model.retryTickets}
+                  >
+                    Try again
+                  </Button>
+                </div>
+              )}
+              {model.showTickets &&
+                !model.loadingTickets &&
+                !model.ticketError &&
+                !model.tickets.length && (
+                  <p className="text-muted-foreground">
+                    There are no tickets listed for this event.
+                  </p>
+                )}
+              {model.loadingAvailability && (
+                <Loading>Checking availability…</Loading>
+              )}
+              {model.availabilityError && (
+                <div className="space-y-2">
+                  <p role="alert">Couldn’t check ticket availability.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={model.retryAvailability}
+                  >
+                    Try again
+                  </Button>
+                </div>
+              )}
+              {!model.ticketError && model.tickets.length > 0 && (
+                <ul className="divide-y">
+                  {model.tickets.map((ticket) => (
+                    <li key={ticket.id} className="space-y-1 py-3 first:pt-0">
+                      <div className="flex flex-wrap justify-between gap-x-3">
+                        <h3 className="font-semibold">{ticket.name}</h3>
+                        <p className="font-semibold tabular-nums">
+                          {ticket.price}
+                        </p>
+                      </div>
+                      {ticket.description && (
+                        <p className="break-words text-muted-foreground">
+                          {ticket.description}
+                        </p>
+                      )}
+                      {ticket.availability && (
+                        <p className="text-muted-foreground">
+                          {ticket.availability}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {!model.ticketError &&
+                model.tickets.some((ticket) => ticket.orderLimit > 0) && (
+                  <Link
+                    href={`/events/${encodeURIComponent(eventId)}/buy`}
+                    className={buttonVariants({
+                      size: "lg",
+                      className: "w-full",
+                    })}
+                  >
+                    Get tickets
+                  </Link>
+                )}
+            </CardContent>
+          </Card>
+        </section>
+      </aside>
     </div>
   )
 }
