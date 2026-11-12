@@ -27,6 +27,7 @@ const discoveryPath = "/events"
 const organizerDashboardPath = "/organizer"
 const previewSize = 4
 const overviewSize = 3
+const attendeePreviewSize = 2
 const pageSize = 12
 
 function eventDetailsPath(eventId: string) {
@@ -452,7 +453,7 @@ function toAttendeeOverview(events: PublicEvent[]) {
       (event) => event.status === "PUBLISHED" && isCurrentEvent(event, now)
     )
     .sort(byStartDate)
-    .slice(0, overviewSize)
+    .slice(0, attendeePreviewSize)
     .map((event) => ({
       ...toOverviewEvent(event),
       href: eventDetailsPath(event.id),
@@ -501,7 +502,8 @@ function useHomeViewModel() {
     showOrganizerOverview: isSignedIn && !!organized.data?.hasEvents,
     organizerItems,
     showOrganizerEmpty: organizerItems.length === 0,
-    showAttendeeOverview: isSignedIn && attendeeItems.length > 0,
+    showAttendeeOverview: isSignedIn,
+    showAttendeeEmpty: attending.isSuccess && attendeeItems.length === 0,
     attendeeItems,
     showOverviewLoading:
       isSignedIn && (organized.isPending || attending.isPending),
@@ -599,13 +601,25 @@ export function HomePage() {
 
         {viewModel.showAttendeeOverview && (
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle>
                 <h2>Events you’re attending</h2>
               </CardTitle>
+              <Link
+                href="/my-tickets"
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                My tickets
+              </Link>
             </CardHeader>
             <CardContent>
-              <OverviewList items={viewModel.attendeeItems} />
+              {viewModel.showAttendeeEmpty ? (
+                <p className="text-sm text-muted-foreground">
+                  No upcoming events.
+                </p>
+              ) : (
+                <OverviewList items={viewModel.attendeeItems} />
+              )}
             </CardContent>
           </Card>
         )}

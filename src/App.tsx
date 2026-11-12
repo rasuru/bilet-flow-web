@@ -15,6 +15,7 @@ import { EventDetailsPage } from "@/pages/events/EventDetailsPage"
 import { EventDiscoveryPage, HomePage } from "@/pages/home/HomePage"
 
 import { SettingsPage } from "@/pages/settings/SettingsPage"
+import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 
 type SignedInSession = Extract<
   ReturnType<typeof useSessionViewModel>,
@@ -71,6 +72,17 @@ export function App() {
       </Route>
       <Route path="/events/:eventId">
         {({ eventId }) => <EventDetailsPage key={eventId} eventId={eventId} />}
+      </Route>
+      <Route path="/my-tickets">
+        <SignedInRoute>
+          {({ account, sessionId }) => (
+            <MyTicketsPage
+              key={sessionId}
+              sessionId={sessionId}
+              verifiedEmail={account.activated ? account.email : null}
+            />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/orders/:orderId">
         {({ orderId }) => (
