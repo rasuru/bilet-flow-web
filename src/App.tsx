@@ -9,6 +9,7 @@ import {
   RequestPasswordResetPage,
 } from "@/pages/account/PasswordResetPages"
 import { AuthPage } from "@/pages/auth/AuthPage"
+import { EventDetailsPage } from "@/pages/events/EventDetailsPage"
 import { EventDiscoveryPage, HomePage } from "@/pages/home/HomePage"
 
 import { SettingsPage } from "@/pages/settings/SettingsPage"
@@ -63,6 +64,9 @@ export function App() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/events" component={EventDiscoveryPage} />
+      <Route path="/events/:eventId">
+        {({ eventId }) => <EventDetailsPage key={eventId} eventId={eventId} />}
+      </Route>
       <Route path="/sign-in">
         <SignedInRoute>{() => <Redirect to="/" />}</SignedInRoute>
       </Route>
