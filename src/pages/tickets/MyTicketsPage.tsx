@@ -131,12 +131,24 @@ export function MyTicketsPage({
                             {order.tickets.map((ticket) => (
                               <li
                                 key={ticket.id}
-                                className="flex flex-wrap justify-between gap-x-3"
+                                className="flex flex-wrap items-start justify-between gap-2 py-1"
                               >
-                                <span className="break-all">
-                                  {ticket.attendee}
-                                </span>
-                                <span>{ticket.status}</span>
+                                <div className="min-w-0">
+                                  <p className="font-medium break-all text-foreground">
+                                    {ticket.attendee}
+                                  </p>
+                                  <p>{ticket.status}</p>
+                                </div>
+                                <Link
+                                  href={ticket.href}
+                                  aria-label={`Open ticket for ${ticket.attendee}`}
+                                  className={buttonVariants({
+                                    variant: "outline",
+                                    size: "sm",
+                                  })}
+                                >
+                                  Open ticket
+                                </Link>
                               </li>
                             ))}
                           </ul>
@@ -165,16 +177,19 @@ export function MyTicketsPage({
                         key={ticket.id}
                         className="space-y-1 py-3 first:pt-0 last:pb-0"
                       >
-                        {ticket.href ? (
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <p className="font-medium">{ticket.title}</p>
                           <Link
                             href={ticket.href}
-                            className="font-medium hover:underline"
+                            aria-label={`Open ticket for ${ticket.title}`}
+                            className={buttonVariants({
+                              variant: "outline",
+                              size: "sm",
+                            })}
                           >
-                            {ticket.title}
+                            Open ticket
                           </Link>
-                        ) : (
-                          <p className="font-medium">{ticket.title}</p>
-                        )}
+                        </div>
                         <p className="text-muted-foreground">
                           {ticket.status} ·{" "}
                           <span className="font-mono">{ticket.code}</span>

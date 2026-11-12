@@ -4,6 +4,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
+import { ticketDetailsPath } from "@/tickets/ticketPresentation"
 
 import { useOrderViewModel } from "./useOrderViewModel"
 
@@ -124,8 +125,18 @@ export function OrderPage({
                       >
                         <span className="break-all">
                           {ticket.attendeeEmail}
+                          <span className="block font-mono">{ticket.code}</span>
                         </span>
-                        <span className="font-mono">{ticket.code}</span>
+                        <Link
+                          href={ticketDetailsPath(ticket.id)}
+                          aria-label={`Open ticket for ${ticket.attendeeEmail}`}
+                          className={buttonVariants({
+                            variant: "outline",
+                            size: "sm",
+                          })}
+                        >
+                          Open ticket
+                        </Link>
                       </li>
                     ))}
                   </ul>
