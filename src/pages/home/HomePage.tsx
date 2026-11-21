@@ -563,6 +563,7 @@ export function HomePage() {
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
       <header className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">BiletFlow</h1>
+        <Link href="/support" className={buttonVariants({ variant: "outline" })}>Support</Link>
         {viewModel.accountLink && (
           <Link
             href={viewModel.accountLink.href}
@@ -692,3 +693,5 @@ export function HomePage() {
     </main>
   )
 }
+
+

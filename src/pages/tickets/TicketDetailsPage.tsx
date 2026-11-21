@@ -62,6 +62,7 @@ export function TicketDetailsPage({
         My tickets
       </Link>
 
+      <Link href={`/support/new?ticketId=${encodeURIComponent(ticketId)}`} className={buttonVariants({ variant: "outline", className: "print:hidden" })}>Get ticket support</Link>
       {model.status === "loading" && (
         <p role="status" className="flex items-center gap-2 text-sm">
           <Spinner aria-hidden="true" /> Loading your ticket…
@@ -202,3 +203,5 @@ export function TicketDetailsPage({
     </main>
   )
 }
+
+
