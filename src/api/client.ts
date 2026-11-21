@@ -14,6 +14,8 @@ type ApiOptions = {
   headers?: HeadersInit
 }
 
+export type OffsetQuery = { offset?: number; limit?: number }
+
 type QueryValue = string | number | boolean | readonly string[] | undefined
 
 export function withQuery(path: string, query: Record<string, QueryValue>) {

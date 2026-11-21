@@ -1,8 +1,9 @@
-import type { ReactNode } from "react"
-import { Redirect, Route, Switch } from "wouter"
+import { lazy, Suspense, type ReactNode } from "react"
+import { Link, Redirect, Route, Switch } from "wouter"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
 import { ActivateAccountPage } from "@/pages/account/ActivateAccountPage"
 import {
   FinishPasswordResetPage,
@@ -20,6 +21,12 @@ import { SupportCasePage } from "@/pages/support/SupportCasePage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
+
+const AdminDashboardPage = lazy(() =>
+  import("@/pages/admin/AdminDashboardPage").then((module) => ({
+    default: module.AdminDashboardPage,
+  }))
+)
 
 type SignedInSession = Extract<
   ReturnType<typeof useSessionViewModel>,
@@ -70,6 +77,42 @@ export function App() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/admin/:section?">
+        {({ section }) => (
+          <SignedInRoute>
+            {({ account, canAccessAdmin, sessionId }) =>
+              canAccessAdmin ? (
+                <Suspense
+                  fallback={
+                    <main className="grid min-h-svh place-items-center">
+                      <Spinner aria-label="Loading administration" />
+                    </main>
+                  }
+                >
+                  <AdminDashboardPage
+                    key={sessionId}
+                    login={account.login}
+                    sessionId={sessionId}
+                    section={section ?? "overview"}
+                  />
+                </Suspense>
+              ) : (
+                <main className="mx-auto max-w-lg space-y-4 px-4 py-12">
+                  <h1 className="text-2xl font-semibold">
+                    Administrator access required
+                  </h1>
+                  <Link
+                    href="/"
+                    className={buttonVariants({ variant: "outline" })}
+                  >
+                    Back to site
+                  </Link>
+                </main>
+              )
+            }
+          </SignedInRoute>
+        )}
+      </Route>
       <Route path="/events" component={EventDiscoveryPage} />
       <Route path="/events/:eventId/buy">
         {({ eventId }) => <BuyTicketsPage key={eventId} eventId={eventId} />}

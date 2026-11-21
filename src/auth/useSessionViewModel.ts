@@ -16,6 +16,10 @@ export function useSessionViewModel() {
 
   return {
     ...session,
+    canAccessAdmin:
+      session.status === "signedIn" &&
+      session.account.activated &&
+      session.account.authorities.includes("ROLE_ADMIN"),
     errorMessage:
       session.status === "restoreFailed"
         ? session.error instanceof Error
