@@ -401,6 +401,7 @@ const organizerStatusLabels: Record<PublicEvent["status"], string> = {
   PUBLISHED: "Published",
   UNPUBLISHED: "Unpublished",
   CANCELLED: "Cancelled",
+  SUSPENDED: "Suspended",
 }
 
 type OverviewEvent = {
@@ -493,6 +494,7 @@ function useHomeViewModel() {
   const previewCards = discovery.data?.cards ?? []
 
   return {
+    canAccessAdmin: session.canAccessAdmin,
     accountLink:
       session.status === "restoring"
         ? null
@@ -561,8 +563,16 @@ export function HomePage() {
 
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-      <header className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">BiletFlow</h1>
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="mr-auto text-2xl font-bold">BiletFlow</h1>
+        {viewModel.canAccessAdmin && (
+          <Link
+            href="/admin"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Administration
+          </Link>
+        )}
         <Link href="/support" className={buttonVariants({ variant: "outline" })}>Support</Link>
         {viewModel.accountLink && (
           <Link

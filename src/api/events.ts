@@ -1,7 +1,13 @@
-import { requestEmpty, requestJson } from "@/api/client"
+import { requestEmpty, requestJson, withQuery } from "@/api/client"
+import type { OffsetQuery } from "@/api/client"
 
 export type EventVisibility = "PUBLIC" | "UNLISTED" | "PRIVATE"
-export type EventStatus = "DRAFT" | "PUBLISHED" | "UNPUBLISHED" | "CANCELLED"
+export type EventStatus =
+  | "DRAFT"
+  | "PUBLISHED"
+  | "UNPUBLISHED"
+  | "CANCELLED"
+  | "SUSPENDED"
 export type SeatingMode = "GENERAL_ADMISSION" | "ASSIGNED_SEATING"
 
 export type RegistrationWindowRequest =
@@ -242,4 +248,53 @@ export function getVenueLayout(layoutId: string) {
   return requestJson<VenueLayout>(
     `/api/venue-layouts/${encodeURIComponent(layoutId)}`
   )
+}
+
+export type AdminEventSummary = {
+  id: string
+  organizerId: number
+  title: string
+  category: string
+  status: EventStatus
+  visibility: EventVisibility
+  startsAt: string
+  endsAt: string
+}
+
+export type AdminEventQuery = OffsetQuery & {
+  search?: string
+  status?: EventStatus
+  visibility?: EventVisibility
+  organizerId?: number
+}
+
+const adminEventsPath = "/api/admin/events"
+
+function adminEventPath(eventId: string) {
+  return `${adminEventsPath}/${encodeURIComponent(eventId)}`
+}
+
+export function listAdminEvents(token: string, query: AdminEventQuery = {}) {
+  return requestJson<AdminEventSummary[]>(withQuery(adminEventsPath, query), {
+    token,
+  })
+}
+
+export function getAdminEvent(token: string, eventId: string) {
+  return requestJson<ManagedEvent>(adminEventPath(eventId), { token })
+}
+
+export function suspendEvent(token: string, eventId: string, reason: string) {
+  return requestJson<ManagedEvent>(`${adminEventPath(eventId)}/suspend`, {
+    token,
+    method: "POST",
+    json: { reason },
+  })
+}
+
+export function reinstateEvent(token: string, eventId: string) {
+  return requestJson<ManagedEvent>(`${adminEventPath(eventId)}/reinstate`, {
+    token,
+    method: "POST",
+  })
 }
