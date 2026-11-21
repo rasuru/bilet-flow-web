@@ -25,6 +25,7 @@ export function EventDetailsPage({ eventId }: { eventId: string }) {
         Discover events
       </Link>
 
+      <Link href={`/support/new?eventId=${encodeURIComponent(eventId)}`} className={buttonVariants({ variant: "outline" })}>Get event support</Link>
       {model.status === "loading" && <Loading>Loading event…</Loading>}
 
       {model.status === "missing" && (
@@ -307,3 +308,5 @@ function EventDetails({
     </div>
   )
 }
+
+

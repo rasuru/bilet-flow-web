@@ -14,6 +14,9 @@ import { OrderPage } from "@/pages/checkout/OrderPage"
 import { EventDetailsPage } from "@/pages/events/EventDetailsPage"
 import { EventDiscoveryPage, HomePage } from "@/pages/home/HomePage"
 
+import { SupportListPage } from "@/pages/support/SupportListPage"
+import { CreateSupportPage } from "@/pages/support/CreateSupportPage"
+import { SupportCasePage } from "@/pages/support/SupportCasePage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
@@ -112,6 +115,15 @@ export function App() {
           </SignedInRoute>
         )}
       </Route>
+      <Route path="/support/new">
+        <SignedInRoute>{({ account, sessionId }) => <CreateSupportPage key={sessionId} accountId={account.id} sessionId={sessionId} />}</SignedInRoute>
+      </Route>
+      <Route path="/support/:caseId">
+        {({ caseId }) => <SignedInRoute>{({ account, sessionId }) => <SupportCasePage key={`${sessionId}:${caseId}`} accountId={account.id} sessionId={sessionId} caseId={caseId} />}</SignedInRoute>}
+      </Route>
+      <Route path="/support">
+        <SignedInRoute>{({ account, sessionId }) => <SupportListPage key={sessionId} accountId={account.id} sessionId={sessionId} />}</SignedInRoute>
+      </Route>
       <Route path="/sign-in">
         <SignedInRoute>{() => <Redirect to="/" />}</SignedInRoute>
       </Route>
@@ -145,3 +157,5 @@ export function App() {
 }
 
 export default App
+
+

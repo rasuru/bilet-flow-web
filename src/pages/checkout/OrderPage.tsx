@@ -30,6 +30,7 @@ export function OrderPage({
         {model.status === "ready" ? "Back to event" : "Discover events"}
       </Link>
 
+      <Link href={`/support/new?orderId=${encodeURIComponent(orderId)}`} className={buttonVariants({ variant: "outline" })}>Get order support</Link>
       <Card>
         <CardHeader>
           <CardTitle>
@@ -149,3 +150,5 @@ export function OrderPage({
     </main>
   )
 }
+
+
