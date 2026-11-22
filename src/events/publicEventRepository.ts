@@ -1,7 +1,12 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
 
 import { ApiError } from "@/api/client"
-import { getPublicEvent, getVenueLayout } from "@/api/events"
+import {
+  getPublicEvent,
+  getVenueLayout,
+  listPublicEvents,
+  type EventDiscoveryParams,
+} from "@/api/events"
 import { getEventInventory, listPublicTicketTypes } from "@/api/inventory"
 
 function retryPublicRead(count: number, error: Error) {
@@ -9,6 +14,14 @@ function retryPublicRead(count: number, error: Error) {
 }
 
 export const publicEventRepository = {
+  discoveryQuery(params: EventDiscoveryParams) {
+    return queryOptions({
+      queryKey: ["public-events", params],
+      queryFn: () => listPublicEvents(params),
+      retry: retryPublicRead,
+    })
+  },
+
   eventQuery(eventId: string) {
     return queryOptions({
       queryKey: ["public-event", eventId],

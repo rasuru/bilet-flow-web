@@ -111,6 +111,14 @@ export function MyTicketsPage({
                             <p className="text-muted-foreground capitalize">
                               {order.status} · {order.total}
                             </p>
+                            {order.placedAt && (
+                              <p className="text-sm text-muted-foreground">
+                                Placed{" "}
+                                <time dateTime={order.placedAt.instant}>
+                                  {order.placedAt.label}
+                                </time>
+                              </p>
+                            )}
                           </div>
                           <Link
                             href={order.href}

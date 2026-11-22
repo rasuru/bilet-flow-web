@@ -1,16 +1,16 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { LucideClock, LucideMapPin } from "lucide-react"
-import { useState, type ChangeEvent, type FormEvent } from "react"
-import { Link } from "wouter"
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
+import { Link, useLocation, useSearch } from "wouter"
 
 import {
-  listPublicEvents,
   type EventDiscoveryPage as DiscoveryPageResponse,
   type EventDiscoveryItem,
   type EventSalesStatus,
   type PublicEvent,
 } from "@/api/events"
 import { managedEventRepository } from "@/events/managedEventRepository"
+import { publicEventRepository } from "@/events/publicEventRepository"
 import { organizerCampaignsPath } from "@/promotions/campaignLinks"
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
@@ -102,6 +102,7 @@ function toResults(page: DiscoveryPageResponse) {
   return {
     cards: page.items.map(toCard),
     countLabel: `${page.totalItems} ${page.totalItems === 1 ? "event" : "events"}`,
+    totalPages: page.totalPages,
     pagination: {
       visible: page.totalPages > 1,
       label: `Page ${pageNumber} of ${page.totalPages}`,
@@ -111,40 +112,96 @@ function toResults(page: DiscoveryPageResponse) {
   }
 }
 
+function discoveryHref(
+  search: string,
+  filters: typeof defaultFilters,
+  page: number
+) {
+  const params = new URLSearchParams(search)
+  const values = {
+    page: page === 0 ? "" : String(page + 1),
+    query: filters.query,
+    category: filters.category,
+    availableOnly: filters.availableOnly ? "true" : "",
+    sort: filters.sort === defaultFilters.sort ? "" : filters.sort,
+  }
+  for (const [key, value] of Object.entries(values)) {
+    if (value) params.set(key, value)
+    else params.delete(key)
+  }
+  return params.size ? `${discoveryPath}?${params}` : discoveryPath
+}
+
 function useEventDiscoveryViewModel() {
-  const [draft, setDraft] = useState(defaultFilters)
-  const [request, setRequest] = useState({ filters: defaultFilters, page: 0 })
-  const params = { ...request.filters, page: request.page, size: pageSize }
+  const [, navigate] = useLocation()
+  const search = useSearch()
+  const current = new URLSearchParams(search)
+  const rawPage = current.get("page")
+  const pageNumber =
+    rawPage && /^[1-9][0-9]*$/.test(rawPage) ? Number(rawPage) : 1
+  const validPage = Number.isInteger(pageNumber) && pageNumber <= 2_147_483_648
+  const page = validPage ? pageNumber - 1 : 0
+  const filters: typeof defaultFilters = {
+    query: current.get("query")?.trim() ?? "",
+    category: current.get("category")?.trim() ?? "",
+    availableOnly: current.get("availableOnly") === "true",
+    sort:
+      current.get("sort") === "startAt,desc" ? "startAt,desc" : "startAt,asc",
+  }
+  const filterKey = JSON.stringify(filters)
+  const [editing, setEditing] = useState({ filterKey, draft: filters })
+  if (editing.filterKey !== filterKey) setEditing({ filterKey, draft: filters })
+  const draft = editing.filterKey === filterKey ? editing.draft : filters
 
   const events = useQuery({
-    queryKey: ["public-events", params],
-    queryFn: () => listPublicEvents(params),
+    ...publicEventRepository.discoveryQuery({
+      ...filters,
+      page,
+      size: pageSize,
+    }),
     select: toResults,
     placeholderData: keepPreviousData,
   })
+
+  const lastPage =
+    events.data && !events.isPlaceholderData && !events.isError
+      ? Math.max(0, events.data.totalPages - 1)
+      : undefined
+  const correctedPage = lastPage === undefined ? page : Math.min(page, lastPage)
+  const shouldReplace =
+    correctedPage !== page || (rawPage !== null && rawPage !== String(page + 1))
+  const correctedHref = shouldReplace
+    ? discoveryHref(search, filters, correctedPage)
+    : null
+  useEffect(() => {
+    if (correctedHref) navigate(correctedHref, { replace: true })
+  }, [correctedHref, navigate])
 
   function setFilter<K extends keyof typeof defaultFilters>(
     field: K,
     value: (typeof defaultFilters)[K]
   ) {
-    setDraft((current) => ({ ...current, [field]: value }))
+    setEditing({ filterKey, draft: { ...draft, [field]: value } })
   }
 
   function submitFilters(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setRequest({
-      page: 0,
-      filters: {
-        ...draft,
-        query: draft.query.trim(),
-        category: draft.category.trim(),
-      },
-    })
+    const applied = {
+      ...draft,
+      query: draft.query.trim(),
+      category: draft.category.trim(),
+    }
+    setEditing({ filterKey, draft: applied })
+    const href = discoveryHref(search, applied, 0)
+    if (href !== (search ? `${discoveryPath}?${search}` : discoveryPath))
+      navigate(href)
   }
 
   function clearFilters() {
-    setDraft(defaultFilters)
-    setRequest({ filters: defaultFilters, page: 0 })
+    setEditing({ filterKey, draft: defaultFilters })
+    const href = discoveryHref(search, defaultFilters, 0)
+    if (href !== (search ? `${discoveryPath}?${search}` : discoveryPath))
+      navigate(href)
   }
 
   const results = events.data
@@ -171,23 +228,20 @@ function useEventDiscoveryViewModel() {
     clearFilters,
     retry: () => void events.refetch(),
     busy: events.isFetching,
-    showLoading: events.isPending,
+    showLoading: events.isPending || shouldReplace,
     showError: events.isError && !results,
     showEmpty:
-      !!results && results.cards.length === 0 && !events.isPlaceholderData,
-    cards: results?.cards ?? [],
+      !!results &&
+      results.cards.length === 0 &&
+      !events.isPlaceholderData &&
+      !shouldReplace,
+    cards: shouldReplace ? [] : (results?.cards ?? []),
     resultLabel: events.isPlaceholderData
       ? "Updating results…"
       : results?.countLabel,
-    pagination: results?.pagination,
-    previousDisabled: !canGoBack,
-    nextDisabled: !canGoForward,
-    previousPage: () => {
-      if (canGoBack) setRequest({ ...request, page: request.page - 1 })
-    },
-    nextPage: () => {
-      if (canGoForward) setRequest({ ...request, page: request.page + 1 })
-    },
+    pagination: shouldReplace ? undefined : results?.pagination,
+    previousHref: canGoBack ? discoveryHref(search, filters, page - 1) : null,
+    nextHref: canGoForward ? discoveryHref(search, filters, page + 1) : null,
   }
 }
 
@@ -372,23 +426,33 @@ export function EventDiscoveryPage() {
             aria-label="Event results pages"
             className="mt-6 flex flex-wrap items-center justify-center gap-3"
           >
-            <Button
-              variant="outline"
-              disabled={viewModel.previousDisabled}
-              onClick={viewModel.previousPage}
-            >
-              Previous
-            </Button>
+            {viewModel.previousHref ? (
+              <Link
+                href={viewModel.previousHref}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Previous
+              </Link>
+            ) : (
+              <Button variant="outline" disabled>
+                Previous
+              </Button>
+            )}
             <span className="text-sm text-muted-foreground">
               {viewModel.pagination.label}
             </span>
-            <Button
-              variant="outline"
-              disabled={viewModel.nextDisabled}
-              onClick={viewModel.nextPage}
-            >
-              Next
-            </Button>
+            {viewModel.nextHref ? (
+              <Link
+                href={viewModel.nextHref}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Next
+              </Link>
+            ) : (
+              <Button variant="outline" disabled>
+                Next
+              </Button>
+            )}
           </nav>
         )}
       </section>
@@ -480,8 +544,7 @@ function useHomeViewModel() {
     select: toAttendeeOverview,
   })
   const discovery = useQuery({
-    queryKey: ["public-events", { page: 0, size: previewSize }],
-    queryFn: () => listPublicEvents({ page: 0, size: previewSize }),
+    ...publicEventRepository.discoveryQuery({ page: 0, size: previewSize }),
     select: toResults,
   })
 
