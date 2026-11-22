@@ -496,6 +496,12 @@ function SupportDialog({
             />
             <div className="space-y-2">
               <h3 className="text-sm font-semibold">Conversation</h3>
+              <Link
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+                href={`/support/${encodeURIComponent(item.id)}`}
+              >
+                Open conversation
+              </Link>
               <ul className="space-y-2">
                 {query.data?.messages.map((message) => (
                   <li key={message.id} className="rounded-lg border p-3">
