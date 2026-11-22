@@ -41,6 +41,7 @@ export type Checkout = {
   subtotalKzt?: number
   discountKzt?: number
   promoCode?: string | null
+  createdAt?: string | null
   expiresAt: string
   paymentId: string | null
   refundState: "PENDING" | "REFUNDED" | "FAILED" | null

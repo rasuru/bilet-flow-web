@@ -49,7 +49,8 @@ function toActivity(data: AttendanceActivity) {
     orders: [...data.orders]
       .sort(
         (first, second) =>
-          Date.parse(second.expiresAt) - Date.parse(first.expiresAt)
+          Date.parse(second.createdAt ?? second.expiresAt) -
+          Date.parse(first.createdAt ?? first.expiresAt)
       )
       .map((order) => ({
         id: order.id,
@@ -65,6 +66,12 @@ function toActivity(data: AttendanceActivity) {
               : order.status === "COMPLETED"
                 ? "Confirmed"
                 : order.status.toLowerCase().replaceAll("_", " "),
+        placedAt: order.createdAt
+          ? {
+              instant: order.createdAt,
+              label: dateTime.format(new Date(order.createdAt)),
+            }
+          : null,
         awaitingPayment: order.status === "AWAITING_PAYMENT",
         tickets: order.tickets.map((ticket) => ({
           id: ticket.id,
