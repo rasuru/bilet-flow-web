@@ -8,7 +8,7 @@ const API_BASE_URL = (
 ).replace(/\/+$/, "")
 
 type ApiOptions = {
-  method?: "GET" | "POST" | "PUT" | "DELETE"
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
   token?: string
   json?: object
   headers?: HeadersInit
