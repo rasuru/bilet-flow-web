@@ -3,7 +3,7 @@ import { ApiError } from "@/api/problems"
 export { ApiError, problemTypes } from "@/api/problems"
 export type { ApiErrorBody, ApiFieldError } from "@/api/problems"
 
-const API_BASE_URL = (
+export const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"
 ).replace(/\/+$/, "")
 

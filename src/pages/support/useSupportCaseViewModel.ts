@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import type { SupportStatus } from "@/api/support"
 import { ApiError } from "@/api/client"
@@ -35,6 +35,9 @@ export function useSupportCaseViewModel(
   const staff = item && item.requesterUserId !== accountId
   const attendee = item?.type === "ATTENDEE_SUPPORT"
   const open = item && item.status !== "RESOLVED"
+  useEffect(() => {
+    if (open) return supportRepository.watchCase(client, sessionId, caseId)
+  }, [client, sessionId, caseId, open])
   const managed = useQuery(
     managedEventRepository.mineQuery(
       staff && attendee && open ? sessionId : null

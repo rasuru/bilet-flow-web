@@ -31,6 +31,55 @@ async function write(
 }
 
 export const supportRepository = {
+  watchCase(client: QueryClient, sessionId: number, caseId: string) {
+    let disposed = false
+    let socket: WebSocket | undefined
+    let retryTimer: number | undefined
+    let delay = 1_000
+
+    function retry() {
+      if (disposed) return
+      retryTimer = window.setTimeout(() => void connect(), delay)
+      delay = Math.min(delay * 2, 30_000)
+    }
+
+    async function connect() {
+      try {
+        const { ticket } = await sessionRepository.authenticatedRequest(
+          sessionId,
+          (token) => support.createSupportSocketTicket(token, caseId)
+        )
+        if (disposed) return
+        const connection = support.openSupportSocket()
+        socket = connection
+        connection.onopen = () => {
+          if (!disposed) connection.send(ticket)
+        }
+        connection.onmessage = ({ data }) => {
+          if (disposed || (data !== "ready" && data !== "changed")) return
+          if (data === "ready") delay = 1_000
+          void client.invalidateQueries({
+            queryKey: detailKey(sessionId, caseId),
+          })
+          if (data === "changed")
+            void client.invalidateQueries({ queryKey: listKey(sessionId) })
+        }
+        connection.onclose = retry
+      } catch (error) {
+        if (error instanceof ApiError && [401, 403, 404].includes(error.status))
+          return
+        retry()
+      }
+    }
+
+    void connect()
+    return () => {
+      disposed = true
+      window.clearTimeout(retryTimer)
+      if (socket && socket.readyState < WebSocket.CLOSING) socket.close()
+    }
+  },
+
   listQuery(sessionId: number) {
     return queryOptions({
       queryKey: listKey(sessionId),

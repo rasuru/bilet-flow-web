@@ -1,4 +1,4 @@
-import { requestJson } from "@/api/client"
+import { API_BASE_URL, requestJson } from "@/api/client"
 
 export type SupportCategory =
   | "TICKET_DELIVERY"
@@ -48,6 +48,22 @@ export type CreateSupportCase = SupportContext & {
 
 const casesPath = "/api/support/cases"
 const casePath = (id: string) => `${casesPath}/${encodeURIComponent(id)}`
+
+export function createSupportSocketTicket(token: string, caseId: string) {
+  return requestJson<{ ticket: string }>(`${casePath(caseId)}/socket-ticket`, {
+    token,
+    method: "POST",
+  })
+}
+
+export function openSupportSocket() {
+  const endpoint = new URL(
+    `${API_BASE_URL}/websocket/support`,
+    window.location.href
+  )
+  endpoint.protocol = endpoint.protocol === "https:" ? "wss:" : "ws:"
+  return new WebSocket(endpoint)
+}
 
 export function listSupportCases(token: string) {
   return requestJson<SupportCase[]>(casesPath, { token })
