@@ -1,17 +1,17 @@
-import { keepPreviousData, skipToken, useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { LucideClock, LucideMapPin } from "lucide-react"
 import { useState, type ChangeEvent, type FormEvent } from "react"
 import { Link } from "wouter"
 
 import {
-  listMyEvents,
   listPublicEvents,
   type EventDiscoveryPage as DiscoveryPageResponse,
   type EventDiscoveryItem,
   type EventSalesStatus,
   type PublicEvent,
 } from "@/api/events"
-import { sessionRepository } from "@/auth/sessionRepository"
+import { managedEventRepository } from "@/events/managedEventRepository"
+import { organizerCampaignsPath } from "@/promotions/campaignLinks"
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -443,6 +443,7 @@ function toOrganizerOverview(events: PublicEvent[]) {
       .map((event) => ({
         ...toOverviewEvent(event),
         statusLabel: organizerStatusLabels[event.status],
+        href: organizerCampaignsPath(event.id),
       })),
   }
 }
@@ -466,11 +467,7 @@ function useHomeViewModel() {
   const sessionId = session.status === "signedIn" ? session.sessionId : null
 
   const organized = useQuery({
-    queryKey: ["home", "organized-events", sessionId],
-    queryFn:
-      sessionId === null
-        ? skipToken
-        : () => sessionRepository.authenticatedRequest(sessionId, listMyEvents),
+    ...managedEventRepository.mineQuery(sessionId),
     select: toOrganizerOverview,
   })
   const attending = useQuery({

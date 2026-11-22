@@ -79,6 +79,16 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
     tickets: completed ? order.tickets : [],
     order,
     total: kzt.format(order.amountKzt),
+    promotion:
+      order.promoCode &&
+      order.subtotalKzt !== undefined &&
+      order.discountKzt !== undefined
+        ? {
+            code: order.promoCode,
+            subtotal: kzt.format(order.subtotalKzt),
+            discount: kzt.format(order.discountKzt),
+          }
+        : null,
     expiresAt: pending ? dateTime.format(new Date(order.expiresAt)) : null,
     busy,
     canCancel: pending && !query.isError,

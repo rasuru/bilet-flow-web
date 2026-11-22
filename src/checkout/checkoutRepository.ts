@@ -1,11 +1,17 @@
-import { queryOptions, type QueryClient } from "@tanstack/react-query"
+import {
+  queryOptions,
+  skipToken,
+  type QueryClient,
+} from "@tanstack/react-query"
 
 import {
   cancelCheckout,
   createCheckout,
   getCheckout,
+  quotePromotion,
   type Checkout,
   type CheckoutRequest,
+  type PromoQuoteRequest,
 } from "@/api/checkouts"
 import { ApiError } from "@/api/client"
 import { createPaymentSession } from "@/api/payments"
@@ -21,6 +27,14 @@ export function isCheckoutPending(order: Checkout) {
 }
 
 export const checkoutRepository = {
+  promoQuoteQuery(request: PromoQuoteRequest | null) {
+    return queryOptions({
+      queryKey: ["checkout-promo-quote", request],
+      queryFn: request === null ? skipToken : () => quotePromotion(request),
+      retry: false,
+    })
+  },
+
   async place(
     client: QueryClient,
     sessionId: number,

@@ -11,6 +11,7 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { Spinner } from "@/components/ui/spinner"
 import { Separator } from "@/components/ui/separator"
 import { LoginForm } from "@/pages/auth/LoginForm"
 import { RegisterForm } from "@/pages/auth/RegisterForm"
@@ -25,14 +26,23 @@ export function TicketOrderForm({
   tickets,
   refreshAvailability,
   seatingLabel,
+  campaignToken,
 }: {
   eventId: string
   tickets: OrderTicket[]
   refreshAvailability: () => void
   seatingLabel: string
+  campaignToken: string | null
 }) {
-  const model = useTicketOrderViewModel(eventId, tickets, refreshAvailability)
+  const model = useTicketOrderViewModel(
+    eventId,
+    tickets,
+    refreshAvailability,
+    campaignToken
+  )
   const formId = useId()
+  const promoInputId = useId()
+  const promo = model.promo
   const { session } = model
   const signedIn = session.status === "signedIn"
   const showAuth = session.status === "signedOut" && model.authMode !== null
@@ -197,6 +207,85 @@ export function TicketOrderForm({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <form onSubmit={promo.apply} className="space-y-2">
+            <Field>
+              <FieldLabel htmlFor={promoInputId}>Promo code</FieldLabel>
+              <div className="flex gap-2">
+                <Input
+                  id={promoInputId}
+                  value={promo.draft}
+                  maxLength={20}
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  disabled={model.isSubmitting || model.retryingOrder}
+                  aria-invalid={!!promo.error}
+                  aria-describedby={
+                    promo.error ? `${promoInputId}-error` : undefined
+                  }
+                  onChange={(event) =>
+                    promo.setDraft(event.currentTarget.value)
+                  }
+                />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={
+                    !promo.draft.trim() ||
+                    promo.pending ||
+                    model.isSubmitting ||
+                    model.retryingOrder
+                  }
+                >
+                  Apply
+                </Button>
+              </div>
+            </Field>
+            {promo.pending && (
+              <p role="status" className="flex items-center gap-2 text-sm">
+                <Spinner aria-hidden="true" /> Checking promo…
+              </p>
+            )}
+            {promo.appliedCode && (
+              <p role="status" className="text-sm font-medium">
+                Code {promo.appliedCode} applied
+              </p>
+            )}
+            {promo.awaitingSelection && (
+              <p className="text-sm text-muted-foreground">
+                Choose tickets to check this code.
+              </p>
+            )}
+            {promo.error && (
+              <FieldError id={`${promoInputId}-error`}>
+                {promo.error}
+              </FieldError>
+            )}
+            <div className="flex flex-wrap gap-2 empty:hidden">
+              {promo.retryLink && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={promo.retryLink}
+                  disabled={model.isSubmitting || model.retryingOrder}
+                >
+                  Retry promo link
+                </Button>
+              )}
+              {promo.canRemove && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={promo.remove}
+                  disabled={model.isSubmitting || model.retryingOrder}
+                >
+                  Remove promo
+                </Button>
+              )}
+            </div>
+          </form>
           {model.hasSelection ? (
             <div className="space-y-3">
               <ul className="space-y-2">
@@ -212,15 +301,31 @@ export function TicketOrderForm({
                   ))}
               </ul>
               <Separator />
+              {promo.discount && (
+                <dl className="space-y-1 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <dt>Subtotal</dt>
+                    <dd>{promo.discount.subtotal}</dd>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <dt>Discount</dt>
+                    <dd>−{promo.discount.amount}</dd>
+                  </div>
+                </dl>
+              )}
               <div className="flex justify-between font-semibold">
                 <span>Estimated total</span>
-                <span>{model.totalLabel}</span>
+                <span>
+                  {promo.chosen && !promo.appliedCode ? "—" : model.totalLabel}
+                </span>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {model.isFree
-                  ? "Free tickets are issued when you place the order."
-                  : "Paid orders continue to Halyk ePay after you reserve your tickets."}
-              </p>
+              {model.maySubmit && (
+                <p className="text-sm text-muted-foreground">
+                  {model.isFree
+                    ? "Free tickets are issued when you place the order."
+                    : "Paid orders continue to Halyk ePay after you reserve your tickets."}
+                </p>
+              )}
               {model.formError && <FieldError>{model.formError}</FieldError>}
               {session.status === "restoring" && (
                 <p role="status">Checking your session…</p>
@@ -242,7 +347,7 @@ export function TicketOrderForm({
                   type="submit"
                   form={formId}
                   className="w-full"
-                  disabled={model.isSubmitting}
+                  disabled={model.isSubmitting || !model.maySubmit}
                 >
                   {model.isSubmitting
                     ? "Placing order…"
