@@ -13,6 +13,8 @@ export const problemTypes = {
   invalidActivationKey: `${biletFlowProblems}invalid-activation-key`,
   invalidPasswordResetKey: `${biletFlowProblems}invalid-password-reset-key`,
   checkoutIdempotencyConflict: `${biletFlowProblems}checkout-idempotency-conflict`,
+  promoCodeRejected: `${biletFlowProblems}promo-code-rejected`,
+  paidSalesInactive: `${biletFlowProblems}paid-sales-inactive`,
   registrationClosed: `${biletFlowProblems}registration-closed`,
   mixedSeatingModes: `${biletFlowProblems}mixed-seating-modes`,
   inventoryUnavailable: `${biletFlowProblems}inventory-unavailable`,
@@ -44,6 +46,11 @@ const problemMessages: ReadonlyMap<string, string> = new Map([
   [
     problemTypes.checkoutIdempotencyConflict,
     "This checkout key was already used for a different purchase.",
+  ],
+  [problemTypes.promoCodeRejected, "This promo code could not be applied."],
+  [
+    problemTypes.paidSalesInactive,
+    "Paid ticket sales are unavailable for this event.",
   ],
   [problemTypes.registrationClosed, "Registration for this event is closed."],
   [

@@ -19,6 +19,8 @@ import { SupportListPage } from "@/pages/support/SupportListPage"
 import { CreateSupportPage } from "@/pages/support/CreateSupportPage"
 import { SupportCasePage } from "@/pages/support/SupportCasePage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
+import { EventCampaignsPage } from "@/pages/organizer/EventCampaignsPage"
+import { OrganizerPage } from "@/pages/organizer/OrganizerPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
 
@@ -112,6 +114,26 @@ export function App() {
             }
           </SignedInRoute>
         )}
+      </Route>
+      <Route path="/organizer/events/:eventId/campaigns">
+        {({ eventId }) => (
+          <SignedInRoute>
+            {({ sessionId }) => (
+              <EventCampaignsPage
+                key={`${sessionId}:${eventId}`}
+                sessionId={sessionId}
+                eventId={eventId}
+              />
+            )}
+          </SignedInRoute>
+        )}
+      </Route>
+      <Route path="/organizer">
+        <SignedInRoute>
+          {({ sessionId }) => (
+            <OrganizerPage key={sessionId} sessionId={sessionId} />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/events" component={EventDiscoveryPage} />
       <Route path="/events/:eventId/buy">

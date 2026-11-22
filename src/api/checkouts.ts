@@ -3,12 +3,27 @@ import type { Ticket } from "@/api/tickets"
 
 export type CheckoutRequest = {
   eventId: string
+  promoCode?: string
   selections: {
     ticketTypeId: string
     /** Empty for general admission. For assigned seating, order must match attendeeEmails. */
     seats: string[]
     attendeeEmails: string[]
   }[]
+}
+
+export type PromoQuoteRequest = {
+  eventId: string
+  promoCode: string
+  selections: { ticketTypeId: string; quantity: number }[]
+}
+
+export type PromoQuote = {
+  promotionId: string
+  promoCode: string
+  subtotalKzt: number
+  discountKzt: number
+  amountKzt: number
 }
 
 type IssuedTicket = Pick<
@@ -23,6 +38,9 @@ export type Checkout = {
   eventId: string
   status: string
   amountKzt: number
+  subtotalKzt?: number
+  discountKzt?: number
+  promoCode?: string | null
   expiresAt: string
   paymentId: string | null
   refundState: "PENDING" | "REFUNDED" | "FAILED" | null
@@ -35,6 +53,13 @@ const checkoutsPath = "/api/checkouts"
 
 function checkoutPath(checkoutId: string) {
   return `${checkoutsPath}/${encodeURIComponent(checkoutId)}`
+}
+
+export function quotePromotion(json: PromoQuoteRequest) {
+  return requestJson<PromoQuote>(`${checkoutsPath}/quote`, {
+    method: "POST",
+    json,
+  })
 }
 
 /** Use the same UUID and request when retrying the same purchase. */

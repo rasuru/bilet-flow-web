@@ -5,15 +5,18 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { TicketOrderForm } from "@/pages/events/TicketOrderForm"
+import { useCampaignToken } from "@/pages/events/useCampaignLinkViewModel"
+import { campaignEventPath } from "@/promotions/campaignLinks"
 import { useEventDetailsViewModel } from "@/pages/events/useEventDetailsViewModel"
 
 export function BuyTicketsPage({ eventId }: { eventId: string }) {
   const model = useEventDetailsViewModel(eventId)
+  const token = useCampaignToken()
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <Link
-        href={`/events/${encodeURIComponent(eventId)}`}
+        href={campaignEventPath(eventId, token)}
         className={buttonVariants({ variant: "ghost" })}
       >
         <ArrowLeftIcon aria-hidden="true" />
@@ -81,7 +84,9 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
             )}
           {model.tickets.length > 0 && (
             <TicketOrderForm
+              key={token}
               eventId={eventId}
+              campaignToken={token}
               tickets={model.tickets}
               refreshAvailability={model.retryAvailability}
               seatingLabel={model.event.seatingLabel}

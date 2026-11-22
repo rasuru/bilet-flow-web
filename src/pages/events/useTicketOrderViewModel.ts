@@ -4,9 +4,11 @@ import { useLocation } from "wouter"
 import { z } from "zod"
 
 import type { CheckoutRequest } from "@/api/checkouts"
-import { ApiError } from "@/api/client"
+import { ApiError, problemTypes } from "@/api/client"
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { checkoutRepository } from "@/checkout/checkoutRepository"
+
+import { useCheckoutPromoViewModel } from "./useCheckoutPromoViewModel"
 
 import type { useEventDetailsViewModel } from "./useEventDetailsViewModel"
 
@@ -26,7 +28,8 @@ const kzt = new Intl.NumberFormat(undefined, {
 export function useTicketOrderViewModel(
   eventId: string,
   tickets: OrderTicket[],
-  refreshAvailability: () => void
+  refreshAvailability: () => void,
+  campaignToken: string | null
 ) {
   const [draft, setDraft] = useState<Record<string, Attendee[]>>({})
   const [authMode, setAuthMode] = useState<"login" | "register" | null>(null)
@@ -57,10 +60,26 @@ export function useTicketOrderViewModel(
       attendees.map((attendee) => attendee.seatId).filter(Boolean)
     )
   )
-  const total = tickets.reduce(
+  const promoSelections = Object.entries(draft)
+    .filter(([, attendees]) => attendees.length > 0)
+    .map(([ticketTypeId, attendees]) => ({
+      ticketTypeId,
+      quantity: attendees.length,
+    }))
+    .sort((first, second) =>
+      first.ticketTypeId.localeCompare(second.ticketTypeId)
+    )
+  const promo = useCheckoutPromoViewModel(
+    eventId,
+    campaignToken,
+    promoSelections
+  )
+  const subtotal = tickets.reduce(
     (sum, ticket) => sum + (draft[ticket.id]?.length ?? 0) * ticket.amount,
     0
   )
+
+  const total = promo.amountKzt ?? subtotal
 
   function setQuantity(ticketId: string, quantity: number) {
     setDraft((current) => ({
@@ -89,7 +108,7 @@ export function useTicketOrderViewModel(
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (order.isPending) return
+    if (order.isPending || (!retryRequest && promo.blocksOrder)) return
     if (session.status === "signedOut") {
       setAuthMode("login")
       return
@@ -144,18 +163,28 @@ export function useTicketOrderViewModel(
     }
 
     if (
+      selections.length > 30 ||
       selections.reduce(
         (count, selection) => count + selection.attendeeEmails.length,
         0
       ) > 100
     ) {
-      setFormError("An order can include up to 100 tickets.")
+      setFormError(
+        "An order can include up to 100 tickets across 30 ticket types."
+      )
       return
     }
     selections.sort((first, second) =>
       first.ticketTypeId.localeCompare(second.ticketTypeId)
     )
-    await place({ eventId, selections }, session.account.id)
+    await place(
+      {
+        eventId,
+        selections,
+        ...(promo.appliedCode ? { promoCode: promo.appliedCode } : {}),
+      },
+      session.account.id
+    )
   }
 
   async function place(request: CheckoutRequest, accountId: number) {
@@ -172,8 +201,12 @@ export function useTicketOrderViewModel(
         error.status !== 429
       ) {
         setRetryRequest(undefined)
-        setFormError(error.fieldErrors[0]?.message ?? error.message)
-        if ([404, 409].includes(error.status)) refreshAvailability()
+        if (error.type === problemTypes.promoCodeRejected) {
+          promo.reject(error)
+        } else {
+          setFormError(error.fieldErrors[0]?.message ?? error.message)
+          if ([404, 409].includes(error.status)) refreshAvailability()
+        }
       } else {
         setRetryRequest({ accountId, request })
         setFormError(
@@ -186,6 +219,7 @@ export function useTicketOrderViewModel(
   }
 
   return {
+    promo,
     draft,
     selectedSeatIds,
     isFree: total === 0,
@@ -198,6 +232,7 @@ export function useTicketOrderViewModel(
     submit,
     formError,
     isSubmitting: order.isPending,
+    maySubmit: !!retryRequest || !promo.blocksOrder,
     retryingOrder: !!retryRequest,
     session,
     authMode,

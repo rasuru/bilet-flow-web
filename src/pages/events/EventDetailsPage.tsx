@@ -10,8 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { FieldError } from "@/components/ui/field"
+import { campaignEventPath } from "@/promotions/campaignLinks"
 import { Spinner } from "@/components/ui/spinner"
 
+import {
+  useCampaignLinkViewModel,
+  useCampaignToken,
+} from "./useCampaignLinkViewModel"
 import { useEventTicketsViewModel } from "./useEventTicketsViewModel"
 import { useEventDetailsViewModel } from "./useEventDetailsViewModel"
 
@@ -89,6 +95,8 @@ function EventDetails({
 }) {
   const { event } = model
   const yourTickets = useEventTicketsViewModel(eventId)
+  const campaignToken = useCampaignToken()
+  const promo = useCampaignLinkViewModel(eventId, campaignToken)
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]">
@@ -226,6 +234,25 @@ function EventDetails({
               )}
             </CardHeader>
             <CardContent className="space-y-4">
+              {promo.status === "loading" && (
+                <Loading>Checking promo link…</Loading>
+              )}
+              {promo.status === "ready" && (
+                <p role="status" className="text-sm">
+                  Promo code <strong>{promo.code}</strong> will be checked when
+                  you choose tickets.
+                </p>
+              )}
+              {promo.status === "error" && (
+                <div className="space-y-2">
+                  <FieldError>{promo.message}</FieldError>
+                  {promo.retry && (
+                    <Button variant="outline" size="sm" onClick={promo.retry}>
+                      Try promo link again
+                    </Button>
+                  )}
+                </div>
+              )}
               {model.salesMessage && (
                 <p className="font-medium">{model.salesMessage}</p>
               )}
@@ -292,7 +319,13 @@ function EventDetails({
               {!model.ticketError &&
                 model.tickets.some((ticket) => ticket.orderLimit > 0) && (
                   <Link
-                    href={`/events/${encodeURIComponent(eventId)}/buy`}
+                    href={campaignEventPath(
+                      eventId,
+                      promo.status === "error" && !promo.retry
+                        ? null
+                        : campaignToken,
+                      true
+                    )}
                     className={buttonVariants({
                       size: "lg",
                       className: "w-full",

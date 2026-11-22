@@ -60,6 +60,16 @@ export function OrderPage({
                 </dd>
                 <dt className="text-muted-foreground">Order ID</dt>
                 <dd className="break-all">{model.order.id}</dd>
+                {model.promotion && (
+                  <>
+                    <dt className="text-muted-foreground">Subtotal</dt>
+                    <dd>{model.promotion.subtotal}</dd>
+                    <dt className="text-muted-foreground">
+                      Promo {model.promotion.code}
+                    </dt>
+                    <dd>−{model.promotion.discount}</dd>
+                  </>
+                )}
                 <dt className="text-muted-foreground">Total</dt>
                 <dd>{model.total}</dd>
                 {model.expiresAt && (
