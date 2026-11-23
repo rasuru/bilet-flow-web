@@ -3,7 +3,7 @@ import { Link } from "wouter"
 
 import type { EventVisibility, SeatingMode } from "@/api/events"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { Textarea } from "@/components/ui/textarea"
 import {
   timeZones,
   visibilityDetails,
@@ -47,11 +48,8 @@ function Field({
   )
 }
 
-const textareaClassName =
-  "min-h-24 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-
-export function CreateEventPage() {
-  const vm = useCreateEventViewModel()
+export function CreateEventPage({ sessionId }: { sessionId: number }) {
+  const vm = useCreateEventViewModel(sessionId)
   const {
     event,
     setField,
@@ -66,13 +64,13 @@ export function CreateEventPage() {
     refreshLayouts,
     step,
     error,
-    needsSignIn,
     busy,
     publishStep,
     result,
-    locked,
+    savedDraft,
     navigate,
   } = vm
+  const hasSavedTickets = Boolean(savedDraft?.ticketKeys.length)
 
   function eventInput(
     key: keyof Omit<EventDraft, "visibility">,
@@ -94,6 +92,12 @@ export function CreateEventPage() {
   return (
     <main className="flex min-h-svh items-start justify-center bg-muted/30 px-4 py-12">
       <div className="w-full max-w-2xl">
+        <Link
+          href="/"
+          className={buttonVariants({ variant: "ghost", className: "mb-6" })}
+        >
+          Back to home
+        </Link>
         {!result && (
           <nav aria-label="Event form progress" className="mb-6">
             <ol className="grid grid-cols-5 gap-2 text-center">
@@ -102,7 +106,7 @@ export function CreateEventPage() {
                   <button
                     type="button"
                     aria-current={index === step ? "step" : undefined}
-                    disabled={busy || locked}
+                    disabled={busy}
                     className="flex w-full flex-col items-center gap-2 rounded-md text-xs focus-visible:outline-ring disabled:opacity-60"
                     onClick={() => navigate(index)}
                   >
@@ -138,7 +142,7 @@ export function CreateEventPage() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  disabled={busy || locked || loadingLayouts}
+                  disabled={busy || Boolean(savedDraft) || loadingLayouts}
                   onClick={vm.fillSample}
                 >
                   Fill sample event
@@ -178,9 +182,8 @@ export function CreateEventPage() {
                     {eventInput("title", "Event title", { required: true })}
                     {eventInput("category", "Category", { required: true })}
                     <Field id="description" label="Description (optional)">
-                      <textarea
+                      <Textarea
                         id="description"
-                        className={textareaClassName}
                         value={event.description}
                         onChange={(e) =>
                           setField("description", e.target.value)
@@ -275,7 +278,7 @@ export function CreateEventPage() {
                         id="admission"
                         className="w-full"
                         value={seatingMode}
-                        disabled={loadingLayouts}
+                        disabled={loadingLayouts || hasSavedTickets}
                         onChange={(e) =>
                           vm.changeSeatingMode(e.target.value as SeatingMode)
                         }
@@ -297,7 +300,9 @@ export function CreateEventPage() {
                           className="w-full"
                           required
                           value={event.layoutId}
-                          disabled={loadingLayouts || !layouts.length}
+                          disabled={
+                            loadingLayouts || !layouts.length || hasSavedTickets
+                          }
                           onChange={(e) => selectLayout(e.target.value)}
                         >
                           <NativeSelectOption value="">
@@ -329,6 +334,7 @@ export function CreateEventPage() {
                               <Button
                                 type="button"
                                 variant="outline"
+                                disabled={hasSavedTickets}
                                 onClick={() => void refreshLayouts()}
                               >
                                 Reload layouts
@@ -342,6 +348,12 @@ export function CreateEventPage() {
                         min: 1,
                         required: true,
                       })
+                    )}
+                    {hasSavedTickets && (
+                      <FieldDescription>
+                        Admission mode and layout are fixed once a ticket tier
+                        is saved.
+                      </FieldDescription>
                     )}
                   </>
                 )}
@@ -367,7 +379,9 @@ export function CreateEventPage() {
                           vm.setCustomSales(ticket, enabled)
                         }
                         onRemove={
-                          !assigned && tickets.length > 1
+                          !assigned &&
+                          tickets.length > 1 &&
+                          !savedDraft?.ticketKeys.includes(ticket.id)
                             ? () => vm.removeTicket(ticket.id)
                             : undefined
                         }
@@ -392,11 +406,10 @@ export function CreateEventPage() {
                       layout={assigned ? vm.selectedLayout : undefined}
                       salesSummary={vm.salesSummary}
                     />
-                    {locked && (
+                    {savedDraft && (
                       <Alert>
                         <AlertDescription>
-                          An event draft exists on the server. Retry to continue
-                          publishing it.
+                          Publishing will continue using your saved draft.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -410,23 +423,13 @@ export function CreateEventPage() {
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
-                {step === 4 && error && needsSignIn && (
-                  <Link
-                    href="/sign-in"
-                    target="_blank"
-                    rel="noopener"
-                    className="text-sm underline"
-                  >
-                    Open sign-in
-                  </Link>
-                )}
               </CardContent>
               <CardFooter className="mt-6 justify-end gap-3">
                 {step > 0 && (
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={busy || locked}
+                    disabled={busy}
                     onClick={() => navigate(step - 1)}
                   >
                     Back
@@ -439,9 +442,7 @@ export function CreateEventPage() {
                   {step === 4
                     ? busy
                       ? "Publishing…"
-                      : locked
-                        ? "Retry publishing"
-                        : "Publish event"
+                      : "Publish event"
                     : step === 3
                       ? "Continue to review"
                       : "Continue"}

@@ -116,7 +116,13 @@ export function App() {
           </SignedInRoute>
         )}
       </Route>
-      <Route path="/organizer/events/new" component={CreateEventPage} />
+      <Route path="/organizer/events/new">
+        <SignedInRoute>
+          {({ sessionId }) => (
+            <CreateEventPage key={sessionId} sessionId={sessionId} />
+          )}
+        </SignedInRoute>
+      </Route>
       <Route path="/organizer/events/:eventId/campaigns">
         {({ eventId }) => (
           <SignedInRoute>

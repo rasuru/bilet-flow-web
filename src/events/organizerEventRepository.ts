@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query"
+import { queryOptions, type QueryClient } from "@tanstack/react-query"
 
 import { ApiError } from "@/api/client"
 import {
@@ -6,6 +6,7 @@ import {
   createEvent,
   listVenueLayouts,
   publishEvent,
+  updateEvent,
   type EventDetailsRequest,
   type VenueLayout,
   type VenueRequest,
@@ -13,6 +14,8 @@ import {
 import {
   createAssignedSeatingTicketType,
   createGeneralAdmissionTicketType,
+  updateAssignedSeatingTicketType,
+  updateGeneralAdmissionTicketType,
   type AssignedSeatingTicketTypeRequest,
   type GeneralAdmissionTicketTypeRequest,
 } from "@/api/inventory"
@@ -23,13 +26,14 @@ export type TicketRequest =
 export type EventSubmission = {
   details: EventDetailsRequest
   venue: VenueRequest
-  tickets: TicketRequest[]
+  tickets: { key: string; request: TicketRequest }[]
 }
 
 export type SubmissionProgress = {
-  eventId?: string
-  venueSaved?: boolean
-  ticketsSaved: number
+  draftEventId?: string
+  details?: EventDetailsRequest
+  venue?: VenueRequest
+  tickets: Map<string, { id: string; request: TicketRequest }>
 }
 
 const apiBase = (
@@ -95,45 +99,74 @@ export function venueLayoutsQuery() {
 }
 
 export async function publishNewEvent(
+  client: QueryClient,
+  sessionId: number,
   token: string,
   submission: EventSubmission,
   progress: SubmissionProgress,
-  onStep: (message: string) => void
+  onStep: (message: string, recoveryStep: number) => void
 ) {
-  if (!progress.eventId) {
-    onStep("Creating event draft…")
+  if (!progress.draftEventId) {
+    onStep("Creating event draft…", 4)
     const { id } = await createEvent(token, submission.details)
-    progress.eventId = id
+    progress.draftEventId = id
+    progress.details = submission.details
+  } else if (
+    JSON.stringify(progress.details) !== JSON.stringify(submission.details)
+  ) {
+    onStep("Updating event draft…", 0)
+    await updateEvent(token, progress.draftEventId, submission.details)
+    progress.details = submission.details
   }
 
-  if (!progress.venueSaved) {
-    onStep("Saving venue…")
-    await attachVenue(token, progress.eventId, submission.venue)
-    progress.venueSaved = true
+  const eventId = progress.draftEventId
+  if (JSON.stringify(progress.venue) !== JSON.stringify(submission.venue)) {
+    onStep("Saving venue…", 2)
+    await attachVenue(token, eventId, submission.venue)
+    progress.venue = submission.venue
   }
 
-  for (const ticket of submission.tickets.slice(progress.ticketsSaved)) {
+  for (const [index, { key, request }] of submission.tickets.entries()) {
+    const saved = progress.tickets.get(key)
+    if (JSON.stringify(saved?.request) === JSON.stringify(request)) continue
+
     onStep(
-      `Saving ticket tier ${progress.ticketsSaved + 1} of ${submission.tickets.length}…`
+      `Saving ticket tier ${index + 1} of ${submission.tickets.length}…`,
+      3
     )
-    if ("priceCategory" in ticket) {
-      await createAssignedSeatingTicketType(token, progress.eventId, ticket)
+    if (saved) {
+      if ("priceCategory" in request) {
+        await updateAssignedSeatingTicketType(token, saved.id, request)
+      } else {
+        await updateGeneralAdmissionTicketType(token, saved.id, request)
+      }
+      saved.request = request
     } else {
-      await createGeneralAdmissionTicketType(token, progress.eventId, ticket)
+      const { id } =
+        "priceCategory" in request
+          ? await createAssignedSeatingTicketType(token, eventId, request)
+          : await createGeneralAdmissionTicketType(token, eventId, request)
+      progress.tickets.set(key, { id, request })
     }
-    progress.ticketsSaved += 1
   }
 
-  onStep("Publishing event…")
-  await publishEvent(token, progress.eventId)
-  return progress.eventId
+  onStep("Publishing event…", 4)
+  await publishEvent(token, eventId)
+  void client.invalidateQueries({ queryKey: ["managed-events", sessionId] })
+  void client.invalidateQueries({ queryKey: ["public-events"] })
+  void client.invalidateQueries({ queryKey: ["public-event", eventId] })
+  return eventId
 }
 
 export function saveLocalEvent(submission: EventSubmission) {
   const id = crypto.randomUUID()
   localStorage.setItem(
     `biletflow.local-event.${id}`,
-    JSON.stringify({ id, ...submission })
+    JSON.stringify({
+      id,
+      ...submission,
+      tickets: submission.tickets.map(({ request }) => request),
+    })
   )
   return id
 }

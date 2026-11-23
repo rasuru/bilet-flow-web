@@ -1,14 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { useRef, useState } from "react"
 
-import { ApiError } from "@/api/client"
 import type {
   RegistrationWindowRequest,
   SeatingMode,
   VenueLayout,
   VenueRequest,
 } from "@/api/events"
-import { clearAuthToken, getAuthToken } from "@/auth/token"
+import { sessionRepository } from "@/auth/sessionRepository"
 import {
   allowsLocalEventSave,
   venueLayoutsQuery,
@@ -36,14 +35,6 @@ function positiveInteger(value: string) {
   )
 }
 
-function publishStepLabel(progress: SubmissionProgress, ticketCount: number) {
-  if (!progress.eventId) return "Could not create the event draft"
-  if (!progress.venueSaved) return "Could not save the venue"
-  if (progress.ticketsSaved < ticketCount)
-    return `Could not save ticket tier ${progress.ticketsSaved + 1}`
-  return "Could not publish the event"
-}
-
 function httpUrl(value: string) {
   try {
     return ["http:", "https:"].includes(new URL(value).protocol)
@@ -52,7 +43,7 @@ function httpUrl(value: string) {
   }
 }
 
-export function useCreateEventViewModel() {
+export function useCreateEventViewModel(sessionId: number) {
   const queryClient = useQueryClient()
   const [openedAt] = useState(Date.now)
   const [event, setEvent] = useState(() => createEventDraft(openedAt))
@@ -68,15 +59,17 @@ export function useCreateEventViewModel() {
   const [layoutError, setLayoutError] = useState("")
   const [step, setStep] = useState(0)
   const [error, setError] = useState("")
-  const [needsSignIn, setNeedsSignIn] = useState(false)
   const [busy, setBusy] = useState(false)
   const [publishStep, setPublishStep] = useState("")
   const [result, setResult] = useState<{ id: string; local: boolean } | null>(
     null
   )
-  const progress = useRef<SubmissionProgress>({ ticketsSaved: 0 })
+  const progress = useRef<SubmissionProgress>({ tickets: new Map() })
   const submissionInFlight = useRef(false)
-  const [locked, setLocked] = useState(false)
+  const [savedDraft, setSavedDraft] = useState<{
+    id: string
+    ticketKeys: string[]
+  } | null>(null)
 
   const assigned = seatingMode === "ASSIGNED_SEATING"
   const autoSales = defaultSalesWindow(event, openedAt)
@@ -162,7 +155,7 @@ export function useCreateEventViewModel() {
   }
 
   function fillSample() {
-    if (busy || locked || result || loadingLayouts) return
+    if (busy || savedDraft || result || loadingLayouts) return
     setEvent(sampleEventDraft(Date.now()))
     setSeatingMode("GENERAL_ADMISSION")
     setGaTickets([
@@ -173,7 +166,6 @@ export function useCreateEventViewModel() {
       },
     ])
     setError("")
-    setNeedsSignIn(false)
     setStep(4)
   }
 
@@ -262,7 +254,7 @@ export function useCreateEventViewModel() {
   }
 
   function navigate(target: number) {
-    if (locked || busy) return
+    if (busy) return
     for (let index = 0; index < target; index++) {
       const message = validate(index)
       if (message) {
@@ -328,9 +320,10 @@ export function useCreateEventViewModel() {
           salesStartAt: toIso(ticket.salesStartAt),
           salesEndAt: toIso(ticket.salesEndAt),
         }
-        return assigned
+        const request = assigned
           ? { ...details, priceCategory: ticket.id }
           : { ...details, capacity: Number(ticket.capacity) }
+        return { key: ticket.id, request }
       }),
     }
   }
@@ -353,11 +346,11 @@ export function useCreateEventViewModel() {
     setBusy(true)
     setPublishStep("Checking connection…")
     setError("")
-    setNeedsSignIn(false)
-    let token: string | null = null
+    let recoveryStep = 4
+    let operation = "Checking connection"
     try {
       const submission = buildSubmission()
-      if (!progress.current.eventId && allowsLocalEventSave) {
+      if (!progress.current.draftEventId && allowsLocalEventSave) {
         const { offline } = await queryClient.fetchQuery(venueLayoutsQuery())
         if (assigned && offline !== layoutsOffline) {
           setStep(2)
@@ -373,34 +366,30 @@ export function useCreateEventViewModel() {
           return
         }
       }
-      token = getAuthToken()
-      if (!token) {
-        setNeedsSignIn(true)
-        setError(
-          "Sign in with Remember me enabled, then return here to publish."
-        )
-        return
-      }
-      const id = await publishNewEvent(
-        token,
-        submission,
-        progress.current,
-        setPublishStep
+      const id = await sessionRepository.authenticatedRequest(
+        sessionId,
+        (token) =>
+          publishNewEvent(
+            queryClient,
+            sessionId,
+            token,
+            submission,
+            progress.current,
+            (message, step) => {
+              operation = message.slice(0, -1)
+              recoveryStep = step
+              setPublishStep(message)
+            }
+          )
       )
       setResult({ id, local: false })
     } catch (err) {
-      setLocked(Boolean(progress.current.eventId))
-      if (token && err instanceof ApiError && err.status === 401) {
-        clearAuthToken()
-        setNeedsSignIn(true)
-        setError(
-          "Your session expired. Sign in with Remember me enabled, then retry."
-        )
-      } else {
-        setError(
-          `${publishStepLabel(progress.current, tickets.length)}. ${submissionError(err)}`
-        )
+      const { draftEventId, tickets } = progress.current
+      if (draftEventId) {
+        setSavedDraft({ id: draftEventId, ticketKeys: [...tickets.keys()] })
       }
+      setStep(recoveryStep)
+      setError(`${operation} failed. ${submissionError(err)}`)
     } finally {
       submissionInFlight.current = false
       setBusy(false)
@@ -423,11 +412,10 @@ export function useCreateEventViewModel() {
     selectedLayout,
     step,
     error,
-    needsSignIn,
     busy,
     publishStep,
     result,
-    locked,
+    savedDraft,
     navigate,
     submit,
     fillSample,
