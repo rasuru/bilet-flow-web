@@ -10,7 +10,7 @@ export function SettingsPage({
   account,
   sessionId,
 }: ComponentProps<typeof ProfileSection>) {
-  const [_, navigate] = useLocation()
+  const [, navigate] = useLocation()
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-5 p-6">

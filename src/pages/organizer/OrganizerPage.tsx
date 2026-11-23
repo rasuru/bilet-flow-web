@@ -1,7 +1,13 @@
 import { Link } from "wouter"
 
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -20,6 +26,11 @@ export function OrganizerPage({ sessionId }: { sessionId: number }) {
           <CardTitle>
             <h2>Your events</h2>
           </CardTitle>
+          <CardAction>
+            <Link href="/organizer/events/new" className={buttonVariants()}>
+              Create event
+            </Link>
+          </CardAction>
         </CardHeader>
         <CardContent>
           {model.loading && (

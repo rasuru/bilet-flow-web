@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from "react"
-import { Link } from "wouter"
+import { Link, Redirect } from "wouter"
 
 import type { EventVisibility, SeatingMode } from "@/api/events"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -72,6 +72,10 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
   } = vm
   const hasSavedTickets = Boolean(savedDraft?.ticketKeys.length)
 
+  if (result && !result.local) {
+    return <Redirect to="/organizer" replace />
+  }
+
   function eventInput(
     key: keyof Omit<EventDraft, "visibility">,
     label: string,
@@ -125,13 +129,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
         <Card>
           <CardHeader>
             <CardTitle>
-              <h1>
-                {result
-                  ? result.local
-                    ? "Event saved locally"
-                    : "Event published"
-                  : "Create new event"}
-              </h1>
+              <h1>{result ? "Event saved locally" : "Create new event"}</h1>
             </CardTitle>
             <CardDescription>
               {result ? event.title : steps[step]}
@@ -153,19 +151,10 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
 
           {result ? (
             <CardContent>
-              {result.local ? (
-                <p role="status" className="text-sm">
-                  The development API is unavailable. This event was saved in
-                  this browser only.
-                </p>
-              ) : (
-                <Link
-                  href={`/events/${encodeURIComponent(result.id)}`}
-                  className="text-sm underline"
-                >
-                  View event
-                </Link>
-              )}
+              <p role="status" className="text-sm">
+                The development API is unavailable. This event was saved in this
+                browser only.
+              </p>
             </CardContent>
           ) : (
             <form

@@ -7,7 +7,6 @@ import type {
   VenueLayout,
   VenueRequest,
 } from "@/api/events"
-import { sessionRepository } from "@/auth/sessionRepository"
 import {
   allowsLocalEventSave,
   venueLayoutsQuery,
@@ -366,21 +365,16 @@ export function useCreateEventViewModel(sessionId: number) {
           return
         }
       }
-      const id = await sessionRepository.authenticatedRequest(
+      const id = await publishNewEvent(
+        queryClient,
         sessionId,
-        (token) =>
-          publishNewEvent(
-            queryClient,
-            sessionId,
-            token,
-            submission,
-            progress.current,
-            (message, step) => {
-              operation = message.slice(0, -1)
-              recoveryStep = step
-              setPublishStep(message)
-            }
-          )
+        submission,
+        progress.current,
+        (message, step) => {
+          operation = message.slice(0, -1)
+          recoveryStep = step
+          setPublishStep(message)
+        }
       )
       setResult({ id, local: false })
     } catch (err) {

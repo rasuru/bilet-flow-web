@@ -19,6 +19,7 @@ import {
   type AssignedSeatingTicketTypeRequest,
   type GeneralAdmissionTicketTypeRequest,
 } from "@/api/inventory"
+import { sessionRepository } from "@/auth/sessionRepository"
 
 export type TicketRequest =
   GeneralAdmissionTicketTypeRequest | AssignedSeatingTicketTypeRequest
@@ -98,31 +99,55 @@ export function venueLayoutsQuery() {
   })
 }
 
+async function refreshEventQueries(
+  client: QueryClient,
+  sessionId: number,
+  eventId: string
+) {
+  const queries = [
+    { queryKey: ["managed-events", sessionId] },
+    { queryKey: ["public-events"] },
+    { queryKey: ["public-event", eventId] },
+  ]
+  await Promise.all(queries.map((query) => client.cancelQueries(query)))
+  for (const query of queries) void client.invalidateQueries(query)
+}
+
 export async function publishNewEvent(
   client: QueryClient,
   sessionId: number,
-  token: string,
   submission: EventSubmission,
   progress: SubmissionProgress,
   onStep: (message: string, recoveryStep: number) => void
 ) {
+  const requestWithSession = <T>(request: (token: string) => Promise<T>) =>
+    sessionRepository.authenticatedRequest(sessionId, request)
+
   if (!progress.draftEventId) {
     onStep("Creating event draft…", 4)
-    const { id } = await createEvent(token, submission.details)
+    const { id } = await requestWithSession((token) =>
+      createEvent(token, submission.details)
+    )
     progress.draftEventId = id
     progress.details = submission.details
+    await refreshEventQueries(client, sessionId, id)
   } else if (
     JSON.stringify(progress.details) !== JSON.stringify(submission.details)
   ) {
     onStep("Updating event draft…", 0)
-    await updateEvent(token, progress.draftEventId, submission.details)
+    const eventId = progress.draftEventId
+    await requestWithSession((token) =>
+      updateEvent(token, eventId, submission.details)
+    )
     progress.details = submission.details
   }
 
   const eventId = progress.draftEventId
   if (JSON.stringify(progress.venue) !== JSON.stringify(submission.venue)) {
     onStep("Saving venue…", 2)
-    await attachVenue(token, eventId, submission.venue)
+    await requestWithSession((token) =>
+      attachVenue(token, eventId, submission.venue)
+    )
     progress.venue = submission.venue
   }
 
@@ -135,26 +160,25 @@ export async function publishNewEvent(
       3
     )
     if (saved) {
-      if ("priceCategory" in request) {
-        await updateAssignedSeatingTicketType(token, saved.id, request)
-      } else {
-        await updateGeneralAdmissionTicketType(token, saved.id, request)
-      }
+      await requestWithSession((token) =>
+        "priceCategory" in request
+          ? updateAssignedSeatingTicketType(token, saved.id, request)
+          : updateGeneralAdmissionTicketType(token, saved.id, request)
+      )
       saved.request = request
     } else {
-      const { id } =
+      const { id } = await requestWithSession((token) =>
         "priceCategory" in request
-          ? await createAssignedSeatingTicketType(token, eventId, request)
-          : await createGeneralAdmissionTicketType(token, eventId, request)
+          ? createAssignedSeatingTicketType(token, eventId, request)
+          : createGeneralAdmissionTicketType(token, eventId, request)
+      )
       progress.tickets.set(key, { id, request })
     }
   }
 
   onStep("Publishing event…", 4)
-  await publishEvent(token, eventId)
-  void client.invalidateQueries({ queryKey: ["managed-events", sessionId] })
-  void client.invalidateQueries({ queryKey: ["public-events"] })
-  void client.invalidateQueries({ queryKey: ["public-event", eventId] })
+  await requestWithSession((token) => publishEvent(token, eventId))
+  await refreshEventQueries(client, sessionId, eventId)
   return eventId
 }
 
