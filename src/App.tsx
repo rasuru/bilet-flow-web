@@ -24,6 +24,9 @@ import { OrganizerPage } from "@/pages/organizer/OrganizerPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
 
+import { Dashboard } from "@/pages/organizer/Dashboard"
+import Events from "@/pages/organizer/Events"
+
 const AdminDashboardPage = lazy(() =>
   import("@/pages/admin/AdminDashboardPage").then((module) => ({
     default: module.AdminDashboardPage,
@@ -128,6 +131,22 @@ export function App() {
           </SignedInRoute>
         )}
       </Route>
+
+      <Route path="/organizer/dashboard">
+        <SignedInRoute>{() => <Dashboard />}</SignedInRoute>
+      </Route>
+      <Route path="/organizer/events">
+        <SignedInRoute>{() => <Events />}</SignedInRoute>
+      </Route>
+
+      <Route path="/organizer/support">
+        <Redirect to="/support" />
+      </Route>
+
+      <Route path="/organizer/profile">
+        <Redirect to="/account/settings" />
+      </Route>
+      
       <Route path="/organizer">
         <SignedInRoute>
           {({ sessionId }) => (
@@ -181,13 +200,40 @@ export function App() {
         )}
       </Route>
       <Route path="/support/new">
-        <SignedInRoute>{({ account, sessionId }) => <CreateSupportPage key={sessionId} accountId={account.id} sessionId={sessionId} />}</SignedInRoute>
+        <SignedInRoute>
+          {({ account, sessionId }) => (
+            <CreateSupportPage
+              key={sessionId}
+              accountId={account.id}
+              sessionId={sessionId}
+            />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/support/:caseId">
-        {({ caseId }) => <SignedInRoute>{({ account, sessionId }) => <SupportCasePage key={`${sessionId}:${caseId}`} accountId={account.id} sessionId={sessionId} caseId={caseId} />}</SignedInRoute>}
+        {({ caseId }) => (
+          <SignedInRoute>
+            {({ account, sessionId }) => (
+              <SupportCasePage
+                key={`${sessionId}:${caseId}`}
+                accountId={account.id}
+                sessionId={sessionId}
+                caseId={caseId}
+              />
+            )}
+          </SignedInRoute>
+        )}
       </Route>
       <Route path="/support">
-        <SignedInRoute>{({ account, sessionId }) => <SupportListPage key={sessionId} accountId={account.id} sessionId={sessionId} />}</SignedInRoute>
+        <SignedInRoute>
+          {({ account, sessionId }) => (
+            <SupportListPage
+              key={sessionId}
+              accountId={account.id}
+              sessionId={sessionId}
+            />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/sign-in">
         <SignedInRoute>{() => <Redirect to="/" />}</SignedInRoute>
