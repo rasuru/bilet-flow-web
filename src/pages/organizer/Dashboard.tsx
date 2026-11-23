@@ -7,7 +7,6 @@ import {
   CalendarDays,
   ChevronDown,
   CircleHelp,
-  Clock3,
   Copy,
   FileEdit,
   LayoutDashboard,
@@ -49,13 +48,17 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import { useQuery } from "@tanstack/react-query"
+import { getOrganizerEvents, type managedEvent, getEventInventory, getInventoryTotals } from "@/api/dashboard"
+import { useLocation } from "wouter"
+
 type EventStatus = "upcoming" | "active" | "draft"
-  | "completed" | "cancelled"
+  | "completed" | "cancelled" | "unpublished"
 
 type EventVisibility = "public" | "unlisted" | "private"
 
 type Event = {
-  id: number
+  id: string
   title: string
   status: EventStatus
   visibility?: EventVisibility
@@ -69,7 +72,7 @@ type Event = {
   ticketCapacity?: number
 }
 
-const events: Event[] = [
+/* const events: Event[] = [
   {
     id: 1,
     title: "Title",
@@ -84,7 +87,7 @@ const events: Event[] = [
     ticketsSold: 500,
     ticketCapacity: 500,
   },
-]
+] */
 
 const statusLabels: Record<EventStatus, string> = {
   upcoming: "Upcoming",
@@ -92,6 +95,7 @@ const statusLabels: Record<EventStatus, string> = {
   draft: "Draft",
   completed: "Completed",
   cancelled: "Cancelled",
+  unpublished: "Unpublished"
 }
 
 const statusStyles: Record<EventStatus, string> = {
@@ -100,6 +104,7 @@ const statusStyles: Record<EventStatus, string> = {
   draft: "bg-orange-50 text-orange-700",
   completed: "bg-stone-100 text-stone-700",
   cancelled: "bg-red-50 text-red-700",
+  unpublished: "bg-gray-100 text-gray-700"
 }
 
 function StatusBadge({ status }: { status: EventStatus }) {
@@ -123,6 +128,7 @@ function VisibilityBadge({ visibility }: { visibility?: EventVisibility }) {
 }
 
 function MenuSidebar() {
+  const [location, navigate] = useLocation()
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader>
@@ -141,14 +147,20 @@ function MenuSidebar() {
           <SidebarGroupLabel>Organizer</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive>
+              <SidebarMenuButton
+                isActive={location === "/organizer/dashboard"}
+                onClick={() => navigate("/organizer/dashboard")}
+              >
                 <LayoutDashboard />
                 <span>Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton>
+              <SidebarMenuButton
+                isActive={location === "/organizer/events"}
+                onClick={() => navigate("/organizer/events")}
+              >
                 <CalendarDays />
                 <span>Events</span>
               </SidebarMenuButton>
@@ -161,7 +173,10 @@ function MenuSidebar() {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton>
+              <SidebarMenuButton
+                isActive={location === "/organizer/support"}
+                onClick={() => navigate("/organizer/support")}
+              >
                 <CircleHelp />
                 <span>Support</span>
               </SidebarMenuButton>
@@ -173,7 +188,11 @@ function MenuSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="h-auto py-2.5">
+            <SidebarMenuButton
+              className="h-auto py-2.5"
+              isActive={location === "/organizer/profile"}
+              onClick={() => navigate("/organizer/profile")}
+            >
               <UserCircle className="h-5 w-5 text-muted-foreground" />
               <div className="min-w-0 flex-1 text-left">
                 <p className="truncate text-sm font-medium">Organizer</p>
@@ -253,6 +272,18 @@ function SummaryChart({
 }
 
 function EventCard({ event }: { event: Event }) {
+
+  const {
+    data: inventory,
+    isPending: inventoryLoading,
+    isError: inventoryError,
+  } = useQuery({
+    queryKey: ["event-inventory", event.id],
+    queryFn: () => getEventInventory(event.id),
+    retry: false,
+  })
+
+  const inventoryTotals = getInventoryTotals(inventory)
   const isDraft = event.status === "draft"
   const isCompleted = event.status === "completed"
   const isCancelled = event.status === "cancelled"
@@ -322,31 +353,46 @@ function EventCard({ event }: { event: Event }) {
             </div>
           )}
 
-          {event.ticketsSold !== undefined &&
-            event.ticketCapacity !== undefined && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">
-                    Ticket inventory
-                  </span>
-                  <span className="font-medium">
-                    {event.ticketsSold} / {event.ticketCapacity} sold
-                  </span>
-                </div>
+          {inventoryLoading && (
+            <p className="text-xs text-muted-foreground">
+              Loading ticket inventory...
+            </p>
+          )}
 
-                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        (event.ticketsSold / event.ticketCapacity) * 100
-                      )}%`,
-                    }}
-                  />
-                </div>
+          {inventoryError && (
+            <p className="text-xs text-destructive" role="alert">
+              Could not load ticket inventory.
+            </p>
+          )}
+
+          {inventoryTotals && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Ticket inventory</span>
+
+                <span className="font-medium">
+                  {inventoryTotals.sold} / {inventoryTotals.capacity} sold
+                </span>
               </div>
-            )}
+
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{
+                    width: `${
+                      inventoryTotals.capacity > 0
+                        ? Math.min(
+                            100,
+                            (inventoryTotals.sold / inventoryTotals.capacity) *
+                              100
+                          )
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-2 border-t pt-4">
             {isDraft ? (
@@ -381,62 +427,83 @@ function EventCard({ event }: { event: Event }) {
     </Card>
   )
 }
+function getEventStatus(event: managedEvent): EventStatus {
+  if (event.status === "DRAFT") return "draft"
+  if (event.status === "CANCELLED") return "cancelled"
+  if (event.status === "UNPUBLISHED") return "unpublished"
 
-function NeedsAttention() {
-  const attentionItems = [
-    {
-      type: "soon",
-      title: "Title",
-      description: "Event is currently active",
-      action: "Open event",
-    },
-  ]
+  if (event.status === "PUBLISHED") {
+    const now = Date.now()
+    const start = Date.parse(event.startAt ?? "")
+    const end = Date.parse(event.endAt ?? "")
 
-  return (
-    <section className="space-y-3">
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">
-          Needs attention
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Important things that may need your attention.
-        </p>
-      </div>
+    if (!Number.isFinite(start) || !Number.isFinite(end)) {
+      throw new Error(`Invalid dates for event ${event.id}`)
+    }
 
-      <div className="space-y-2">
-        {attentionItems.map((item) => (
-          <Card key={item.title} className="shadow-none">
-            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                  {item.type === "warning" ? (
-                    <AlertCircle className="h-4 w-4 text-orange-600" />
-                  ) : (
-                    <Clock3 className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
+    if (start > now) return "upcoming"
+    if (end <= now) return "completed"
+    return "active"
+  }
 
-                <div>
-                  <p className="text-sm font-medium">{item.title}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-
-              <Button variant="outline" size="sm" className="shrink-0">
-                {item.action}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </section>
-  )
+  throw new Error(`Unknown status for event ${event.id}`)
 }
+
+function formatEvent(event: managedEvent): Event {
+  const parsedStart = event.startAt
+    ? new Date(event.startAt)
+    : null
+
+  const start =
+    parsedStart && !Number.isNaN(parsedStart.getTime())
+      ? parsedStart
+      : null
+
+  return {
+    id: event.id,
+    title: event.title ?? "Untitled event",
+    status: getEventStatus(event),
+
+    visibility: event.visibility?.toLowerCase() as
+      EventVisibility | undefined,
+
+    date: start
+      ? start.toLocaleDateString()
+      : "Date not set",
+
+    time: start
+      ? start.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      : "Time not set",
+
+    venue: event.venue?.name ?? undefined,
+
+    admission:
+      event.venue?.seatingMode === "GENERAL_ADMISSION"
+        ? "General admission"
+        : event.venue?.seatingMode === "ASSIGNED_SEATING"
+          ? "Assigned seating"
+          : "Admission not configured",
+  }
+}
+
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<EventStatus>("upcoming")
+
+  const {
+    data: backendEvents = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["organizer-events"],
+    queryFn: () => getOrganizerEvents(),
+    retry: false,
+  })
+
+  const events = useMemo(() => backendEvents.map(formatEvent), [backendEvents])
 
   const summary = useMemo(() => {
     return {
@@ -444,11 +511,11 @@ export function Dashboard() {
       active: events.filter((event) => event.status === "active").length,
       drafts: events.filter((event) => event.status === "draft").length,
     }
-  }, [])
+  }, [events])
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => event.status === activeTab)
-  }, [activeTab])
+  }, [events, activeTab])
 
   const tabs: EventStatus[] = [
     "upcoming",
@@ -456,7 +523,20 @@ export function Dashboard() {
     "draft",
     "completed",
     "cancelled",
+    "unpublished"
   ]
+
+  if (isLoading) {
+    return <p>Loading events...</p>
+  }
+
+  if (error) {
+    return (
+      <p role="alert">
+        Failed to load events: {error.message}
+      </p>
+    )
+  }
 
   return (
     <SidebarProvider>
@@ -489,9 +569,7 @@ export function Dashboard() {
         <main className="mx-auto w-full max-w-7xl space-y-8 p-4 sm:p-6 lg:p-8">
           <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="mb-2 text-sm font-medium text-primary">
-                Organizer
-              </p>
+              <p className="mb-2 text-sm font-medium text-primary">Organizer</p>
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                 Organizer Dashboard
               </h1>
@@ -509,8 +587,6 @@ export function Dashboard() {
           <section>
             <SummaryChart summary={summary} />
           </section>
-
-          <NeedsAttention />
 
           <section className="space-y-4">
             <div>
@@ -582,6 +658,8 @@ export function Dashboard() {
               </Card>
             )}
           </section>
+
+
         </main>
       </SidebarInset>
     </SidebarProvider>

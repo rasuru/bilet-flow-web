@@ -146,7 +146,7 @@ export function App() {
       <Route path="/organizer/profile">
         <Redirect to="/account/settings" />
       </Route>
-      
+
       <Route path="/organizer">
         <SignedInRoute>
           {({ sessionId }) => (
