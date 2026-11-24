@@ -975,7 +975,6 @@ export const russian: Readonly<Record<string, string>> = {
     "Регистрация должна пройти до окончания мероприятия.",
   "Registration opens (optional)": "Открытие регистрации (необязательно)",
   "Reload layouts": "Обновить схемы залов",
-  Remove: "Удалить",
   "Remove {0}": "Удалить «{0}»",
   Review: "Проверка",
   "Sales close when the event ends.": "Продажи закроются в конце мероприятия.",
@@ -1051,7 +1050,6 @@ export const russian: Readonly<Record<string, string>> = {
   Remaining: "Осталось",
   Reserved: "Зарезервировано",
   Sidebar: "Боковое меню",
-  Sold: "Продано",
   "Cancellation is permanent. Existing paid orders must be refunded separately.":
     "Отмена необратима. Возврат средств по оплаченным заказам нужно оформить отдельно.",
   "Cancellation cannot be undone. New sales and admission will stop, and attendees will be notified. Completed paid orders are not automatically refunded.":
@@ -2265,7 +2263,6 @@ export const kazakh: Readonly<Record<string, string>> = {
     "Тіркелу іс-шара аяқталғанға дейін өтуі керек.",
   "Registration opens (optional)": "Тіркеудің ашылуы (міндетті емес)",
   "Reload layouts": "Зал сызбаларын қайта жүктеу",
-  Remove: "Алып тастау",
   "Remove {0}": "«{0}» санатын алып тастау",
   Review: "Тексеру",
   "Sales close when the event ends.": "Іс-шара аяқталғанда сату жабылады.",
@@ -2344,7 +2341,6 @@ export const kazakh: Readonly<Record<string, string>> = {
   Remaining: "Қалғаны",
   Reserved: "Брондалғаны",
   Sidebar: "Бүйірлік мәзір",
-  Sold: "Сатылғаны",
   "Cancellation is permanent. Existing paid orders must be refunded separately.":
     "Іс-шарадан бас тарту қайтымсыз. Төленген тапсырыстардың ақшасын бөлек қайтару қажет.",
   "Cancellation cannot be undone. New sales and admission will stop, and attendees will be notified. Completed paid orders are not automatically refunded.":
@@ -2580,4 +2576,5 @@ export const kazakh: Readonly<Record<string, string>> = {
   "View all events": "Барлық іс-шаралар",
   "Welcome back, {0}": "Қайта қош келдіңіз, {0}",
 }
+
 

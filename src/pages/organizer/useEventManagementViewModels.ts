@@ -6,6 +6,7 @@ import type { ManagedEvent, SeatingMode } from "@/api/events"
 import type { TicketType } from "@/api/inventory"
 import { managedEventRepository } from "@/events/managedEventRepository"
 import { submissionError } from "@/events/organizerEventRepository"
+import { buildLayoutPreview } from "@/events/seatMapPresentation"
 import { dateFormat, numberFormat, statusText, t } from "@/i18n/locale"
 import {
   buildEventDetails,
@@ -177,6 +178,7 @@ export function useAttachVenueViewModel(
       save.reset()
     },
     layouts: layouts.data ?? [],
+    layoutPreviews: (layouts.data ?? []).map(buildLayoutPreview),
     loadingLayouts: assigned && layouts.isPending,
     layoutError:
       loadError(layouts.error, "Could not load venue layouts.") ?? "",
@@ -447,4 +449,5 @@ export function useEventStaffViewModel(
         : save.submit({ userId: removing, action: "remove" }),
   }
 }
+
 
