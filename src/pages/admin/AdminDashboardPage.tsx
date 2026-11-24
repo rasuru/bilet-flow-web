@@ -1,5 +1,8 @@
+import { TransactionNotice } from "@/components/site/TransactionNotice"
+import { BrandLogo } from "@/components/site/BrandLogo"
+import { BackLink, PageHeading } from "@/components/site/SitePage"
+import { AppearanceControls } from "@/components/site/AppearanceControls"
 import { t } from "@/i18n/locale"
-import { ArrowUpRight, ShieldCheck } from "lucide-react"
 import { Link, useSearch } from "wouter"
 
 import { buttonVariants } from "@/components/ui/button"
@@ -37,33 +40,20 @@ export function AdminDashboardPage({
   return (
     <div className="min-h-svh bg-muted/35 lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
       <aside className="border-b bg-sidebar text-sidebar-foreground lg:sticky lg:top-0 lg:h-svh lg:overflow-y-auto lg:border-r lg:border-b-0">
-        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:py-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 lg:py-5">
           <Link
             href="/admin"
-            className="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4"
+            className="inline-flex flex-col items-start gap-1 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
           >
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <ShieldCheck aria-hidden="true" className="size-[18px]" />
-            </span>
-            <span className="block">
-              <span className="block text-sm font-semibold tracking-tight">
-                BiletFlow
-              </span>
-              <span className="block text-xs text-muted-foreground">
-                {t("Administration")}
-              </span>
+            <BrandLogo />
+            <span className="text-xs text-muted-foreground">
+              {t("Administration")}
             </span>
           </Link>
-          <Link
-            href="/"
-            className={buttonVariants({
-              variant: "outline",
-              size: "sm",
-              className: "lg:hidden",
-            })}
-          >
-            {t("Back to site")} <ArrowUpRight aria-hidden="true" />
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-1 lg:hidden">
+            <BackLink href="/">{t("Home")}</BackLink>
+            <AppearanceControls />
+          </div>
         </div>
         <nav
           aria-label={t("Admin sections")}
@@ -102,14 +92,12 @@ export function AdminDashboardPage({
           ))}
         </nav>
       </aside>
-      <div className="min-w-0">
+      <div className="flex min-w-0 flex-col">
         <header className="hidden items-center justify-between gap-4 border-b bg-background px-6 py-3 lg:flex xl:px-8">
-          <Link
-            href="/"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            {t("Back to site")} <ArrowUpRight aria-hidden="true" />
-          </Link>
+          <BackLink href="/">{t("Home")}</BackLink>
+          <div className="ml-auto">
+            <AppearanceControls />
+          </div>
           <Link
             href="/account/settings"
             className="max-w-56 truncate rounded-md text-sm font-medium text-muted-foreground hover:underline focus-visible:outline"
@@ -117,17 +105,15 @@ export function AdminDashboardPage({
             {login}
           </Link>
         </header>
-        <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:py-8 xl:px-8">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {t(title)}
-            </h1>
-            {section && (
-              <p className="text-sm text-muted-foreground">
-                {t(section.description)}
-              </p>
-            )}
-          </div>
+        <main className="mx-auto w-full max-w-7xl flex-1 space-y-5 px-4 py-6 sm:px-6 lg:py-8 xl:px-8">
+          {section?.id !== "overview" && (
+            <BackLink href="/admin">{t("Go to overview")}</BackLink>
+          )}
+          <PageHeading
+            description={section ? t(section.description) : undefined}
+          >
+            {t(title)}
+          </PageHeading>
           {section ? (
             <AdminSectionContent
               key={`${section.id}:${search}`}
@@ -144,6 +130,9 @@ export function AdminDashboardPage({
             </Link>
           )}
         </main>
+        <footer className="border-t bg-background px-4 py-4 sm:px-6 xl:px-8 print:hidden">
+          <TransactionNotice />
+        </footer>
       </div>
     </div>
   )
@@ -183,4 +172,3 @@ function AdminSectionContent({
       return <AdminExports sessionId={sessionId} />
   }
 }
-

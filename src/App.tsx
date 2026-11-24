@@ -1,9 +1,11 @@
 import { t, useLanguage } from "@/i18n/locale"
-import { lazy, Suspense, type ReactNode } from "react"
-import { Link, Redirect, Route, Switch } from "wouter"
+import { lazy, Suspense, useEffect, type ReactNode } from "react"
+import { Redirect, Route, Switch, useLocation } from "wouter"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { SiteLayout } from "@/components/site/SiteLayout"
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
+import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { ActivateAccountPage } from "@/pages/account/ActivateAccountPage"
 import {
@@ -22,7 +24,9 @@ import { SupportCasePage } from "@/pages/support/SupportCasePage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 import { EventCampaignsPage } from "@/pages/organizer/EventCampaignsPage"
 import { CreateEventPage } from "@/pages/organizer/CreateEventPage"
-import { OrganizerPage } from "@/pages/organizer/OrganizerPage"
+import { ManageEventPage } from "@/pages/organizer/ManageEventPage"
+import { OrganizerStartPage } from "@/pages/organizer/OrganizerStartPage"
+import { OrganizerDashboardPage } from "@/pages/organizer/OrganizerDashboardPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
 
@@ -42,28 +46,39 @@ function SignedInRoute({
 }: {
   children: (session: SignedInSession) => ReactNode
 }) {
+  const [path] = useLocation()
   const session = useSessionViewModel()
   const { status, errorMessage, retry } = session
 
   if (status === "signedOut") {
-    return <AuthPage />
+    return (
+      <AuthPage
+        forOrganizer={path === "/organizer" || path.startsWith("/organizer/")}
+        creatingEvent={path === "/organizer/events/new"}
+      />
+    )
   }
 
   if (status === "restoring") {
     return (
-      <main className="flex min-h-svh items-center justify-center p-6">
-        <p className="text-sm text-muted-foreground">{t("Loading…")}</p>
-      </main>
+      <SitePage width="compact" className="py-12">
+        <p
+          role="status"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
+        >
+          <Spinner aria-hidden="true" />
+          {t("Loading…")}
+        </p>
+      </SitePage>
     )
   }
 
   if (status === "restoreFailed") {
     return (
-      <main className="flex min-h-svh items-center justify-center p-6">
+      <SitePage width="compact" className="py-12">
+        <BackLink href="/">{t("Home")}</BackLink>
         <div className="w-full max-w-sm">
-          <h1 className="text-2xl font-semibold">
-            {t("Could not load account")}
-          </h1>
+          <PageHeading>{t("Could not load account")}</PageHeading>
 
           <p className="mt-2 text-sm text-destructive" role="alert">
             {t(errorMessage ?? "Could not restore your session.")}
@@ -72,7 +87,7 @@ function SignedInRoute({
             {t("Try again")}
           </Button>
         </div>
-      </main>
+      </SitePage>
     )
   }
 
@@ -81,7 +96,19 @@ function SignedInRoute({
 
 export function App() {
   useLanguage()
-  return (
+  const [path] = useLocation()
+  const session = useSessionViewModel()
+  useEffect(() => {
+    if (!window.location.hash) window.scrollTo(0, 0)
+  }, [path])
+  const organizerWorkspace =
+    /^\/organizer(?:\/events\/[^/]+(?:\/campaigns)?)?\/?$/.test(path) &&
+    path !== "/organizer/start"
+  const adminWorkspace = /^\/admin(?:\/[^/]+)?\/?$/.test(path)
+  const ownLayout =
+    (session.status === "signedIn" && organizerWorkspace) ||
+    (session.canAccessAdmin && adminWorkspace)
+  const routes = (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/admin/:section?">
@@ -104,22 +131,18 @@ export function App() {
                   />
                 </Suspense>
               ) : (
-                <main className="mx-auto max-w-lg space-y-4 px-4 py-12">
-                  <h1 className="text-2xl font-semibold">
+                <SitePage width="compact">
+                  <BackLink href="/">{t("Home")}</BackLink>
+                  <PageHeading>
                     {t("Administrator access required")}
-                  </h1>
-                  <Link
-                    href="/"
-                    className={buttonVariants({ variant: "outline" })}
-                  >
-                    {t("Back to site")}
-                  </Link>
-                </main>
+                  </PageHeading>
+                </SitePage>
               )
             }
           </SignedInRoute>
         )}
       </Route>
+      <Route path="/organizer/start" component={OrganizerStartPage} />
       <Route path="/organizer/events/new">
         <SignedInRoute>
           {({ sessionId }) => (
@@ -140,10 +163,38 @@ export function App() {
           </SignedInRoute>
         )}
       </Route>
+      <Route path="/organizer/events/:eventId">
+        {({ eventId }) => (
+          <SignedInRoute>
+            {({ sessionId }) => (
+              <ManageEventPage
+                key={`${sessionId}:${eventId}`}
+                sessionId={sessionId}
+                eventId={eventId}
+              />
+            )}
+          </SignedInRoute>
+        )}
+      </Route>
+      <Route path="/organizer/dashboard">
+        <Redirect to="/organizer" replace />
+      </Route>
+      <Route path="/organizer/events">
+        <Redirect to="/organizer" replace />
+      </Route>
+
+      <Route path="/organizer/support">
+        <Redirect to="/support" />
+      </Route>
+
+      <Route path="/organizer/profile">
+        <Redirect to="/account/settings" />
+      </Route>
+
       <Route path="/organizer">
         <SignedInRoute>
           {({ sessionId }) => (
-            <OrganizerPage key={sessionId} sessionId={sessionId} />
+            <OrganizerDashboardPage key={sessionId} sessionId={sessionId} />
           )}
         </SignedInRoute>
       </Route>
@@ -252,13 +303,14 @@ export function App() {
       </Route>
 
       <Route>
-        <main className="p-6">
-          <p>{t("Page not found")}</p>
-        </main>
+        <SitePage>
+          <BackLink href="/">{t("Home")}</BackLink>
+          <PageHeading>{t("Page not found")}</PageHeading>
+        </SitePage>
       </Route>
     </Switch>
   )
+  return ownLayout ? routes : <SiteLayout>{routes}</SiteLayout>
 }
 
 export default App
-

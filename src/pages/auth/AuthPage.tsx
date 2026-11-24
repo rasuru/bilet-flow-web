@@ -1,4 +1,5 @@
 import { t } from "@/i18n/locale"
+import { AccountFlowPage } from "@/components/site/AccountFlowPage"
 import { useState } from "react"
 
 import { LoginForm } from "@/pages/auth/LoginForm"
@@ -6,25 +7,32 @@ import { RegisterForm } from "@/pages/auth/RegisterForm"
 
 type AuthMode = "login" | "register"
 
-export function AuthPage() {
+export function AuthPage({
+  forOrganizer = false,
+  creatingEvent = false,
+}: {
+  forOrganizer?: boolean
+  creatingEvent?: boolean
+}) {
   const [mode, setMode] = useState<AuthMode>("login")
 
   return (
-    <main className="flex min-h-svh items-center justify-center p-6">
-      <section className="w-full max-w-sm">
-        <header className="mb-6">
-          <h1 className="text-2xl font-semibold">
-            {mode === "login" ? t("Log in") : t("Create an account")}
-          </h1>
-        </header>
-
-        {mode === "login" ? (
-          <LoginForm onRegister={() => setMode("register")} />
-        ) : (
-          <RegisterForm onLogin={() => setMode("login")} />
-        )}
-      </section>
-    </main>
+    <AccountFlowPage
+      title={t(
+        mode === "register"
+          ? "Create an account"
+          : creatingEvent
+            ? "Sign in to create an event"
+            : "Log in"
+      )}
+      href={forOrganizer ? "/organizer/start" : "/"}
+      backLabel={t(forOrganizer ? "Organize an event" : "Home")}
+    >
+      {mode === "login" ? (
+        <LoginForm onRegister={() => setMode("register")} />
+      ) : (
+        <RegisterForm onLogin={() => setMode("login")} />
+      )}
+    </AccountFlowPage>
   )
 }
-

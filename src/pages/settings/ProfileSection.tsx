@@ -1,6 +1,7 @@
 import { t } from "@/i18n/locale"
 import { useState } from "react"
 
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AccountFormField } from "@/pages/account/AccountFormField"
 import { useProfileViewModel } from "./useProfileViewModel"
@@ -72,69 +73,81 @@ export function ProfileSection({ account, sessionId }: Props) {
   const [saved, setSaved] = useState(false)
 
   return (
-    <section className="space-y-4 rounded-xl border p-5">
-      <h2 className="text-lg font-semibold">
-        {t("Profile and contact email")}
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        {t("BiletFlow uses your account email for sign-in and password reset.")}
-      </p>
-      {isEditing ? (
-        <ProfileForm
-          account={account}
-          sessionId={sessionId}
-          onCancel={() => setIsEditing(false)}
-          onSaved={() => {
-            setIsEditing(false)
-            setSaved(true)
-          }}
-        />
-      ) : (
-        <>
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-muted-foreground">{t("Username")}</dt>
-              <dd className="break-all">{account.login}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">{t("Name")}</dt>
-              <dd className="wrap-anywhere">
-                {[account.firstName, account.lastName]
-                  .filter(Boolean)
-                  .join(" ") || t("Not set")}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">{t("Account email")}</dt>
-              <dd className="wrap-anywhere">{account.email || t("Not set")}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">
-                {t("Profile image URL")}
-              </dt>
-              <dd className="wrap-anywhere">
-                {account.imageUrl || t("Not set")}
-              </dd>
-            </div>
-          </dl>
-          {saved && (
-            <p role="status" className="text-sm">
-              {t("Profile saved.")}
-            </p>
+    <section
+      id="profile"
+      className="scroll-mt-5"
+      aria-labelledby="profile-heading"
+    >
+      <Card className="gap-4 p-5">
+        <h2
+          id="profile-heading"
+          className="text-xl font-semibold tracking-tight"
+        >
+          {t("Profile and contact email")}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {t(
+            "BiletFlow uses your account email for sign-in and password reset."
           )}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setSaved(false)
-              setIsEditing(true)
+        </p>
+        {isEditing ? (
+          <ProfileForm
+            account={account}
+            sessionId={sessionId}
+            onCancel={() => setIsEditing(false)}
+            onSaved={() => {
+              setIsEditing(false)
+              setSaved(true)
             }}
-          >
-            {t("Edit profile")}
-          </Button>
-        </>
-      )}
+          />
+        ) : (
+          <>
+            <dl className="grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt className="text-muted-foreground">{t("Username")}</dt>
+                <dd className="wrap-anywhere">{account.login}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">{t("Name")}</dt>
+                <dd className="wrap-anywhere">
+                  {[account.firstName, account.lastName]
+                    .filter(Boolean)
+                    .join(" ") || t("Not set")}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">{t("Account email")}</dt>
+                <dd className="wrap-anywhere">
+                  {account.email || t("Not set")}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">
+                  {t("Profile image URL")}
+                </dt>
+                <dd className="wrap-anywhere">
+                  {account.imageUrl || t("Not set")}
+                </dd>
+              </div>
+            </dl>
+            {saved && (
+              <p role="status" className="text-sm">
+                {t("Profile saved.")}
+              </p>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setSaved(false)
+                setIsEditing(true)
+              }}
+            >
+              {t("Edit profile")}
+            </Button>
+          </>
+        )}
+      </Card>
     </section>
   )
 }
-

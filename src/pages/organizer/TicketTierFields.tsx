@@ -22,12 +22,12 @@ import type { TicketDraft } from "./createEventDraft"
 
 type TicketTierFieldsProps = {
   ticket: TicketDraft
-  title: string
+  title?: string
   readOnlyQuantity: boolean
   timeZone: string
-  salesSummary: string
+  salesSummary?: string
   onChange: (changes: Partial<Omit<TicketDraft, "id">>) => void
-  onCustomSales: (enabled: boolean) => void
+  onCustomSales?: (enabled: boolean) => void
   onRemove?: () => void
 }
 
@@ -70,6 +70,72 @@ export function TicketTierFields({
   const salesId = `ticket-${ticket.id}-custom-sales`
   const validPrice = ticket.price !== "" && Number(ticket.price) >= 0
 
+  const fields = (
+    <FieldGroup>
+      {input("name", t("Tier name"), { required: true })}
+      {input("description", t("Ticket description (optional)"))}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {input("price", t("Price (KZT)"), {
+          type: "number",
+          min: 0,
+          step: "0.01",
+          required: true,
+        })}
+        {input(
+          "capacity",
+          t("Quantity"),
+          {
+            type: "number",
+            min: 1,
+            readOnly: readOnlyQuantity,
+            required: true,
+          },
+          readOnlyQuantity ? t("Set by the venue layout.") : undefined
+        )}
+        {input(
+          "maxPerOrder",
+          t("Max per order"),
+          { type: "number", min: 1, required: true },
+          t("Maximum tickets from this tier in one order.")
+        )}
+      </div>
+      <div className="space-y-3 rounded-lg border p-3">
+        {onCustomSales && (
+          <Field orientation="horizontal">
+            <Checkbox
+              id={salesId}
+              checked={ticket.customSales}
+              onCheckedChange={onCustomSales}
+              aria-describedby={`${salesId}-description`}
+            />
+            <FieldLabel htmlFor={salesId}>
+              {t("Custom sales window")}
+            </FieldLabel>
+          </Field>
+        )}
+        <FieldDescription id={`${salesId}-description`}>
+          {ticket.customSales
+            ? t("Sales times use {0}.", timeZone)
+            : salesSummary}
+        </FieldDescription>
+        {ticket.customSales && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {input("salesStartAt", t("Sales start"), {
+              type: "datetime-local",
+              required: true,
+            })}
+            {input("salesEndAt", t("Sales end"), {
+              type: "datetime-local",
+              required: true,
+            })}
+          </div>
+        )}
+      </div>
+    </FieldGroup>
+  )
+
+  if (!title) return fields
+
   return (
     <Card size="sm">
       <CardHeader>
@@ -95,68 +161,7 @@ export function TicketTierFields({
           </CardAction>
         )}
       </CardHeader>
-      <CardContent>
-        <FieldGroup>
-          {input("name", t("Tier name"), { required: true })}
-          {input("description", t("Ticket description (optional)"))}
-          <div className="grid gap-4 sm:grid-cols-3">
-            {input("price", t("Price (KZT)"), {
-              type: "number",
-              min: 0,
-              step: "0.01",
-              required: true,
-            })}
-            {input(
-              "capacity",
-              t("Quantity"),
-              {
-                type: "number",
-                min: 1,
-                readOnly: readOnlyQuantity,
-                required: true,
-              },
-              readOnlyQuantity ? t("Set by the venue layout.") : undefined
-            )}
-            {input(
-              "maxPerOrder",
-              t("Max per order"),
-              { type: "number", min: 1, required: true },
-              t("Maximum tickets from this tier in one order.")
-            )}
-          </div>
-          <div className="space-y-3 rounded-lg border p-3">
-            <Field orientation="horizontal">
-              <Checkbox
-                id={salesId}
-                checked={ticket.customSales}
-                onCheckedChange={onCustomSales}
-                aria-describedby={`${salesId}-description`}
-              />
-              <FieldLabel htmlFor={salesId}>
-                {t("Custom sales window")}
-              </FieldLabel>
-            </Field>
-            <FieldDescription id={`${salesId}-description`}>
-              {ticket.customSales
-                ? t("Sales times use {0}.", timeZone)
-                : salesSummary}
-            </FieldDescription>
-            {ticket.customSales && (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {input("salesStartAt", t("Sales start"), {
-                  type: "datetime-local",
-                  required: true,
-                })}
-                {input("salesEndAt", t("Sales end"), {
-                  type: "datetime-local",
-                  required: true,
-                })}
-              </div>
-            )}
-          </div>
-        </FieldGroup>
-      </CardContent>
+      <CardContent>{fields}</CardContent>
     </Card>
   )
 }
-

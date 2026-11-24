@@ -37,6 +37,16 @@ export function listUsers(token: string, query: PageQuery = {}) {
   return requestPage<PublicUser>(withQuery("/api/users", query), token)
 }
 
+export function findDirectoryUsers(
+  token: string,
+  criteria: { login: string } | { ids: readonly string[] }
+) {
+  return requestJson<PublicUser[]>(
+    withQuery("/api/users/directory", criteria),
+    { token }
+  )
+}
+
 export function searchUsers(token: string, query: string) {
   return requestJson<PublicUser[]>(
     `/api/users/_search/${encodeURIComponent(query)}`,

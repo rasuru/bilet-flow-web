@@ -1,3 +1,4 @@
+import { useEventReturn } from "@/components/site/useEventReturn"
 import { t, numberFormat } from "@/i18n/locale"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRef, useState, type FormEvent } from "react"
@@ -42,6 +43,7 @@ export function useTicketOrderViewModel(
   const submitting = useRef(false)
   const session = useSessionViewModel()
   const client = useQueryClient()
+  const { href: eventReturn } = useEventReturn()
   const [, navigate] = useLocation()
   const order = useMutation({
     mutationFn: async (request: CheckoutRequest) => {
@@ -194,7 +196,9 @@ export function useTicketOrderViewModel(
     setFormError(undefined)
     try {
       const checkout = await order.mutateAsync(request)
-      navigate(`/orders/${encodeURIComponent(checkout.id)}`)
+      navigate(`/orders/${encodeURIComponent(checkout.id)}`, {
+        state: { eventReturn },
+      })
     } catch (error) {
       if (
         error instanceof ApiError &&
@@ -245,4 +249,3 @@ export function useTicketOrderViewModel(
     },
   }
 }
-

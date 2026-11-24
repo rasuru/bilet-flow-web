@@ -1,8 +1,8 @@
-import { numberFormat, t } from "@/i18n/locale"
-import type { ComponentProps, ReactNode } from "react"
+import { BackLink } from "@/components/site/SitePage"
+import { useEffect, useRef } from "react"
+import { t } from "@/i18n/locale"
 import { Link, Redirect } from "wouter"
 
-import type { EventVisibility, SeatingMode } from "@/api/events"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
@@ -14,42 +14,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Field as ShadcnField,
-  FieldDescription,
-  FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  timeZones,
-  visibilityDetails,
-  type EventDraft,
-} from "./createEventDraft"
+import { FieldDescription } from "@/components/ui/field"
+import { EventDetailsFields } from "./EventDetailsFields"
+import { EventVenueFields } from "./EventVenueFields"
+import { OrganizerLayout } from "./OrganizerLayout"
+import { manageEventPath } from "./organizerEventPresentation"
 import { EventPreview } from "./EventPreview"
 import { TicketTierFields } from "./TicketTierFields"
 import { useCreateEventViewModel } from "./useCreateEventViewModel"
 
-const seatCount = numberFormat({ maximumFractionDigits: 0 })
-
 const steps = ["Basics", "Schedule", "Venue & Admission", "Tickets", "Review"]
-function Field({
-  id,
-  label,
-  children,
-}: {
-  id: string
-  label: string
-  children: ReactNode
-}) {
-  return (
-    <ShadcnField>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      {children}
-    </ShadcnField>
-  )
-}
 
 export function CreateEventPage({ sessionId }: { sessionId: number }) {
   const vm = useCreateEventViewModel(sessionId)
@@ -73,55 +47,49 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
     savedDraft,
     navigate,
   } = vm
-  const hasSavedTickets = Boolean(savedDraft?.ticketKeys.length)
+
+  const stepTitle = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    stepTitle.current?.focus({ preventScroll: true })
+  }, [step])
 
   if (result && !result.local) {
-    return <Redirect to="/organizer" replace />
-  }
-
-  function eventInput(
-    key: keyof Omit<EventDraft, "visibility">,
-    label: string,
-    props: ComponentProps<typeof Input> = {}
-  ) {
     return (
-      <Field id={key} label={label}>
-        <Input
-          {...props}
-          id={key}
-          value={event[key]}
-          onChange={(e) => setField(key, e.target.value)}
-        />
-      </Field>
+      <Redirect
+        to={manageEventPath(result.id)}
+        state={{
+          organizerNotice: result.published
+            ? "Event published."
+            : "Draft saved.",
+        }}
+        replace
+      />
     )
   }
 
   return (
-    <main className="flex min-h-svh items-start justify-center bg-muted/30 px-4 py-12">
-      <div className="w-full max-w-2xl">
-        <Link
-          href="/"
-          className={buttonVariants({ variant: "ghost", className: "mb-6" })}
-        >
-          {t("Back to home")}
-        </Link>
+    <OrganizerLayout>
+      <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-5 sm:px-6 sm:py-7">
+        <BackLink href="/organizer">{t("Organizer dashboard")}</BackLink>
+        <h1 className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight font-semibold tracking-tight">
+          {result ? t("Event saved locally") : t("Create new event")}
+        </h1>
         {!result && (
           <nav aria-label={t("Event form progress")} className="mb-6">
-            <ol className="grid grid-cols-5 gap-2 text-center">
+            <ol className="flex flex-wrap gap-2">
               {steps.map((label, index) => (
                 <li key={label}>
                   <button
                     type="button"
                     aria-current={index === step ? "step" : undefined}
                     disabled={busy}
-                    className="flex w-full flex-col items-center gap-2 rounded-md text-xs focus-visible:outline-ring disabled:opacity-60"
+                    className={buttonVariants({
+                      variant: index === step ? "secondary" : "ghost",
+                      size: "sm",
+                    })}
                     onClick={() => navigate(index)}
                   >
-                    <span
-                      className={`grid size-7 place-items-center rounded-full ${index === step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
-                    >
-                      {index + 1}
-                    </span>
                     <span>{t(label)}</span>
                   </button>
                 </li>
@@ -131,14 +99,21 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
         )}
         <Card>
           <CardHeader>
-            <CardTitle>
-              <h1>
-                {result ? t("Event saved locally") : t("Create new event")}
-              </h1>
-            </CardTitle>
-            <CardDescription>
-              {result ? event.title : t(steps[step])}
-            </CardDescription>
+            {result ? (
+              <CardDescription className="wrap-anywhere">
+                {event.title}
+              </CardDescription>
+            ) : (
+              <CardTitle>
+                <h2
+                  ref={stepTitle}
+                  tabIndex={-1}
+                  className="w-fit rounded-sm text-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                >
+                  {t(steps[step])}
+                </h2>
+              </CardTitle>
+            )}
             {import.meta.env.DEV && !result && (
               <CardAction>
                 <Button
@@ -166,271 +141,135 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
             <form
               onSubmit={(e) => {
                 e.preventDefault()
-                void vm.submit()
+                void vm.submit("publish")
               }}
               noValidate
               aria-busy={busy}
             >
-              <CardContent className="space-y-4">
-                {step === 0 && (
-                  <>
-                    {eventInput("title", t("Event title"), { required: true })}
-                    {eventInput("category", t("Category"), { required: true })}
-                    <Field id="description" label={t("Description (optional)")}>
-                      <Textarea
-                        id="description"
-                        value={event.description}
-                        onChange={(e) =>
-                          setField("description", e.target.value)
-                        }
-                      />
-                    </Field>
-                    {eventInput("imageUrl", t("Image URL (optional)"), {
-                      type: "url",
-                    })}
-                    <Field id="visibility" label={t("Visibility")}>
-                      <NativeSelect
-                        id="visibility"
-                        aria-describedby="visibility-description"
-                        className="w-full"
-                        value={event.visibility}
-                        onChange={(e) =>
-                          setField(
-                            "visibility",
-                            e.target.value as EventVisibility
-                          )
-                        }
-                      >
-                        {Object.entries(visibilityDetails).map(
-                          ([value, { label }]) => (
-                            <NativeSelectOption key={value} value={value}>
-                              {t(label)}
-                            </NativeSelectOption>
-                          )
-                        )}
-                      </NativeSelect>
-                      <FieldDescription id="visibility-description">
-                        {t(visibilityDetails[event.visibility].description)}
-                      </FieldDescription>
-                    </Field>
-                  </>
-                )}
-                {step === 1 && (
-                  <>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {eventInput("startAt", t("Starts"), {
-                        type: "datetime-local",
-                        required: true,
-                      })}
-                      {eventInput("endAt", t("Ends"), {
-                        type: "datetime-local",
-                        required: true,
-                      })}
-                    </div>
-                    <Field id="timeZone" label={t("Time zone")}>
-                      <NativeSelect
-                        id="timeZone"
-                        className="w-full"
-                        value={event.timeZone}
-                        onChange={(e) => setField("timeZone", e.target.value)}
-                      >
-                        {timeZones.map((zone) => (
-                          <NativeSelectOption key={zone}>
-                            {zone}
-                          </NativeSelectOption>
-                        ))}
-                      </NativeSelect>
-                    </Field>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {eventInput(
-                        "registrationOpensAt",
-                        t("Registration opens (optional)"),
-                        {
-                          type: "datetime-local",
-                          "aria-describedby": "registration-description",
-                        }
-                      )}
-                      {eventInput(
-                        "registrationClosesAt",
-                        t("Registration closes (optional)"),
-                        {
-                          type: "datetime-local",
-                          "aria-describedby": "registration-description",
-                        }
-                      )}
-                    </div>
-                    <FieldDescription id="registration-description">
-                      {t(
-                        "Registration limits when buyers can order tickets across all tiers. Leave both dates blank to open registration when the event is published."
-                      )}
-                    </FieldDescription>
-                  </>
-                )}
-                {step === 2 && (
-                  <>
-                    <Field id="admission" label={t("Admission mode")}>
-                      <NativeSelect
-                        id="admission"
-                        className="w-full"
-                        value={seatingMode}
-                        disabled={loadingLayouts || hasSavedTickets}
-                        onChange={(e) =>
-                          vm.changeSeatingMode(e.target.value as SeatingMode)
-                        }
-                      >
-                        <NativeSelectOption value="GENERAL_ADMISSION">
-                          {t("General admission")}
-                        </NativeSelectOption>
-                        <NativeSelectOption value="ASSIGNED_SEATING">
-                          {t("Assigned seating")}
-                        </NativeSelectOption>
-                      </NativeSelect>
-                    </Field>
-                    {eventInput("venueName", t("Venue name"), {
-                      required: true,
-                    })}
-                    {eventInput("venueAddress", t("Address"), {
-                      required: true,
-                    })}
-                    {assigned ? (
-                      <Field id="layoutId" label={t("Venue layout")}>
-                        <NativeSelect
-                          id="layoutId"
-                          className="w-full"
-                          required
-                          value={event.layoutId}
-                          disabled={
-                            loadingLayouts || !layouts.length || hasSavedTickets
-                          }
-                          onChange={(e) => selectLayout(e.target.value)}
-                        >
-                          <NativeSelectOption value="">
-                            {loadingLayouts
-                              ? t("Loading layouts…")
-                              : t("Select a layout")}
-                          </NativeSelectOption>
-                          {layouts.map((layout) => (
-                            <NativeSelectOption
-                              key={layout.layoutId}
-                              value={layout.layoutId}
-                            >
-                              {t(
-                                "{0} ({1} seats)",
-                                layout.name,
-                                seatCount.format(layout.seats.length)
-                              )}
-                            </NativeSelectOption>
-                          ))}
-                        </NativeSelect>
-                        {layoutsOffline && layouts.length > 0 && (
-                          <p className="text-sm text-muted-foreground">
-                            {t("Sample layouts are available for local saves.")}
-                          </p>
-                        )}
-                        {!loadingLayouts &&
-                          (layoutError || !layouts.length) && (
-                            <>
-                              <p className="text-sm" role="status">
-                                {layoutError ||
-                                  t("No venue layouts are available.")}
-                              </p>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                disabled={hasSavedTickets}
-                                onClick={() => void refreshLayouts()}
-                              >
-                                {t("Reload layouts")}
-                              </Button>
-                            </>
+              <CardContent>
+                <fieldset disabled={busy} className="min-w-0 space-y-4">
+                  {step < 2 && (
+                    <EventDetailsFields
+                      event={event}
+                      setField={setField}
+                      section={step === 0 ? "basics" : "schedule"}
+                    />
+                  )}
+                  {step === 2 &&
+                    (vm.venueSaved ? (
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          {event.venueName} · {event.venueAddress}
+                        </p>
+                        <FieldDescription>
+                          {t(
+                            "Venue and admission settings are fixed after you save them."
                           )}
-                      </Field>
+                        </FieldDescription>
+                      </div>
                     ) : (
-                      eventInput("venueCapacity", t("Total event capacity"), {
-                        type: "number",
-                        min: 1,
-                        required: true,
-                      })
-                    )}
-                    {hasSavedTickets && (
-                      <FieldDescription>
-                        {t(
-                          "Admission mode and layout are fixed once a ticket tier is saved."
-                        )}
-                      </FieldDescription>
-                    )}
-                  </>
-                )}
-                {step === 3 && (
-                  <>
-                    <FieldDescription>
-                      {t("Prices are in KZT. Enter 0 for a free ticket.")}
-                    </FieldDescription>
-                    {tickets.map((ticket, index) => (
-                      <TicketTierFields
-                        key={ticket.id}
-                        ticket={ticket}
-                        title={
-                          assigned ? ticket.id : t("Ticket tier {0}", index + 1)
-                        }
-                        readOnlyQuantity={assigned}
-                        timeZone={event.timeZone}
-                        salesSummary={vm.salesSummary}
-                        onChange={(changes) =>
-                          vm.updateTicket(ticket.id, changes)
-                        }
-                        onCustomSales={(enabled) =>
-                          vm.setCustomSales(ticket, enabled)
-                        }
-                        onRemove={
-                          !assigned &&
-                          tickets.length > 1 &&
-                          !savedDraft?.ticketKeys.includes(ticket.id)
-                            ? () => vm.removeTicket(ticket.id)
-                            : undefined
-                        }
+                      <EventVenueFields
+                        event={event}
+                        setField={setField}
+                        seatingMode={seatingMode}
+                        changeSeatingMode={vm.changeSeatingMode}
+                        layouts={layouts}
+                        layoutsOffline={layoutsOffline}
+                        loadingLayouts={loadingLayouts}
+                        layoutError={layoutError}
+                        selectLayout={selectLayout}
+                        refreshLayouts={() => void refreshLayouts()}
                       />
                     ))}
-                    {!assigned && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={vm.addTicket}
-                      >
-                        {t("Add ticket tier")}
-                      </Button>
-                    )}
-                  </>
+                  {step === 3 && (
+                    <>
+                      <FieldDescription>
+                        {t("Prices are in KZT. Enter 0 for a free ticket.")}
+                      </FieldDescription>
+                      {tickets.map((ticket, index) => (
+                        <TicketTierFields
+                          key={ticket.id}
+                          ticket={ticket}
+                          title={
+                            assigned
+                              ? ticket.id
+                              : t("Ticket tier {0}", index + 1)
+                          }
+                          readOnlyQuantity={assigned}
+                          timeZone={event.timeZone}
+                          salesSummary={vm.salesSummary}
+                          onChange={(changes) =>
+                            vm.updateTicket(ticket.id, changes)
+                          }
+                          onCustomSales={(enabled) =>
+                            vm.setCustomSales(ticket, enabled)
+                          }
+                          onRemove={
+                            !assigned &&
+                            tickets.length > 1 &&
+                            !savedDraft?.ticketKeys.includes(ticket.id)
+                              ? () => vm.removeTicket(ticket.id)
+                              : undefined
+                          }
+                        />
+                      ))}
+                      {!assigned && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={vm.addTicket}
+                        >
+                          {t("Add ticket tier")}
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  {step === 4 && (
+                    <>
+                      <EventPreview
+                        event={event}
+                        tickets={tickets}
+                        layout={assigned ? vm.selectedLayout : undefined}
+                        salesSummary={vm.salesSummary}
+                      />
+                      {savedDraft && (
+                        <Alert>
+                          <AlertDescription>
+                            {t(
+                              "Publishing will continue using your saved draft."
+                            )}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </>
+                  )}
+                </fieldset>
+                {!busy && step < 2 && (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    {t("Save a draft to add a venue and tickets later.")}
+                  </p>
                 )}
-                {step === 4 && (
-                  <>
-                    <EventPreview
-                      event={event}
-                      tickets={tickets}
-                      layout={assigned ? vm.selectedLayout : undefined}
-                      salesSummary={vm.salesSummary}
-                    />
-                    {savedDraft && (
-                      <Alert>
-                        <AlertDescription>
-                          {t(
-                            "Publishing will continue using your saved draft."
-                          )}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </>
-                )}
-                <p role="status" className={busy ? "text-sm" : "sr-only"}>
+                <p role="status" className={busy ? "mt-4 text-sm" : "sr-only"}>
                   {busy ? publishStep : ""}
                 </p>
+                {savedDraft && (
+                  <Link
+                    href={manageEventPath(savedDraft.id)}
+                    className={buttonVariants({
+                      variant: "link",
+                      className: "px-0",
+                    })}
+                  >
+                    {t("Open saved draft")}
+                  </Link>
+                )}
                 {error && (
                   <Alert role="alert" variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
               </CardContent>
-              <CardFooter className="mt-6 justify-end gap-3">
+              <CardFooter className="mt-6 flex-wrap justify-end gap-2">
                 {step > 0 && (
                   <Button
                     type="button"
@@ -442,13 +281,19 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                   </Button>
                 )}
                 <Button
+                  type="button"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => void vm.submit("draft")}
+                >
+                  {t("Save draft")}
+                </Button>
+                <Button
                   type="submit"
                   disabled={busy || (step === 2 && loadingLayouts)}
                 >
                   {step === 4
-                    ? busy
-                      ? t("Publishing…")
-                      : t("Publish event")
+                    ? t("Publish event")
                     : step === 3
                       ? t("Continue to review")
                       : t("Continue")}
@@ -458,7 +303,6 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
           )}
         </Card>
       </div>
-    </main>
+    </OrganizerLayout>
   )
 }
-
