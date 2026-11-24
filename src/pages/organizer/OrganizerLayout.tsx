@@ -102,4 +102,3 @@ export function OrganizerLayout({
     </SidebarProvider>
   )
 }
-

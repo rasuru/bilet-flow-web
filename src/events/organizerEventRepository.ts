@@ -216,4 +216,3 @@ export function submissionError(error: unknown) {
   return "Could not save the event. Please try again."
 }
 
-

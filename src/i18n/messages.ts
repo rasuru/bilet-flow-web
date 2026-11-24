@@ -1969,4 +1969,3 @@ export const kazakh: Readonly<Record<string, string>> = {
   "{0} sold": "{0} сатылды",
   "{0}?": "{0}?",
 }
-

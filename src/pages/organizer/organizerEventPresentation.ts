@@ -160,4 +160,3 @@ export function presentInventory(inventory: EventInventory | null | undefined) {
           },
   }
 }
-

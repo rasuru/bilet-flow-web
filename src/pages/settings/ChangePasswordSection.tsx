@@ -51,4 +51,3 @@ export function ChangePasswordSection({ sessionId }: { sessionId: number }) {
   )
 }
 
-

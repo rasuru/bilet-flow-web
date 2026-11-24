@@ -68,4 +68,3 @@ export function AdminOverview({ sessionId }: { sessionId: number }) {
   )
 }
 
-

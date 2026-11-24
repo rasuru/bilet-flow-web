@@ -55,4 +55,3 @@ export function useSupportListViewModel(sessionId: number, accountId: number) {
   }
 }
 
-

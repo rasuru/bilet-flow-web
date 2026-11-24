@@ -485,4 +485,3 @@ export function useCreateEventViewModel(sessionId: number) {
   }
 }
 
-

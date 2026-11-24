@@ -71,4 +71,3 @@ export function useCampaignLinkViewModel(
   return { status: "loading" } as const
 }
 
-

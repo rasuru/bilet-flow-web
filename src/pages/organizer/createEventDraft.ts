@@ -117,4 +117,3 @@ export function defaultSalesWindow(event: EventDraft, openedAt: number) {
     salesEndAt: closesAt === start ? event.startAt : event.endAt,
   }
 }
-

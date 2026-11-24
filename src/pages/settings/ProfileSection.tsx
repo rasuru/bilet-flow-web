@@ -138,4 +138,3 @@ export function ProfileSection({ account, sessionId }: Props) {
   )
 }
 
-

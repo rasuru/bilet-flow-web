@@ -462,4 +462,3 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
   )
 }
 
-

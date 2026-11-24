@@ -83,4 +83,3 @@ export function usePasswordResetKey() {
   return new URLSearchParams(useSearch()).get("key")?.trim() ?? ""
 }
 
-

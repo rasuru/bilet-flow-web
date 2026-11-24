@@ -38,4 +38,3 @@ function AlertDescription({ className, ...props }: ComponentProps<"p">) {
 }
 
 export { Alert, AlertDescription }
-

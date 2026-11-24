@@ -145,4 +145,3 @@ export function unhideTicketType(token: string, ticketTypeId: string) {
     method: "POST",
   })
 }
-

@@ -99,4 +99,3 @@ export function useCreateSupportViewModel(sessionId: number) {
   }
 }
 
-

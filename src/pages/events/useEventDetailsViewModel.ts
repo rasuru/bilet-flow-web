@@ -178,4 +178,3 @@ export function useEventDetailsViewModel(eventId: string) {
   } as const
 }
 
-

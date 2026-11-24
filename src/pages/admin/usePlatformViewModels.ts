@@ -164,4 +164,3 @@ export function useAuthoritiesViewModel(sessionId: number) {
   }
 }
 
-

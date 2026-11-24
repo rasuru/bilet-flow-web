@@ -179,4 +179,3 @@ export function useOrganizerViewModel(sessionId: number) {
 export type OrganizerEventCardModel = ReturnType<
   typeof useOrganizerViewModel
 >["events"][number]
-
