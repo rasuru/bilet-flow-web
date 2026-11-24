@@ -1,14 +1,21 @@
-import { t, dateFormat, uiText } from "@/i18n/locale"
+import { t, dateFormat, numberFormat, uiText } from "@/i18n/locale"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import {
   ArrowRight,
   CalendarPlus,
+  ImageOff,
   LucideClock,
   LucideMapPin,
   Search,
   Ticket,
 } from "lucide-react"
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react"
 import { Link, useLocation, useSearch } from "wouter"
 
 import {
@@ -261,6 +268,32 @@ function useEventDiscoveryViewModel() {
   }
 }
 
+function EventCardImage({ src }: { src: string }) {
+  const [unavailable, setUnavailable] = useState(false)
+
+  return (
+    <AspectRatio ratio={16 / 9} className="bg-muted/60">
+      {src && !unavailable ? (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 size-full object-cover"
+          onError={() => setUnavailable(true)}
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 grid place-content-center justify-items-center gap-2 px-3 text-center text-sm text-muted-foreground"
+        >
+          <ImageOff className="size-6" />
+          <span>{t("No image available")}</span>
+        </div>
+      )}
+    </AspectRatio>
+  )
+}
+
 function EventCard({
   card,
   returnHref,
@@ -268,6 +301,8 @@ function EventCard({
   card: ReturnType<typeof toCard>
   returnHref: string
 }) {
+  const imageUrl = card.imageUrl?.trim() ?? ""
+
   return (
     <Link
       href={card.href}
@@ -275,18 +310,7 @@ function EventCard({
       className="group block h-full rounded-xl focus-visible:outline-2 focus-visible:outline-ring"
     >
       <Card className="h-full gap-0 overflow-hidden py-0 transition-colors group-hover:bg-muted/50">
-        {card.imageUrl && (
-          <div className="bg-muted">
-            <AspectRatio ratio={16 / 9}>
-              <img
-                src={card.imageUrl}
-                alt=""
-                loading="lazy"
-                className="absolute inset-0 size-full object-cover"
-              />
-            </AspectRatio>
-          </div>
-        )}
+        <EventCardImage key={imageUrl} src={imageUrl} />
 
         <CardHeader className="gap-1 px-4 pt-4 pb-2">
           <p className="text-sm text-muted-foreground">{card.category}</p>
@@ -495,6 +519,8 @@ export function EventDiscoveryPage() {
   )
 }
 
+const eventCount = numberFormat({ maximumFractionDigits: 0 })
+
 const organizerStatusLabels: Record<PublicEvent["status"], string> = {
   DRAFT: "Draft",
   PUBLISHED: "Published",
@@ -536,7 +562,7 @@ function byStartDate(first: PublicEvent, second: PublicEvent) {
 function toOrganizerOverview(events: PublicEvent[]) {
   const now = Date.now()
   return {
-    hasEvents: events.length > 0,
+    total: events.length,
     items: events
       .filter((event) => event.status === "DRAFT" || isCurrentEvent(event, now))
       .sort(
@@ -608,6 +634,45 @@ function useHomeViewModel() {
   }
 }
 
+function OverviewRow({
+  id,
+  title,
+  action,
+  count,
+  children,
+}: {
+  id: string
+  title: string
+  action?: ReactNode
+  count?: number
+  children: ReactNode
+}) {
+  return (
+    <section
+      aria-labelledby={id}
+      className="grid min-w-0 items-center gap-3 px-4 py-3 sm:px-5 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-5"
+    >
+      <header className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 lg:flex-col lg:items-start">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <h2 id={id} className="font-semibold tracking-tight">
+            {title}
+          </h2>
+          {count !== undefined && (
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {t(
+                count === 1 ? "{0} event" : "{0} events",
+                eventCount.format(count)
+              )}
+            </span>
+          )}
+        </div>
+        {action}
+      </header>
+      <div className="min-w-0">{children}</div>
+    </section>
+  )
+}
+
 function OverviewList({
   items,
   organizer = false,
@@ -616,13 +681,21 @@ function OverviewList({
   organizer?: boolean
 }) {
   return (
-    <ul className="divide-y border-y">
+    <ul
+      className={
+        organizer
+          ? "grid gap-y-1 divide-y sm:grid-cols-2 sm:gap-x-4 sm:divide-y-0 lg:grid-cols-3"
+          : items.length > 1
+            ? "grid gap-x-5 divide-y sm:grid-cols-2 sm:divide-y-0"
+            : ""
+      }
+    >
       {items.map((item, index) => (
         <li
           key={item.id}
-          className="flex flex-wrap items-center justify-between gap-3 py-3"
+          className="flex min-w-0 flex-wrap items-center justify-between gap-2 py-1.5"
         >
-          <div className="min-w-0 space-y-1">
+          <div className="min-w-0 space-y-0.5">
             <Link
               href={item.href}
               state={organizer ? undefined : { eventReturn: "/" }}
@@ -637,7 +710,9 @@ function OverviewList({
               )}
             </p>
             {item.statusLabel && (
-              <Badge variant="secondary">{item.statusLabel}</Badge>
+              <Badge variant="secondary" className="mt-1">
+                {item.statusLabel}
+              </Badge>
             )}
           </div>
           {item.ticketHref && (
@@ -712,11 +787,12 @@ export function HomePage() {
   const model = useHomeViewModel()
   const { account, organized, attending, discovery } = model
   const nextEvents = attending.data ?? []
+  const organizerTotal = organized.data?.total
   const cards = discovery.data?.cards ?? []
   const firstName = account?.firstName?.trim() || account?.login
 
   return (
-    <SitePage className="space-y-8">
+    <SitePage className="space-y-5 sm:space-y-6">
       {firstName ? (
         <PageHeading>{t("Welcome back, {0}", firstName)}</PageHeading>
       ) : (
@@ -740,141 +816,115 @@ export function HomePage() {
         />
       )}
       {account && (
-        <div className="grid items-start gap-4 lg:grid-cols-2">
-          <Card>
-            <CardHeader className="flex flex-wrap items-center justify-between gap-3">
-              <CardTitle>
-                <h2 className="text-xl font-semibold tracking-tight">
-                  {t("Upcoming events")}
-                </h2>
-              </CardTitle>
+        <Card className="gap-0 divide-y py-0">
+          <OverviewRow
+            id="home-upcoming-events"
+            title={t("Upcoming events")}
+            action={
               <Link
                 href="/my-tickets"
                 className={buttonVariants({
-                  className: "min-h-10",
-                  variant: nextEvents.length ? "outline" : "ghost",
+                  variant: "outline",
+                  className: "min-h-9",
                 })}
               >
                 <Ticket aria-hidden="true" /> {t("My tickets")}
               </Link>
-            </CardHeader>
-            <CardContent>
-              {attending.isPending ? (
-                <Skeleton
-                  className="h-16"
-                  role="status"
-                  aria-label={t("Loading your events…")}
-                />
-              ) : attending.isError ? (
-                <HomeFailure retry={() => void attending.refetch()}>
-                  {t("Couldn’t load your tickets and events.")}
-                </HomeFailure>
-              ) : nextEvents.length ? (
-                <OverviewList items={nextEvents} />
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-muted-foreground">
-                    {t("You don’t have any upcoming events.")}
-                  </p>
-                  <Link
-                    href="/events"
-                    className={buttonVariants({
-                      variant: "link",
-                      className: "px-0",
-                    })}
-                  >
-                    {t("Browse events")} <ArrowRight aria-hidden="true" />
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-wrap items-center justify-between gap-3">
-              <CardTitle>
-                <h2 className="text-xl font-semibold tracking-tight">
-                  {t("Events you organize")}
-                </h2>
-              </CardTitle>
-              {organized.data?.hasEvents && (
+            }
+          >
+            {attending.isPending ? (
+              <Skeleton
+                className="h-10"
+                role="status"
+                aria-label={t("Loading your events…")}
+              />
+            ) : attending.isError ? (
+              <HomeFailure retry={() => void attending.refetch()}>
+                {t("Couldn’t load your tickets and events.")}
+              </HomeFailure>
+            ) : nextEvents.length ? (
+              <OverviewList items={nextEvents} />
+            ) : (
+              <p className="text-muted-foreground">
+                {t("You don’t have any upcoming events.")}
+              </p>
+            )}
+          </OverviewRow>
+          <OverviewRow
+            id="home-organized-events"
+            title={t("Events you organize")}
+            count={organizerTotal}
+            action={
+              organizerTotal !== undefined &&
+              (organizerTotal > 0 ? (
                 <Link
                   href={organizerDashboardPath}
                   className={buttonVariants({
                     variant: "outline",
-                    className: "min-h-10",
+                    className: "min-h-9",
                   })}
                 >
-                  {t("Organizer dashboard")}
+                  {t("Organizer dashboard")} <ArrowRight aria-hidden="true" />
                 </Link>
-              )}
-            </CardHeader>
-            <CardContent>
-              {organized.isPending ? (
-                <Skeleton
-                  className="h-16"
-                  role="status"
-                  aria-label={t("Loading your events…")}
-                />
-              ) : organized.isError ? (
-                <HomeFailure retry={() => void organized.refetch()}>
-                  {t("Couldn’t load your events.")}
-                </HomeFailure>
-              ) : organized.data?.hasEvents ? (
-                organized.data.items.length ? (
-                  <OverviewList items={organized.data.items} organizer />
-                ) : (
-                  <p className="text-muted-foreground">
-                    {t("No current or draft events.")}
-                  </p>
-                )
               ) : (
-                <div className="space-y-2">
-                  <p className="text-muted-foreground">
-                    {t(
-                      "Start a draft whenever you’re ready to plan your first event."
-                    )}
-                  </p>
-                  <Link
-                    href="/organizer/start"
-                    className={buttonVariants({
-                      variant: "link",
-                      className: "px-0",
-                    })}
-                  >
-                    <CalendarPlus aria-hidden="true" />{" "}
-                    {t("Become an organizer")}
-                  </Link>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                <Link
+                  href="/organizer/start"
+                  className={buttonVariants({
+                    variant: "outline",
+                    className: "min-h-9",
+                  })}
+                >
+                  <CalendarPlus aria-hidden="true" /> {t("Become an organizer")}
+                </Link>
+              ))
+            }
+          >
+            {organized.isPending ? (
+              <Skeleton
+                className="h-10"
+                role="status"
+                aria-label={t("Loading your events…")}
+              />
+            ) : organized.isError ? (
+              <HomeFailure retry={() => void organized.refetch()}>
+                {t("Couldn’t load your events.")}
+              </HomeFailure>
+            ) : organized.data?.items.length ? (
+              <OverviewList items={organized.data.items} organizer />
+            ) : (
+              <p className="text-muted-foreground">
+                {t(
+                  organizerTotal
+                    ? "No current or draft events."
+                    : "Start a draft whenever you’re ready to plan your first event."
+                )}
+              </p>
+            )}
+          </OverviewRow>
+        </Card>
       )}
 
       <section aria-labelledby="home-public-events" className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2
-            id="home-public-events"
-            className="text-xl font-semibold tracking-tight"
-          >
-            {t("Public events")}
-          </h2>
-          <Link
-            href={discoveryPath}
-            className={buttonVariants({
-              variant: "outline",
-              className: "min-h-10",
-            })}
-          >
-            {t("View all events")} <ArrowRight aria-hidden="true" />
-          </Link>
-        </div>
-
-        {account && (
-          <div className="max-w-lg">
-            <HomeSearch model={model} />
+        <div className="grid items-end gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,27rem)]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h2
+              id="home-public-events"
+              className="text-xl font-semibold tracking-tight"
+            >
+              {t("Public events")}
+            </h2>
+            <Link
+              href={discoveryPath}
+              className={buttonVariants({
+                variant: "ghost",
+                className: "min-h-10",
+              })}
+            >
+              {t("Browse public events")} <ArrowRight aria-hidden="true" />
+            </Link>
           </div>
-        )}
+          {account && <HomeSearch model={model} />}
+        </div>
 
         {discovery.isPending ? (
           <Skeleton

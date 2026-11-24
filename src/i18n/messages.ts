@@ -1149,6 +1149,8 @@ export const russian: Readonly<Record<string, string>> = {
     "Пользователь {0} потеряет права администратора этого мероприятия.",
   "Become an organizer": "Стать организатором",
   "Browse events": "Смотреть мероприятия",
+  "Browse public events": "Смотреть публичные мероприятия",
+  "No image available": "Нет изображения",
   "Choose admission, ticket quantities and prices.":
     "Выберите тип входа, количество билетов и цены.",
   "Couldn’t load administrator usernames.":
@@ -2339,6 +2341,8 @@ export const kazakh: Readonly<Record<string, string>> = {
     "{0} пайдаланушысы осы іс-шараның әкімші рұқсатынан айырылады.",
   "Become an organizer": "Ұйымдастырушы болу",
   "Browse events": "Іс-шараларды қарау",
+  "Browse public events": "Жария іс-шараларды қарау",
+  "No image available": "Сурет жоқ",
   "Choose admission, ticket quantities and prices.":
     "Кіру түрін, билет санын және бағасын таңдаңыз.",
   "Couldn’t load administrator usernames.":
