@@ -15,7 +15,14 @@ export type OrganizerSales = {
   netKzt: number
 }
 
+export type OrganizerEventSales = {
+  eventId: string
+  sales: OrganizerSales
+  pricing: "PAID" | "FREE" | "MIXED" | "UNCONFIGURED"
+}
+
 export type OrganizerAnalyticsOverview = {
+  events: OrganizerEventSales[]
   inventory: { capacity: number; sold: number; remaining: number; held: number }
   sales: OrganizerSales
   attendance: { registered: number; checkedIn: number; absent: number } | null

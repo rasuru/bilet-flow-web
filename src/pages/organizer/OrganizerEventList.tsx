@@ -9,12 +9,11 @@ import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { numberFormat, t } from "@/i18n/locale"
-import type { OrganizerEvent } from "./organizerEventPresentation"
 import { useOrganizerEventsViewModel } from "./useOrganizerEventsViewModel"
 
 const integer = numberFormat({ maximumFractionDigits: 0 })
 const rowColumns =
-  "sm:grid-cols-[minmax(0,1fr)_minmax(8rem,0.36fr)_minmax(6rem,0.26fr)_minmax(0,auto)]"
+  "lg:grid-cols-[minmax(0,1fr)_minmax(6rem,0.32fr)_minmax(6rem,0.28fr)_minmax(6rem,0.3fr)_6rem]"
 
 export function OrganizerEventList({
   model,
@@ -32,7 +31,7 @@ export function OrganizerEventList({
         >
           {t("Your events")}
         </h2>
-        {hasEvents && (
+        {hasEvents && !model.salesLoading && !model.salesUnavailable && (
           <p role="status" className="text-sm text-muted-foreground">
             {t(
               "{0} of {1} events",
@@ -115,7 +114,39 @@ export function OrganizerEventList({
                 </NativeSelectOption>
               ))}
             </NativeSelect>
-            {(model.search || model.filter !== "all") && (
+            <Label htmlFor="organizer-pricing" className="sr-only">
+              {t("Filter events by ticket price")}
+            </Label>
+            <NativeSelect
+              id="organizer-pricing"
+              className="max-w-full [&>select]:h-10"
+              value={model.pricing}
+              onChange={(e) => model.setPricing(e.currentTarget.value)}
+            >
+              {model.pricingOptions.map(({ value, label }) => (
+                <NativeSelectOption key={value} value={value}>
+                  {label}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+            <Label htmlFor="organizer-sort" className="sr-only">
+              {t("Sort events by")}
+            </Label>
+            <NativeSelect
+              id="organizer-sort"
+              className="max-w-full [&>select]:h-10"
+              value={model.sort}
+              onChange={(e) => model.setSort(e.currentTarget.value)}
+            >
+              {model.sortOptions.map(({ value, label }) => (
+                <NativeSelectOption key={value} value={value}>
+                  {label}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+            {(model.search ||
+              model.filter !== "all" ||
+              model.pricing !== "all") && (
               <Button
                 variant="ghost"
                 className="h-10"
@@ -125,7 +156,38 @@ export function OrganizerEventList({
               </Button>
             )}
           </div>
-          {model.visible.length === 0 ? (
+          {model.incompleteSales && (
+            <p
+              role="status"
+              className="border-t px-4 py-3 text-sm text-muted-foreground"
+            >
+              {t("Sales or ticket prices are unavailable for some events.")}
+            </p>
+          )}
+          {model.salesLoading ? (
+            <p
+              role="status"
+              className="border-t px-4 py-3 text-sm text-muted-foreground"
+            >
+              {t("Loading event sales and ticket prices…")}
+            </p>
+          ) : model.salesUnavailable ? (
+            <div
+              role="status"
+              className="flex flex-wrap items-center gap-3 border-t px-4 py-3 text-sm text-muted-foreground"
+            >
+              <p>
+                {t(
+                  "This view needs sales and ticket prices. Try again or change the sort or filters."
+                )}
+              </p>
+              {model.retrySales && (
+                <Button size="sm" variant="outline" onClick={model.retrySales}>
+                  {t("Retry sales data")}
+                </Button>
+              )}
+            </div>
+          ) : model.visible.length === 0 ? (
             <p className="border-t p-5 text-sm text-muted-foreground">
               {t("No events match your search and filters.")}
             </p>
@@ -133,19 +195,21 @@ export function OrganizerEventList({
             <>
               <div
                 aria-hidden="true"
-                className={`hidden ${rowColumns} gap-3 border-y bg-muted/45 px-4 py-2.5 text-xs font-medium text-muted-foreground sm:grid`}
+                className={`hidden ${rowColumns} gap-3 border-y bg-muted/45 px-4 py-2.5 text-xs font-medium text-muted-foreground lg:grid`}
               >
                 <span>{t("Event")}</span>
                 <span>{t("Starts")}</span>
                 <span>{t("Status")}</span>
-                <span className="w-11 lg:w-24" />
+                <span>{model.salesLabel}</span>
+                <span />
               </div>
-              <ul className="divide-y border-t sm:border-t-0">
+              <ul className="divide-y border-t lg:border-t-0">
                 {model.visible.map((event) => (
                   <EventRow
                     key={event.id}
                     event={event}
                     filters={model.returnFilters}
+                    salesLabel={model.salesLabel}
                   />
                 ))}
               </ul>
@@ -160,9 +224,11 @@ export function OrganizerEventList({
 function EventRow({
   event,
   filters,
+  salesLabel,
 }: {
-  event: OrganizerEvent
+  event: ReturnType<typeof useOrganizerEventsViewModel>["visible"][number]
   filters: string
+  salesLabel: string
 }) {
   const metadata = `organizer-event-${event.id}`
   return (
@@ -170,9 +236,9 @@ function EventRow({
       <Link
         href={event.managePath}
         state={{ organizerEventFilters: filters }}
-        className={`group grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-4 py-3.5 hover:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring ${rowColumns} sm:gap-3`}
+        className={`group grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-4 py-3.5 hover:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring ${rowColumns} lg:gap-3`}
         aria-label={t("Manage {0}", event.title)}
-        aria-describedby={`${metadata}-venue ${metadata}-date ${metadata}-status`}
+        aria-describedby={`${metadata}-venue ${metadata}-date ${metadata}-status ${metadata}-sales`}
       >
         <div className="col-start-1 min-w-0">
           <p className="font-semibold wrap-anywhere">{event.title}</p>
@@ -185,40 +251,62 @@ function EventRow({
         </div>
         <div
           id={`${metadata}-date`}
-          className="col-start-1 row-start-2 min-w-0 text-sm tabular-nums sm:col-start-2 sm:row-start-1"
+          className="col-start-1 row-start-2 min-w-0 text-sm tabular-nums lg:col-start-2 lg:row-start-1"
         >
           <span>{event.startDate}</span>
           {event.startTime && (
-            <span className="text-muted-foreground sm:mt-0.5 sm:block">
-              <span className="sm:hidden"> · </span>
+            <span className="text-muted-foreground lg:mt-0.5 lg:block">
+              <span className="lg:hidden"> · </span>
               {event.startTime}
             </span>
           )}
         </div>
-        <Badge
+        <div
           id={`${metadata}-status`}
-          variant={
-            event.status === "active" || event.status === "upcoming"
-              ? "secondary"
-              : "outline"
-          }
-          className="col-start-1 row-start-3 h-auto w-fit max-w-full gap-1 whitespace-normal sm:col-start-3 sm:row-start-1"
+          className="col-start-1 row-start-3 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 lg:col-start-3 lg:row-start-1 lg:flex-col lg:items-start"
         >
-          {(event.status === "active" || event.status === "upcoming") && (
-            <span
-              aria-hidden="true"
-              className={
-                event.status === "active"
-                  ? "size-1.5 rounded-full bg-emerald-700 dark:bg-emerald-300"
-                  : "size-1.5 rounded-full border border-current"
-              }
-            />
+          <Badge
+            variant={
+              event.status === "active" || event.status === "upcoming"
+                ? "secondary"
+                : "outline"
+            }
+            className="h-auto w-fit max-w-full gap-1 whitespace-normal"
+          >
+            {(event.status === "active" || event.status === "upcoming") && (
+              <span
+                aria-hidden="true"
+                className={
+                  event.status === "active"
+                    ? "size-1.5 rounded-full bg-emerald-700 dark:bg-emerald-300"
+                    : "size-1.5 rounded-full border border-current"
+                }
+              />
+            )}
+            {event.statusLabel}
+          </Badge>
+          {event.pricingLabel && (
+            <span className="text-xs wrap-anywhere text-muted-foreground">
+              {event.pricingLabel}
+            </span>
           )}
-          {event.statusLabel}
-        </Badge>
+        </div>
+        <div
+          id={`${metadata}-sales`}
+          className="col-start-1 row-start-4 min-w-0 text-sm wrap-anywhere tabular-nums empty:hidden lg:col-start-4 lg:row-start-1"
+        >
+          {event.salesValue !== null && (
+            <>
+              <span className="mr-1.5 text-xs text-muted-foreground lg:sr-only">
+                {salesLabel}
+              </span>
+              <span className="font-medium">{event.salesValue}</span>
+            </>
+          )}
+        </div>
         <span
           aria-hidden="true"
-          className="col-start-2 row-span-3 row-start-1 flex w-fit items-center justify-end gap-2 justify-self-end rounded-md border px-2.5 py-2 text-sm font-medium group-hover:bg-background sm:col-start-4 sm:row-span-1 sm:w-11 lg:w-24 lg:justify-center"
+          className="col-start-2 row-span-4 row-start-1 flex w-fit items-center justify-end gap-2 justify-self-end rounded-md border px-2.5 py-2 text-sm font-medium group-hover:bg-background lg:col-start-5 lg:row-span-1 lg:w-24 lg:justify-center"
         >
           <span className="hidden lg:inline">{t("Manage")}</span>
           <ArrowRight className="size-4 shrink-0" />

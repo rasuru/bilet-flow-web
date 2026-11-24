@@ -21,7 +21,8 @@ export function OrganizerDashboardPage({ sessionId }: { sessionId: number }) {
 }
 
 function Dashboard({ sessionId }: { sessionId: number }) {
-  const events = useOrganizerEventsViewModel(sessionId)
+  const overview = useOrganizerAnalyticsOverviewViewModel(sessionId)
+  const events = useOrganizerEventsViewModel(sessionId, overview)
   const empty = !events.loading && !events.error && events.events.length === 0
 
   return (
@@ -54,16 +55,19 @@ function Dashboard({ sessionId }: { sessionId: number }) {
           )}
         </header>
 
-        {!empty && <AnalyticsOverview sessionId={sessionId} />}
+        {!empty && <AnalyticsOverview model={overview} />}
         <OrganizerEventList model={events} />
       </div>
     </OrganizerLayout>
   )
 }
 
-function AnalyticsOverview({ sessionId }: { sessionId: number }) {
-  const { summary, loading, error, retry } =
-    useOrganizerAnalyticsOverviewViewModel(sessionId)
+function AnalyticsOverview({
+  model,
+}: {
+  model: ReturnType<typeof useOrganizerAnalyticsOverviewViewModel>
+}) {
+  const { summary, loading, error, retry } = model
 
   return (
     <section className="space-y-3" aria-labelledby="organizer-overview">

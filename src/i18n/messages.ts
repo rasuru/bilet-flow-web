@@ -1056,6 +1056,30 @@ export const russian: Readonly<Record<string, string>> = {
     "Отметились {0} из {1} · не отметились {2}",
   "{0} confirmed redemptions \u00b7 {1} attributed tickets":
     "Подтверждённых применений: {0} · билетов по акции: {1}",
+  "All ticket prices": "Любая цена билета",
+  "Has paid tickets": "Есть платные билеты",
+  "Paid tickets only": "Только платные билеты",
+  "Free tickets only": "Только бесплатные билеты",
+  "No ticket types": "Нет типов билетов",
+  "Schedule priority": "По приоритету расписания",
+  "Most tickets sold": "Больше всего билетов продано",
+  "Highest gross sales": "Наибольшие продажи до вычетов",
+  "Highest net revenue": "Наибольшая чистая выручка",
+  "Earliest start date": "Сначала ранние даты",
+  "Latest start date": "Сначала поздние даты",
+  "Event name": "По названию",
+  "Paid only": "Только платные",
+  "Free only": "Только бесплатные",
+  "Paid and free": "Платные и бесплатные",
+  "Filter events by ticket price": "Фильтр мероприятий по цене билетов",
+  "Sort events by": "Сортировать мероприятия по",
+  "Sales or ticket prices are unavailable for some events.":
+    "Для некоторых мероприятий недоступны продажи или цены билетов.",
+  "Loading event sales and ticket prices\u2026":
+    "Загружаем данные о продажах и ценах билетов…",
+  "This view needs sales and ticket prices. Try again or change the sort or filters.":
+    "Для этого списка нужны данные о продажах и ценах билетов. Повторите попытку или измените сортировку или фильтры.",
+  "Retry sales data": "Повторить загрузку продаж",
 }
 
 export const kazakh: Readonly<Record<string, string>> = {
@@ -2120,4 +2144,28 @@ export const kazakh: Readonly<Record<string, string>> = {
     "{1} адамның {0}-і тіркелді · {2}-і тіркелмеді",
   "{0} confirmed redemptions \u00b7 {1} attributed tickets":
     "Расталған қолданыс: {0} · науқан бойынша билет: {1}",
+  "All ticket prices": "Барлық билет бағасы",
+  "Has paid tickets": "Ақылы билеттері бар",
+  "Paid tickets only": "Тек ақылы билеттер",
+  "Free tickets only": "Тек тегін билеттер",
+  "No ticket types": "Билет түрлері жоқ",
+  "Schedule priority": "Кесте басымдығы бойынша",
+  "Most tickets sold": "Ең көп билет сатылған",
+  "Highest gross sales": "Ең жоғары жалпы сатылым",
+  "Highest net revenue": "Ең жоғары таза түсім",
+  "Earliest start date": "Алдымен ерте басталатындар",
+  "Latest start date": "Алдымен кеш басталатындар",
+  "Event name": "Атауы бойынша",
+  "Paid only": "Тек ақылы",
+  "Free only": "Тек тегін",
+  "Paid and free": "Ақылы және тегін",
+  "Filter events by ticket price": "Іс-шараларды билет бағасы бойынша сүзу",
+  "Sort events by": "Іс-шараларды сұрыптау",
+  "Sales or ticket prices are unavailable for some events.":
+    "Кейбір іс-шаралардың сатылымы немесе билет бағалары қолжетімсіз.",
+  "Loading event sales and ticket prices\u2026":
+    "Сатылым мен билет бағалары жүктелуде…",
+  "This view needs sales and ticket prices. Try again or change the sort or filters.":
+    "Бұл тізімге сатылым мен билет бағалары қажет. Қайталап көріңіз немесе сұрыптау мен сүзгілерді өзгертіңіз.",
+  "Retry sales data": "Сатылымды қайта жүктеу",
 }

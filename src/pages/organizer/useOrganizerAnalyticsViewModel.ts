@@ -36,6 +36,7 @@ export function useOrganizerAnalyticsOverviewViewModel(sessionId: number) {
     loading: query.isPending,
     error: query.isError ? t("Could not load analytics.") : null,
     retry: () => void query.refetch(),
+    eventSales: data?.events,
     summary: data && {
       inventory: presentInventory(data.inventory),
       sales: presentSales(data.sales),

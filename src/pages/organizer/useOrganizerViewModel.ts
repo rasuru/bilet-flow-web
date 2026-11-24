@@ -23,7 +23,7 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
   } | null>()
   const filters = new URLSearchParams(historyState?.organizerEventFilters)
   const returnSearch = new URLSearchParams()
-  for (const key of ["q", "status"]) {
+  for (const key of ["q", "status", "pricing", "sort"]) {
     const value = filters.get(key)
     if (value) returnSearch.set(key, value)
   }
