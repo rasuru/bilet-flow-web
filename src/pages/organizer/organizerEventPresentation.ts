@@ -87,7 +87,10 @@ export function presentOrganizerEvent(event: ManagedEvent, now: number) {
   }
   if (status === "active" || status === "upcoming" || status === "published") {
     actions.push("unpublish")
-    if (Date.parse(event.endAt) > now) actions.push("cancel")
+  }
+
+  if (event.status !== "CANCELLED" && Date.parse(event.endAt) > now) {
+    actions.push("cancel")
   }
 
   return {
@@ -125,7 +128,14 @@ export function presentOrganizerEvent(event: ManagedEvent, now: number) {
     managePath: manageEventPath(event.id),
     campaignsPath: organizerCampaignsPath(event.id),
     actions,
+    hasActions: actions.length > 0,
+    menuActions: actions.map((action) => ({
+      action,
+      label: t(eventActionLabels[action]),
+      variant: action === "cancel" ? "destructive" as const : "default" as const,
+    })),
   }
 }
 
 export type OrganizerEvent = ReturnType<typeof presentOrganizerEvent>
+

@@ -11,27 +11,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import type { ManagedEventAction } from "@/events/managedEventRepository"
 import { t } from "@/i18n/locale"
 import { OrganizerAnalyticsPanel } from "./OrganizerAnalyticsPanel"
+import { AttachEventVenue, EditEventDetails } from "./OrganizerEventSettings"
+import { usePaidSalesViewModel } from "./usePaidSalesViewModel"
+import { Badge } from "@/components/ui/badge"
+import { PaidSalesActivation } from "./PaidSalesActivation"
+import { OrganizerEventStaff } from "./OrganizerEventStaff"
+import { OrganizerTicketTypes } from "./OrganizerTicketTypes"
+import { OrganizerCampaignsSection } from "./OrganizerCampaignsSection"
 import { OrganizerEventCard } from "./OrganizerEventCard"
 import { eventActionLabels } from "./organizerEventPresentation"
-import { AttachEventVenue, EditEventDetails } from "./OrganizerEventSettings"
-import { OrganizerEventStaff } from "./OrganizerEventStaff"
 import { OrganizerLayout } from "./OrganizerLayout"
-import { OrganizerTicketTypes } from "./OrganizerTicketTypes"
-import { PaidSalesActivation } from "./PaidSalesActivation"
 import { useOrganizerViewModel } from "./useOrganizerViewModel"
-import { usePaidSalesViewModel } from "./usePaidSalesViewModel"
 
 const actionDescriptions = {
   publish: "Publish this event with its current visibility and schedule.",
   unpublish: "Take the event off sale and remove its public page.",
-  cancel: "Stop new sales and admission. Attendees will be notified.",
+  cancel: "Cancellation cannot be undone. New sales and admission will stop, and attendees will be notified. Completed paid orders are not automatically refunded.",
 } satisfies Record<ManagedEventAction, string>
 
 export function ManageEventPage({
@@ -52,27 +53,24 @@ export function ManageEventPage({
   }, [])
 
   return (
-    <OrganizerLayout>
+    <OrganizerLayout eventSections={model.eventSections}>
       <div className="mx-auto w-full max-w-7xl min-w-0 space-y-6 px-4 py-5 sm:px-6 sm:py-7 xl:px-10">
         <BackLink href={model.dashboardPath}>
           {t("Organizer dashboard")}
         </BackLink>
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-          <h1
-            ref={title}
-            tabIndex={-1}
-            className="w-fit max-w-full rounded-sm text-[clamp(1.75rem,4vw,2.5rem)] leading-tight font-semibold tracking-tight wrap-anywhere outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            {event?.title ?? t("Manage event")}
-          </h1>
-          {paidSales.loaded && paidSales.active && (
-            <Badge
-              variant="outline"
-              className="border-green-600/40 bg-green-500/10 leading-none text-green-700 dark:text-green-400"
-            >
-              {t("Paid sales activated")}
-            </Badge>
-          )}
+        <h1
+          ref={title}
+          tabIndex={-1}
+          className="w-fit max-w-full rounded-sm text-[clamp(1.75rem,4vw,2.5rem)] leading-tight font-semibold tracking-tight wrap-anywhere outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          {event?.title ?? t("Manage event")}
+        </h1>
+        {managedEvent?.status !== "CANCELLED" && paidSales.loaded && paidSales.active && (
+          <Badge variant="outline" className="border-green-600/40 bg-green-500/10 leading-none text-green-700 dark:text-green-400">
+            {t("Paid sales activated")}
+          </Badge>
+        )}
         </div>
 
         {model.loading && (
@@ -99,29 +97,14 @@ export function ManageEventPage({
         )}
         {event && managedEvent && (
           <>
-            <PaidSalesActivation vm={paidSales} />
-            <nav
-              aria-label={t("Event sections")}
-              className="flex flex-wrap gap-2 border-b pb-3"
-            >
-              {[
-                ["organizer-details", "Event details"],
-                ["organizer-tickets", "Ticket tiers"],
-                ["organizer-staff", "Event administrators"],
-                ["organizer-analytics", "Analytics"],
-              ].map(([id, label]) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  className={buttonVariants({
-                    variant: "ghost",
-                    className: "h-10",
-                  })}
-                >
-                  {t(label)}
-                </a>
-              ))}
-            </nav>
+            {managedEvent.status !== "CANCELLED" && <PaidSalesActivation vm={paidSales} />}
+            {managedEvent.status === "CANCELLED" && (
+              <Alert>
+                <AlertDescription>
+                  {t("This event is cancelled. Ticket sales and admission are closed. Existing paid orders must be refunded separately.")}
+                </AlertDescription>
+              </Alert>
+            )}
             <section
               id="organizer-details"
               aria-labelledby="manage-event-details"
@@ -131,7 +114,7 @@ export function ManageEventPage({
                 <CardHeader className="flex flex-wrap items-center justify-between gap-3">
                   <CardTitle>
                     <h2 id="manage-event-details" className="text-lg">
-                      {t("Event details")}
+                      {t("Event")}
                     </h2>
                   </CardTitle>
                   {managedEvent.status !== "CANCELLED" && (
@@ -139,14 +122,14 @@ export function ManageEventPage({
                       sessionId={sessionId}
                       event={managedEvent}
                       notify={model.notify}
+                      actions={event.menuActions}
+                      onAction={model.requestAction}
                     />
                   )}
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <OrganizerEventCard
                     event={event}
-                    dashboardFilters={model.dashboardFilters}
-                    onAction={model.requestAction}
                     onCopy={() => {
                       if (event.copyPath)
                         void model.copyEventLink(event.copyPath)
@@ -173,6 +156,12 @@ export function ManageEventPage({
               sessionId={sessionId}
               event={managedEvent}
               notify={model.notify}
+            />
+            <OrganizerCampaignsSection
+              sessionId={sessionId}
+              eventId={event.id}
+              campaignsPath={event.campaignsPath}
+              dashboardFilters={model.dashboardFilters}
             />
             <div id="organizer-analytics" className="scroll-mt-4">
               <OrganizerAnalyticsPanel
@@ -230,3 +219,4 @@ export function ManageEventPage({
     </OrganizerLayout>
   )
 }
+

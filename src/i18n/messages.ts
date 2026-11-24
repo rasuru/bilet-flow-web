@@ -1,4 +1,7 @@
 export const russian: Readonly<Record<string, string>> = {
+  "Event": "Мероприятие",
+  "Edit event": "Редактировать мероприятие",
+  "Save changes before changing the event status.": "Сохраните изменения перед изменением статуса мероприятия.",
   "Paid sales activated": "Платные продажи активированы",
   "Activate paid sales": "Активировать платные продажи",
   "Continue managing event": "Продолжить управление мероприятием",
@@ -795,6 +798,7 @@ export const russian: Readonly<Record<string, string>> = {
   "View all": "Смотреть все",
   "View case": "Открыть обращение",
   "View event": "Открыть мероприятие",
+  "View event page": "Открыть страницу мероприятия",
   "View order": "Открыть заказ",
   "View payment": "Открыть платёж",
   "View queue": "Открыть очередь",
@@ -994,6 +998,12 @@ export const russian: Readonly<Record<string, string>> = {
   Reserved: "Зарезервировано",
   Sidebar: "Боковое меню",
   Sold: "Продано",
+  "Cancellation is permanent. Existing paid orders must be refunded separately.":
+    "Отмена необратима. Возврат средств по оплаченным заказам нужно оформить отдельно.",
+  "Cancellation cannot be undone. New sales and admission will stop, and attendees will be notified. Completed paid orders are not automatically refunded.":
+    "Отмену нельзя отменить. Продажа билетов и допуск прекратятся, участники получат уведомления. Оплаченные заказы не возвращаются автоматически.",
+  "This event is cancelled. Ticket sales and admission are closed. Existing paid orders must be refunded separately.":
+    "Мероприятие отменено. Продажа билетов и допуск закрыты. Возврат средств по оплаченным заказам нужно оформить отдельно.",
   "Stop new sales and admission. Attendees will be notified.":
     "Продажа билетов и допуск на мероприятие прекратятся. Участники получат уведомление.",
   "Take the event off sale and remove its public page.":
@@ -1224,6 +1234,9 @@ export const russian: Readonly<Record<string, string>> = {
 }
 
 export const kazakh: Readonly<Record<string, string>> = {
+  "Event": "Іс-шара",
+  "Edit event": "Іс-шараны өңдеу",
+  "Save changes before changing the event status.": "Іс-шара күйін өзгертпес бұрын өзгерістерді сақтаңыз.",
   "Paid sales activated": "Ақылы сатылым іске қосылды",
   "Activate paid sales": "Ақылы сатылымды іске қосу",
   "Continue managing event": "Іс-шараны басқаруды жалғастыру",
@@ -2023,6 +2036,7 @@ export const kazakh: Readonly<Record<string, string>> = {
   "View all": "Барлығын көру",
   "View case": "Өтінішті ашу",
   "View event": "Іс-шараны ашу",
+  "View event page": "Іс-шара бетін ашу",
   "View order": "Тапсырысты ашу",
   "View payment": "Төлемді ашу",
   "View queue": "Кезекті ашу",
@@ -2223,6 +2237,12 @@ export const kazakh: Readonly<Record<string, string>> = {
   Reserved: "Брондалғаны",
   Sidebar: "Бүйірлік мәзір",
   Sold: "Сатылғаны",
+  "Cancellation is permanent. Existing paid orders must be refunded separately.":
+    "Іс-шарадан бас тарту қайтымсыз. Төленген тапсырыстардың ақшасын бөлек қайтару қажет.",
+  "Cancellation cannot be undone. New sales and admission will stop, and attendees will be notified. Completed paid orders are not automatically refunded.":
+    "Іс-шарадан бас тартуды кері қайтару мүмкін емес. Билет сату және кіру тоқтатылады, қатысушыларға хабарлама жіберіледі. Төленген тапсырыстардың ақшасы автоматты түрде қайтарылмайды.",
+  "This event is cancelled. Ticket sales and admission are closed. Existing paid orders must be refunded separately.":
+    "Іс-шара өткізілмейді. Билет сату және кіру жабық. Төленген тапсырыстардың ақшасын бөлек қайтару қажет.",
   "Stop new sales and admission. Attendees will be notified.":
     "Билет сату және іс-шараға кіргізу тоқтатылады. Қатысушыларға хабарлама жіберіледі.",
   "Take the event off sale and remove its public page.":
@@ -2452,4 +2472,3 @@ export const kazakh: Readonly<Record<string, string>> = {
   "View all events": "Барлық іс-шаралар",
   "Welcome back, {0}": "Қайта қош келдіңіз, {0}",
 }
-

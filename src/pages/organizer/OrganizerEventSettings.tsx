@@ -1,6 +1,9 @@
 import { useState } from "react"
 
 import type { ManagedEvent } from "@/api/events"
+import { Button } from "@/components/ui/button"
+import type { ManagedEventAction } from "@/events/managedEventRepository"
+import type { OrganizerEvent } from "./organizerEventPresentation"
 import { t } from "@/i18n/locale"
 import { EventDetailsFields } from "./EventDetailsFields"
 import { EventManagementDialog } from "./EventManagementDialog"
@@ -16,12 +19,21 @@ type SettingsProps = {
   notify: (message: string) => void
 }
 
-export function EditEventDetails({ sessionId, event, notify }: SettingsProps) {
+export function EditEventDetails({ sessionId, event, notify, actions, onAction }: SettingsProps & {
+  actions: OrganizerEvent["menuActions"]
+  onAction: (action: ManagedEventAction) => void
+}) {
   const [open, setOpen] = useState(false)
   const model = useEditEventViewModel(sessionId, event, () => {
     setOpen(false)
     notify("Event details saved.")
   })
+  const lifecycleDisabled = model.busy || model.hasUnsavedChanges
+  function requestAction(action: ManagedEventAction) {
+    if (lifecycleDisabled) return
+    setOpen(false)
+    onAction(action)
+  }
   return (
     <EventManagementDialog
       open={open}
@@ -29,10 +41,34 @@ export function EditEventDetails({ sessionId, event, notify }: SettingsProps) {
         if (next) model.reset()
         setOpen(next)
       }}
-      trigger={t("Edit event details")}
-      title={t("Edit event details")}
+      trigger={t("Edit event")}
+      title={t("Edit event")}
       action={t("Save changes")}
       model={model}
+      additionalActions={actions.length > 0 && (
+        <section className="space-y-2 rounded-lg bg-muted/50 p-3" aria-label={t("Event status")}>
+          <h3 className="font-medium">{t("Event status")}</h3>
+          {model.hasUnsavedChanges && (
+            <p className="text-sm text-muted-foreground" role="status">
+              {t("Save changes before changing the event status.")}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {actions.map(({ action, label, variant }) => (
+              <Button
+                key={action}
+                type="button"
+                variant={variant === "destructive" ? "destructive" : "outline"}
+                className="min-h-9 max-w-full whitespace-normal"
+                disabled={lifecycleDisabled}
+                onClick={() => requestAction(action)}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        </section>
+      )}
     >
       <EventDetailsFields
         event={model.event}
@@ -65,3 +101,4 @@ export function AttachEventVenue({ sessionId, event, notify }: SettingsProps) {
     </EventManagementDialog>
   )
 }
+

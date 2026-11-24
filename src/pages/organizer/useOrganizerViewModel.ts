@@ -84,6 +84,13 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
 
   return {
     event,
+    eventSections: event ? [
+      { id: "organizer-details", label: t("Event") },
+      { id: "organizer-tickets", label: t("Ticket tiers") },
+      { id: "organizer-staff", label: t("Event administrators") },
+      { id: "organizer-campaigns", label: t("Campaigns") },
+      { id: "organizer-analytics", label: t("Analytics") },
+    ] : [],
     managedEvent: query.data,
     notify: (text: string) => setNotice({ text }),
     dashboardPath,
@@ -121,3 +128,4 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
     copyEventLink,
   }
 }
+

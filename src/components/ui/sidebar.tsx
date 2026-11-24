@@ -700,6 +700,7 @@ function SidebarMenuSubButton({
 }
 
 export {
+  useSidebar,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -724,3 +725,4 @@ export {
   SidebarSeparator,
   SidebarTrigger,
 }
+
