@@ -20,6 +20,7 @@ import { CreateSupportPage } from "@/pages/support/CreateSupportPage"
 import { SupportCasePage } from "@/pages/support/SupportCasePage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 import { EventCampaignsPage } from "@/pages/organizer/EventCampaignsPage"
+import { CreateEventPage } from "@/pages/organizer/CreateEventPage"
 import { OrganizerPage } from "@/pages/organizer/OrganizerPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
@@ -114,6 +115,13 @@ export function App() {
             }
           </SignedInRoute>
         )}
+      </Route>
+      <Route path="/organizer/events/new">
+        <SignedInRoute>
+          {({ sessionId }) => (
+            <CreateEventPage key={sessionId} sessionId={sessionId} />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/organizer/events/:eventId/campaigns">
         {({ eventId }) => (
