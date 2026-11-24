@@ -1,4 +1,5 @@
 import { CalendarDays, ChevronDown, MapPin, Users } from "lucide-react"
+import type { ReactNode } from "react"
 import { Link } from "wouter"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -21,10 +22,12 @@ export function OrganizerEventCard({
   event,
   onAction,
   onCopy,
+  venueAction,
 }: {
   event: OrganizerEvent
   onAction: (action: ManagedEventAction) => void
   onCopy: () => void
+  venueAction?: ReactNode
 }) {
   const [firstAction] = event.actions
   return (
@@ -56,6 +59,7 @@ export function OrganizerEventCard({
         </Alert>
       )}
       <div className="flex flex-wrap gap-2">
+        {venueAction}
         <Link
           href={event.campaignsPath}
           className={buttonVariants({ variant: "outline", className: "h-10" })}
@@ -109,7 +113,7 @@ export function OrganizerEventCard({
 
       <details className="border-t pt-2">
         <summary className="w-fit cursor-pointer rounded-md py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-ring">
-          {t("Event details")}
+          {t("More event information")}
         </summary>
         <dl className="mt-2 grid gap-3 text-sm sm:grid-cols-3">
           {[

@@ -12,11 +12,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import type { ManagedEventAction } from "@/events/managedEventRepository"
 import { t } from "@/i18n/locale"
 import { OrganizerAnalyticsPanel } from "./OrganizerAnalyticsPanel"
+import { AttachEventVenue, EditEventDetails } from "./OrganizerEventSettings"
+import { OrganizerEventStaff } from "./OrganizerEventStaff"
+import { OrganizerTicketTypes } from "./OrganizerTicketTypes"
 import { OrganizerEventCard } from "./OrganizerEventCard"
 import { eventActionLabels } from "./organizerEventPresentation"
 import { OrganizerLayout } from "./OrganizerLayout"
@@ -36,7 +40,7 @@ export function ManageEventPage({
   eventId: string
 }) {
   const model = useOrganizerViewModel(sessionId, eventId)
-  const { event, confirmation } = model
+  const { event, managedEvent, confirmation } = model
   const title = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -86,16 +90,87 @@ export function ManageEventPage({
             </AlertDescription>
           </Alert>
         )}
-        {event && (
+        {event && managedEvent && (
           <>
-            <OrganizerEventCard
-              event={event}
-              onAction={model.requestAction}
-              onCopy={() => {
-                if (event.copyPath) void model.copyEventLink(event.copyPath)
-              }}
+            <nav
+              aria-label={t("Event sections")}
+              className="flex flex-wrap gap-2 border-b pb-3"
+            >
+              {[
+                ["organizer-details", "Event details"],
+                ["organizer-tickets", "Ticket tiers"],
+                ["organizer-staff", "Event administrators"],
+                ["organizer-analytics", "Analytics"],
+              ].map(([id, label]) => (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  className={buttonVariants({
+                    variant: "ghost",
+                    className: "h-10",
+                  })}
+                >
+                  {t(label)}
+                </a>
+              ))}
+            </nav>
+            <section
+              id="organizer-details"
+              aria-labelledby="manage-event-details"
+              className="scroll-mt-4"
+            >
+              <Card>
+                <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+                  <CardTitle>
+                    <h2 id="manage-event-details" className="text-lg">
+                      {t("Event details")}
+                    </h2>
+                  </CardTitle>
+                  {managedEvent.status !== "CANCELLED" && (
+                    <EditEventDetails
+                      sessionId={sessionId}
+                      event={managedEvent}
+                      notify={model.notify}
+                    />
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <OrganizerEventCard
+                    event={event}
+                    onAction={model.requestAction}
+                    onCopy={() => {
+                      if (event.copyPath)
+                        void model.copyEventLink(event.copyPath)
+                    }}
+                    venueAction={
+                      managedEvent.status === "DRAFT" && !managedEvent.venue ? (
+                        <AttachEventVenue
+                          sessionId={sessionId}
+                          event={managedEvent}
+                          notify={model.notify}
+                        />
+                      ) : undefined
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </section>
+            <OrganizerTicketTypes
+              sessionId={sessionId}
+              event={managedEvent}
+              notify={model.notify}
             />
-            <OrganizerAnalyticsPanel sessionId={sessionId} eventId={event.id} />
+            <OrganizerEventStaff
+              sessionId={sessionId}
+              event={managedEvent}
+              notify={model.notify}
+            />
+            <div id="organizer-analytics" className="scroll-mt-4">
+              <OrganizerAnalyticsPanel
+                sessionId={sessionId}
+                eventId={event.id}
+              />
+            </div>
           </>
         )}
 

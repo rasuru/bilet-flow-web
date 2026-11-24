@@ -7,14 +7,30 @@ import {
 
 import { ApiError } from "@/api/client"
 import {
+  assignStaff,
+  attachVenue,
   cancelEvent,
   getManagedEvent,
+  getVenueLayout,
   listMyEvents,
+  listVenueLayouts,
   publishEvent,
+  removeStaff,
   unpublishEvent,
+  updateEvent,
+  type EventDetailsRequest,
+  type VenueRequest,
 } from "@/api/events"
-import { listManagedTicketTypes } from "@/api/inventory"
+import {
+  createAssignedSeatingTicketType,
+  createGeneralAdmissionTicketType,
+  listManagedTicketTypes,
+  updateAssignedSeatingTicketType,
+  updateGeneralAdmissionTicketType,
+} from "@/api/inventory"
+import { searchUsers } from "@/api/users"
 import { sessionRepository } from "@/auth/sessionRepository"
+import type { TicketRequest } from "./organizerEventRepository"
 
 function retryRead(count: number, error: Error) {
   return count < 2 && (!(error instanceof ApiError) || error.status >= 500)
@@ -27,6 +43,22 @@ const eventActions = {
 }
 
 export type ManagedEventAction = keyof typeof eventActions
+
+export async function refreshManagedEvent(
+  client: QueryClient,
+  sessionId: number,
+  eventId: string
+) {
+  const queries = [
+    { queryKey: ["managed-events", sessionId, eventId] },
+    { queryKey: ["managed-events", sessionId], exact: true },
+    { queryKey: ["managed-events", sessionId, "analytics-overview"] },
+    { queryKey: ["public-events"] },
+    { queryKey: ["public-event", eventId] },
+  ]
+  await Promise.all(queries.map((query) => client.cancelQueries(query)))
+  await Promise.all(queries.map((query) => client.invalidateQueries(query)))
+}
 
 export const managedEventRepository = {
   changeStatusMutation(client: QueryClient, sessionId: number) {
@@ -42,17 +74,138 @@ export const managedEventRepository = {
         sessionRepository.authenticatedRequest(sessionId, (token) =>
           eventActions[action](token, eventId)
         ),
-      onSuccess: async (_data, { eventId }) => {
-        const queries = [
-          { queryKey: ["managed-events", sessionId] },
-          { queryKey: ["public-events"] },
-          { queryKey: ["public-event", eventId] },
-        ]
-        await Promise.all(queries.map((query) => client.cancelQueries(query)))
-        await Promise.all(
-          queries.map((query) => client.invalidateQueries(query))
-        )
-      },
+      onSuccess: (_data, { eventId }) =>
+        refreshManagedEvent(client, sessionId, eventId),
+    })
+  },
+
+  updateDetails(
+    client: QueryClient,
+    sessionId: number,
+    eventId: string,
+    details: EventDetailsRequest
+  ) {
+    return updateManagedEvent(client, sessionId, eventId, (token) =>
+      updateEvent(token, eventId, details)
+    )
+  },
+
+  attachVenue(
+    client: QueryClient,
+    sessionId: number,
+    eventId: string,
+    venue: VenueRequest
+  ) {
+    return updateManagedEvent(client, sessionId, eventId, (token) =>
+      attachVenue(token, eventId, venue)
+    )
+  },
+
+  addTicket(
+    client: QueryClient,
+    sessionId: number,
+    eventId: string,
+    request: TicketRequest
+  ) {
+    return updateManagedEvent(client, sessionId, eventId, (token) =>
+      "priceCategory" in request
+        ? createAssignedSeatingTicketType(token, eventId, request)
+        : createGeneralAdmissionTicketType(token, eventId, request)
+    )
+  },
+
+  changeTicketPrice(
+    client: QueryClient,
+    sessionId: number,
+    eventId: string,
+    ticketId: string,
+    price: string
+  ) {
+    return updateManagedEvent(client, sessionId, eventId, async (token) => {
+      // The API replaces all editable fields. Read the latest configuration
+      // so a price change does not send back the form's older snapshot.
+      const ticket = (await listManagedTicketTypes(token, eventId)).find(
+        ({ id }) => id === ticketId
+      )
+      if (!ticket) throw new Error("Ticket tier is no longer available.")
+      const {
+        name,
+        description,
+        maxPerOrder,
+        salesStartAt,
+        salesEndAt,
+        priceCategory,
+        totalCapacity,
+      } = ticket
+      const details = {
+        name,
+        description,
+        maxPerOrder,
+        salesStartAt,
+        salesEndAt,
+        price,
+      }
+      if (priceCategory !== null) {
+        await updateAssignedSeatingTicketType(token, ticketId, {
+          ...details,
+          priceCategory,
+        })
+      } else {
+        if (totalCapacity === null)
+          throw new Error("Ticket tier capacity is unavailable.")
+        await updateGeneralAdmissionTicketType(token, ticketId, {
+          ...details,
+          capacity: totalCapacity,
+        })
+      }
+    })
+  },
+
+  changeStaff(
+    client: QueryClient,
+    sessionId: number,
+    eventId: string,
+    userId: number,
+    action: "assign" | "remove"
+  ) {
+    return updateManagedEvent(client, sessionId, eventId, (token) =>
+      action === "assign"
+        ? assignStaff(token, eventId, {
+            staffUserId: userId,
+            role: "EVENT_ADMIN",
+          })
+        : removeStaff(token, eventId, userId)
+    )
+  },
+
+  userSearchQuery(sessionId: number, login: string) {
+    return queryOptions({
+      queryKey: ["organizer", sessionId, "staff-search", login],
+      queryFn: login
+        ? () =>
+            sessionRepository.authenticatedRequest(sessionId, async (token) =>
+              (await searchUsers(token, `login:"${login}"`)).filter(
+                (user) => user.login.toLowerCase() === login
+              )
+            )
+        : skipToken,
+      retry: false,
+    })
+  },
+
+  venueLayoutsQuery(enabled: boolean) {
+    return queryOptions({
+      queryKey: ["organizer", "managed-venue-layouts"],
+      queryFn: enabled ? listVenueLayouts : skipToken,
+      retry: false,
+    })
+  },
+
+  venueLayoutQuery(layoutId: string | null) {
+    return queryOptions({
+      queryKey: ["organizer", "managed-venue-layouts", layoutId],
+      queryFn: layoutId ? () => getVenueLayout(layoutId) : skipToken,
+      retry: false,
     })
   },
 
@@ -91,4 +244,14 @@ export const managedEventRepository = {
       retry: retryRead,
     })
   },
+}
+
+async function updateManagedEvent<T>(
+  client: QueryClient,
+  sessionId: number,
+  eventId: string,
+  request: (token: string) => Promise<T>
+) {
+  await sessionRepository.authenticatedRequest(sessionId, request)
+  await refreshManagedEvent(client, sessionId, eventId)
 }

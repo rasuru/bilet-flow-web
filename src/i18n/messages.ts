@@ -1080,6 +1080,73 @@ export const russian: Readonly<Record<string, string>> = {
   "This view needs sales and ticket prices. Try again or change the sort or filters.":
     "Для этого списка нужны данные о продажах и ценах билетов. Повторите попытку или измените сортировку или фильтры.",
   "Retry sales data": "Повторить загрузку продаж",
+  "Account username": "Имя пользователя",
+  "Add a venue before setting up ticket tiers.":
+    "Добавьте площадку, чтобы настроить категории билетов.",
+  "Add venue": "Добавить площадку",
+  "Already assigned": "Уже назначен",
+  "Assign administrator": "Назначить администратором",
+  "Assigned {0}": "Назначен {0}",
+  "Could not find accounts. Try searching again.":
+    "Не удалось выполнить поиск аккаунтов. Попробуйте ещё раз.",
+  "Could not load ticket tiers.": "Не удалось загрузить категории билетов.",
+  "Could not load venue layouts.": "Не удалось загрузить схемы площадок.",
+  "Could not load the venue layout.": "Не удалось загрузить схему площадки.",
+  "Draft saved.": "Черновик сохранён.",
+  "Edit event details": "Редактировать данные мероприятия",
+  "Edit price": "Изменить цену",
+  "Edit price for {0}": "Изменить цену билета «{0}»",
+  "Enter 0 for a free ticket.": "Укажите 0 для бесплатного билета.",
+  "Enter a nonnegative price with up to two decimal places.":
+    "Укажите неотрицательную цену с максимум двумя знаками после запятой.",
+  "Enter a sales window that starts before it closes and ends by the event end time.":
+    "Укажите период продаж, который начинается до закрытия продаж и заканчивается не позднее окончания мероприятия.",
+  "Enter a ticket tier name.": "Укажите название категории билетов.",
+  "Enter an account username.": "Введите имя пользователя.",
+  "Event administrator assigned.": "Администратор мероприятия назначен.",
+  "Event administrator removed.": "Администратор мероприятия удалён.",
+  "Event administrators": "Администраторы мероприятия",
+  "Event administrators can check in attendees and handle event support requests.":
+    "Администраторы могут регистрировать участников на входе и обрабатывать обращения по мероприятию.",
+  "Event details saved.": "Данные мероприятия сохранены.",
+  "Event sections": "Разделы мероприятия",
+  "Find account": "Найти аккаунт",
+  "Loading ticket tiers…": "Загрузка категорий билетов…",
+  "Max per order must be between 1 and the tier quantity.":
+    "Лимит на заказ должен быть от 1 до количества билетов в категории.",
+  "More event information": "Дополнительная информация о мероприятии",
+  "No account found. Check the username and search again.":
+    "Аккаунт не найден. Проверьте имя пользователя и повторите поиск.",
+  "No event administrators assigned.":
+    "Администраторы мероприятия не назначены.",
+  "Open saved draft": "Открыть сохранённый черновик",
+  "Remove administrator": "Удалить администратора",
+  "Remove event administrator?": "Удалить администратора мероприятия?",
+  "Save a draft to add a venue and tickets later.":
+    "Сохраните черновик, чтобы добавить площадку и билеты позже.",
+  "Save draft": "Сохранить черновик",
+  "Save price": "Сохранить цену",
+  "Save ticket tier": "Сохранить категорию билетов",
+  "Save venue": "Сохранить площадку",
+  "Searching…": "Поиск…",
+  "Seat price category": "Ценовая категория мест",
+  "Select a seat price category": "Выберите ценовую категорию мест",
+  "Select a seat price category.": "Выберите ценовую категорию мест.",
+  "The new price applies to future purchases.":
+    "Новая цена применяется к будущим покупкам.",
+  "This event has no ticket tiers yet.":
+    "Для этого мероприятия пока нет категорий билетов.",
+  "This layout has no seat price categories.":
+    "В этой схеме нет ценовых категорий мест.",
+  "Ticket price saved.": "Цена билета сохранена.",
+  "Ticket tier added.": "Категория билетов добавлена.",
+  "User #{0}": "Пользователь №{0}",
+  "Venue added.": "Площадка добавлена.",
+  "Venue and admission settings are fixed after you save them.":
+    "Площадку и параметры входа нельзя изменить после сохранения.",
+  "{0} of {1} sold": "Продано {0} из {1}",
+  "{0} will lose administrator access to this event.":
+    "Пользователь {0} потеряет права администратора этого мероприятия.",
 }
 
 export const kazakh: Readonly<Record<string, string>> = {
@@ -2168,4 +2235,72 @@ export const kazakh: Readonly<Record<string, string>> = {
   "This view needs sales and ticket prices. Try again or change the sort or filters.":
     "Бұл тізімге сатылым мен билет бағалары қажет. Қайталап көріңіз немесе сұрыптау мен сүзгілерді өзгертіңіз.",
   "Retry sales data": "Сатылымды қайта жүктеу",
+  "Account username": "Тіркелгідегі пайдаланушы аты",
+  "Add a venue before setting up ticket tiers.":
+    "Билет санаттарын баптау үшін өткізу орнын қосыңыз.",
+  "Add venue": "Өткізу орнын қосу",
+  "Already assigned": "Тағайындалған",
+  "Assign administrator": "Әкімші етіп тағайындау",
+  "Assigned {0}": "Тағайындалған күні: {0}",
+  "Could not find accounts. Try searching again.":
+    "Тіркелгілерді іздеу мүмкін болмады. Қайта іздеп көріңіз.",
+  "Could not load ticket tiers.": "Билет санаттарын жүктеу мүмкін болмады.",
+  "Could not load venue layouts.":
+    "Өткізу орындарының сызбаларын жүктеу мүмкін болмады.",
+  "Could not load the venue layout.":
+    "Өткізу орнының сызбасын жүктеу мүмкін болмады.",
+  "Draft saved.": "Нобай сақталды.",
+  "Edit event details": "Іс-шара мәліметтерін өңдеу",
+  "Edit price": "Бағаны өзгерту",
+  "Edit price for {0}": "«{0}» билетінің бағасын өзгерту",
+  "Enter 0 for a free ticket.": "Тегін билет үшін 0 енгізіңіз.",
+  "Enter a nonnegative price with up to two decimal places.":
+    "Теріс емес бағаны үтірден кейін ең көбі екі таңбамен енгізіңіз.",
+  "Enter a sales window that starts before it closes and ends by the event end time.":
+    "Сатылымның басталу уақыты аяқталуынан бұрын, ал аяқталу уақыты іс-шараның аяқталуынан кеш болмауы керек.",
+  "Enter a ticket tier name.": "Билет санатының атауын енгізіңіз.",
+  "Enter an account username.": "Тіркелгідегі пайдаланушы атын енгізіңіз.",
+  "Event administrator assigned.": "Іс-шара әкімшісі тағайындалды.",
+  "Event administrator removed.": "Іс-шара әкімшісінің рұқсаты алынды.",
+  "Event administrators": "Іс-шара әкімшілері",
+  "Event administrators can check in attendees and handle event support requests.":
+    "Әкімшілер қатысушыларды кіреберісте тіркеп, іс-шара бойынша қолдау өтініштерін қарай алады.",
+  "Event details saved.": "Іс-шара мәліметтері сақталды.",
+  "Event sections": "Іс-шара бөлімдері",
+  "Find account": "Тіркелгіні табу",
+  "Loading ticket tiers…": "Билет санаттары жүктелуде…",
+  "Max per order must be between 1 and the tier quantity.":
+    "Бір тапсырысқа шектеу 1 мен санаттағы билет санының арасында болуы керек.",
+  "More event information": "Іс-шара туралы қосымша ақпарат",
+  "No account found. Check the username and search again.":
+    "Тіркелгі табылмады. Пайдаланушы атын тексеріп, қайта іздеңіз.",
+  "No event administrators assigned.": "Іс-шара әкімшілері тағайындалмаған.",
+  "Open saved draft": "Сақталған нобайды ашу",
+  "Remove administrator": "Әкімші рұқсатын алу",
+  "Remove event administrator?": "Іс-шара әкімшісінің рұқсатын алу керек пе?",
+  "Save a draft to add a venue and tickets later.":
+    "Өткізу орны мен билеттерді кейін қосу үшін нобайды сақтаңыз.",
+  "Save draft": "Нобайды сақтау",
+  "Save price": "Бағаны сақтау",
+  "Save ticket tier": "Билет санатын сақтау",
+  "Save venue": "Өткізу орнын сақтау",
+  "Searching…": "Ізделуде…",
+  "Seat price category": "Орындардың баға санаты",
+  "Select a seat price category": "Орындардың баға санатын таңдаңыз",
+  "Select a seat price category.": "Орындардың баға санатын таңдаңыз.",
+  "The new price applies to future purchases.":
+    "Жаңа баға кейінгі сатып алуларға қолданылады.",
+  "This event has no ticket tiers yet.":
+    "Бұл іс-шарада әзірге билет санаттары жоқ.",
+  "This layout has no seat price categories.":
+    "Бұл сызбада орындардың баға санаттары жоқ.",
+  "Ticket price saved.": "Билет бағасы сақталды.",
+  "Ticket tier added.": "Билет санаты қосылды.",
+  "User #{0}": "№{0} пайдаланушы",
+  "Venue added.": "Өткізу орны қосылды.",
+  "Venue and admission settings are fixed after you save them.":
+    "Сақтағаннан кейін өткізу орнын және кіру параметрлерін өзгерту мүмкін емес.",
+  "{0} of {1} sold": "{1} билеттің {0}-і сатылды",
+  "{0} will lose administrator access to this event.":
+    "{0} пайдаланушысы осы іс-шараның әкімші рұқсатынан айырылады.",
 }

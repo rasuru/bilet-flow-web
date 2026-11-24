@@ -20,6 +20,7 @@ const actionResults: Record<ManagedEventAction, string> = {
 export function useOrganizerViewModel(sessionId: number, eventId: string) {
   const historyState = useHistoryState<{
     organizerEventFilters?: string
+    organizerNotice?: string
   } | null>()
   const filters = new URLSearchParams(historyState?.organizerEventFilters)
   const returnSearch = new URLSearchParams()
@@ -40,11 +41,15 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
   const [notice, setNotice] = useState<{
     text: string
     error?: boolean
-  } | null>(null)
+  } | null>(() =>
+    historyState?.organizerNotice
+      ? { text: historyState.organizerNotice }
+      : null
+  )
   const changingStatus = useRef(false)
 
   const now = useOrganizerClock()
-  const event = query.isSuccess ? presentOrganizerEvent(query.data, now) : null
+  const event = query.data ? presentOrganizerEvent(query.data, now) : null
 
   async function confirmAction() {
     if (!pending || !event?.actions.includes(pending) || changingStatus.current)
@@ -78,6 +83,8 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
 
   return {
     event,
+    managedEvent: query.data,
+    notify: (text: string) => setNotice({ text }),
     dashboardPath,
     loading: query.isPending,
     error: query.isError
