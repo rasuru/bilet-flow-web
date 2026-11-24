@@ -57,7 +57,12 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
   if (result && !result.local) {
     return (
       <Redirect
-        to={manageEventPath(result.id)}
+        to={
+          result.published &&
+          vm.tickets.some((ticket) => Number(ticket.price) > 0)
+            ? "/organizer/events/" + encodeURIComponent(result.id) + "/activate"
+            : manageEventPath(result.id)
+        }
         state={{
           organizerNotice: result.published
             ? "Event published."
@@ -153,7 +158,18 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                       event={event}
                       setField={setField}
                       section={step === 0 ? "basics" : "schedule"}
+                      dateStep={1}
                     />
+                  )}
+                  {step === 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={vm.applyDemoSchedule}
+                    >
+                      {t("Demo: Starts in 2 mins")}
+                    </Button>
                   )}
                   {step === 2 &&
                     (vm.venueSaved ? (

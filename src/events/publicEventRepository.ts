@@ -53,7 +53,8 @@ export const publicEventRepository = {
               return { inventory, layout }
             },
       retry: retryPublicRead,
-      refetchInterval: 30_000,
+      refetchInterval: 5_000,
+      refetchOnWindowFocus: "always",
     })
   },
 }

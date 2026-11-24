@@ -83,6 +83,7 @@ export function useTicketDetailsViewModel(
     venue: event?.venue,
     seating,
     attendee: record.ticket.attendeeEmail,
+    attendeeName: record.attendeeName,
     code:
       "ticketCode" in record.ticket
         ? record.ticket.ticketCode

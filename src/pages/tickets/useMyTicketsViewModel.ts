@@ -23,6 +23,9 @@ const currency = numberFormat({
 function toActivity(data: AttendanceActivity) {
   const now = Date.now()
   const eventsById = new Map(data.events.map((event) => [event.id, event]))
+  const orderIdsByTicket = new Map(
+    data.tickets.map((ticket) => [ticket.id, ticket.orderId])
+  )
   const orderTicketIds = new Set(
     data.orders.flatMap((order) => order.tickets.map((ticket) => ticket.id))
   )
@@ -55,6 +58,11 @@ function toActivity(data: AttendanceActivity) {
       )
       .map((order) => ({
         id: order.id,
+        orderId:
+          order.orderId ??
+          order.tickets
+            .map((ticket) => ticket.orderId ?? orderIdsByTicket.get(ticket.id))
+            .find(Boolean),
         href: `/orders/${encodeURIComponent(order.id)}`,
         title: eventsById.get(order.eventId)?.title ?? t("Event unavailable"),
         total:
@@ -111,4 +119,3 @@ export function useMyTicketsViewModel(
     activity: query.data,
   }
 }
-

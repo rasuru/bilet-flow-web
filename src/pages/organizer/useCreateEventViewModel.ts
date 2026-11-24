@@ -18,6 +18,7 @@ import {
   buildVenue,
   createEventDraft,
   defaultSalesWindow,
+  demoSchedule,
   instant,
   newTicket,
   sampleEventDraft,
@@ -424,12 +425,17 @@ export function useCreateEventViewModel(sessionId: number) {
     navigate,
     submit,
     fillSample,
+    applyDemoSchedule: () => {
+      const now = Date.now()
+      setEvent((draft) => ({
+        ...draft,
+        ...demoSchedule(now, draft.timeZone),
+      }))
+      setError(null)
+    },
     updateTicket,
     setCustomSales,
-    salesSummary:
-      autoSales.salesEndAt === event.startAt
-        ? t("On sale immediately until event starts.")
-        : t("Sales close when the event ends."),
+    salesSummary: t("Sales close when the event ends."),
     addTicket: () => setGaTickets((previous) => [...previous, newTicket()]),
     removeTicket: (id: string) =>
       setGaTickets((previous) => previous.filter((ticket) => ticket.id !== id)),

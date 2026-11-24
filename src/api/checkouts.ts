@@ -28,18 +28,21 @@ export type PromoQuote = {
 
 type IssuedTicket = Pick<
   Ticket,
-  "id" | "status" | "ticketTypeId" | "seatId" | "attendeeEmail"
+  "id" | "status" | "ticketTypeId" | "seatId" | "attendeeEmail" | "attendeeName"
 > & {
   code: string
+  orderId?: string | null
 }
 
 export type Checkout = {
   id: string
+  orderId?: string | null
   eventId: string
   status: string
   amountKzt: number
   subtotalKzt?: number
   discountKzt?: number
+  processingFeeKzt?: number | null
   promoCode?: string | null
   createdAt?: string | null
   expiresAt: string
@@ -95,7 +98,7 @@ export function cancelCheckout(token: string, checkoutId: string) {
 export function refundCheckout(
   token: string,
   checkoutId: string,
-  reason: string
+  reason?: string
 ) {
   return requestJson<Checkout>(`${checkoutPath(checkoutId)}/refund`, {
     token,

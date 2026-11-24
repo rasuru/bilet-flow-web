@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { useLanguage } from "@/i18n/locale"
 
 import {
   AccountRequestError,
@@ -12,9 +13,12 @@ const schema = z
   .object({
     login: z
       .string()
+      .trim()
       .min(1, "Username is required")
       .max(50, "Username must be at most 50 characters"),
-    email: z.email("Enter a valid email address"),
+    email: z.string().trim().pipe(z.email("Enter a valid email address")),
+    firstName: z.string().trim(),
+    lastName: z.string().trim(),
     password: z
       .string()
       .min(4, "Password must be at least 4 characters")
@@ -29,11 +33,14 @@ const schema = z
 type RegisterFormValues = z.infer<typeof schema>
 
 export function useRegisterViewModel() {
+  const langKey = useLanguage()
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       login: "",
       email: "",
+      firstName: "",
+      lastName: "",
       password: "",
       confirmPassword: "",
     },
@@ -45,6 +52,9 @@ export function useRegisterViewModel() {
         login: values.login,
         email: values.email,
         password: values.password,
+        firstName: values.firstName || undefined,
+        lastName: values.lastName || undefined,
+        langKey,
       }),
     onError: (error) => {
       if (!(error instanceof AccountRequestError)) return
@@ -59,7 +69,13 @@ export function useRegisterViewModel() {
       }
 
       for (const { field, message, code } of error.fieldErrors) {
-        if (field === "login" || field === "email" || field === "password") {
+        if (
+          field === "login" ||
+          field === "email" ||
+          field === "password" ||
+          field === "firstName" ||
+          field === "lastName"
+        ) {
           form.setError(field, { type: code ?? "server", message })
         }
       }

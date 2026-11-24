@@ -1,3 +1,9 @@
+import { useQuery } from "@tanstack/react-query"
+import { OrderIdentifiers } from "@/checkout/OrderIdentifiers"
+import { Badge } from "@/components/ui/badge"
+import { EventCalendarActions } from "@/events/EventCalendarActions"
+import { publicEventRepository } from "@/events/publicEventRepository"
+import { ticketRepository } from "@/tickets/ticketRepository"
 import { useEventReturn } from "@/components/site/useEventReturn"
 import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
@@ -12,6 +18,11 @@ import { ticketDetailsPath } from "@/tickets/ticketPresentation"
 
 import { useOrderViewModel } from "./useOrderViewModel"
 
+function OrderCalendarActions({ eventId }: { eventId: string }) {
+  const { data } = useQuery(publicEventRepository.eventQuery(eventId))
+  return data ? <EventCalendarActions event={data} /> : null
+}
+
 export function OrderPage({
   sessionId,
   orderId,
@@ -20,6 +31,17 @@ export function OrderPage({
   orderId: string
 }) {
   const model = useOrderViewModel(sessionId, orderId)
+  const order = model.status === "ready" ? model.order : undefined
+  const issuedOrderId =
+    order?.orderId ?? order?.tickets.find((ticket) => ticket.orderId)?.orderId
+  const ticketRecords = useQuery({
+    ...ticketRepository.mineQuery(sessionId),
+    enabled: !issuedOrderId && Boolean(order?.tickets.length),
+  })
+  const linkedOrderId = ticketRecords.data?.find((ticket) =>
+    order?.tickets.some((issued) => issued.id === ticket.id)
+  )?.orderId
+
   const { href: eventReturn } = useEventReturn()
   const state = useHistoryState<{ orderFrom?: string } | null>()
   const eventParent =
@@ -70,25 +92,43 @@ export function OrderPage({
           )}
           {model.status === "ready" && (
             <>
+              {model.order.sandbox && (
+                <Badge variant="secondary">
+                  {t("Sandbox · Demo transaction")}
+                </Badge>
+              )}
+              <OrderIdentifiers
+                checkoutId={model.order.id}
+                orderId={issuedOrderId ?? linkedOrderId}
+              />
               <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
                 <dt className="text-muted-foreground">{t("Status")}</dt>
                 <dd className="font-medium capitalize" role="status">
                   {model.statusLabel}
                 </dd>
-                <dt className="text-muted-foreground">{t("Order ID")}</dt>
-                <dd className="break-all">{model.order.id}</dd>
-                {model.promotion && (
+                <dt className="text-muted-foreground">
+                  {t("Ticket subtotal")}
+                </dt>
+                <dd>{model.subtotal ?? t("Unavailable")}</dd>
+                {(model.order.promoCode ||
+                  Boolean(model.order.discountKzt)) && (
                   <>
-                    <dt className="text-muted-foreground">{t("Subtotal")}</dt>
-                    <dd>{model.promotion.subtotal}</dd>
                     <dt className="text-muted-foreground">
-                      {t("Promo")} {model.promotion.code}
+                      {t("Promo discount")} {model.order.promoCode}
                     </dt>
-                    <dd>−{model.promotion.discount}</dd>
+                    <dd>{model.discount ?? t("Unavailable")}</dd>
                   </>
                 )}
-                <dt className="text-muted-foreground">{t("Total")}</dt>
-                <dd>{model.total}</dd>
+                {model.processingFee !== null && (
+                  <>
+                    <dt className="text-muted-foreground">
+                      {t("Processing fee")}
+                    </dt>
+                    <dd>{model.processingFee}</dd>
+                  </>
+                )}
+                <dt className="font-semibold">{t("Total (KZT)")}</dt>
+                <dd className="font-semibold">{model.total}</dd>
                 {model.expiresAt && (
                   <>
                     <dt className="text-muted-foreground">
@@ -102,6 +142,9 @@ export function OrderPage({
                   </>
                 )}
               </dl>
+              {model.order.status === "COMPLETED" && (
+                <OrderCalendarActions eventId={model.order.eventId} />
+              )}
               {model.error && <FieldError>{model.error}</FieldError>}
               {model.paymentMessage && (
                 <p className="text-muted-foreground">{model.paymentMessage}</p>

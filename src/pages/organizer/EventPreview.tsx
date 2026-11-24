@@ -130,7 +130,11 @@ export function EventPreview({
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-medium">{ticket.name}</h3>
-                  <Badge>
+                  <Badge
+                    variant={
+                      Number(ticket.price) === 0 ? "secondary" : "outline"
+                    }
+                  >
                     {Number(ticket.price) === 0
                       ? t("Free")
                       : price.format(Number(ticket.price))}
@@ -163,4 +167,3 @@ export function EventPreview({
     </div>
   )
 }
-

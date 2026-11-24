@@ -126,6 +126,7 @@ export function TicketTierFields({
             })}
             {input("salesEndAt", t("Sales end"), {
               type: "datetime-local",
+              step: 1,
               required: true,
             })}
           </div>
@@ -142,7 +143,9 @@ export function TicketTierFields({
         <CardTitle className="flex flex-wrap items-center gap-2">
           <h2>{title}</h2>
           {validPrice && (
-            <Badge>
+            <Badge
+              variant={Number(ticket.price) === 0 ? "secondary" : "outline"}
+            >
               {Number(ticket.price) === 0 ? t("Free") : t("Paid ticket")}
             </Badge>
           )}

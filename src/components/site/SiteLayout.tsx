@@ -1,3 +1,4 @@
+import { NotificationBell } from "@/notifications/NotificationBell"
 import type { ReactNode } from "react"
 import { ArrowUpRight, Compass, Ticket, UserRound } from "lucide-react"
 import { Link, useLocation } from "wouter"
@@ -74,6 +75,13 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           </nav>
           <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1 sm:gap-2">
             <AppearanceControls />
+            {session.status === "signedIn" && (
+              <NotificationBell
+                key={session.sessionId}
+                sessionId={session.sessionId}
+                accountId={session.account.id}
+              />
+            )}
             {session.status !== "restoring" && (
               <Link
                 href={signedIn ? "/account/settings" : "/sign-in"}

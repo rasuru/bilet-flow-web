@@ -57,13 +57,18 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
   const free = order.amountKzt === 0
   const awaitingPayment = order.status === "AWAITING_PAYMENT"
   const completed = order.status === "COMPLETED"
-  const statusLabel = completed
-    ? free
-      ? t("Free order confirmed")
-      : t("Payment confirmed")
-    : awaitingPayment
-      ? t("Awaiting payment")
-      : statusText(order.status)
+  const statusLabel =
+    order.refundState === "REFUNDED"
+      ? t("Refunded")
+      : order.refundState === "PENDING"
+        ? t("Refund pending")
+        : completed
+          ? free
+            ? t("Free order confirmed")
+            : t("Payment confirmed")
+          : awaitingPayment
+            ? t("Awaiting payment")
+            : statusText(order.status)
   const paymentMessage =
     completed && free
       ? t("Your total was zero. Your tickets were issued immediately.")
@@ -78,16 +83,15 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
     tickets: completed ? order.tickets : [],
     order,
     total: kzt.format(order.amountKzt),
-    promotion:
-      order.promoCode &&
-      order.subtotalKzt !== undefined &&
-      order.discountKzt !== undefined
-        ? {
-            code: order.promoCode,
-            subtotal: kzt.format(order.subtotalKzt),
-            discount: kzt.format(order.discountKzt),
-          }
-        : null,
+    subtotal: order.subtotalKzt == null ? null : kzt.format(order.subtotalKzt),
+    discount:
+      order.discountKzt == null
+        ? null
+        : kzt.format(-Math.abs(order.discountKzt)),
+    processingFee:
+      order.processingFeeKzt == null
+        ? null
+        : kzt.format(order.processingFeeKzt),
     expiresAt: pending ? dateTime.format(new Date(order.expiresAt)) : null,
     busy,
     canCancel: pending && !query.isError,

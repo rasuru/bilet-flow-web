@@ -1,25 +1,44 @@
 const LOCAL_TOKEN_KEY = "biletflow.auth.token"
 const SESSION_TOKEN_KEY = "biletflow.auth.token"
+let inMemoryToken: string | null | undefined
 
 export function getAuthToken(): string | null {
-  return (
-    sessionStorage.getItem(SESSION_TOKEN_KEY) ??
-    localStorage.getItem(LOCAL_TOKEN_KEY)
-  )
+  if (inMemoryToken !== undefined) return inMemoryToken
+  try {
+    const token = sessionStorage.getItem(SESSION_TOKEN_KEY)
+    if (token !== null) return token
+  } catch {
+    // The other storage may still be available.
+  }
+  try {
+    return localStorage.getItem(LOCAL_TOKEN_KEY)
+  } catch {
+    return null
+  }
 }
 
 export function storeAuthToken(token: string, rememberMe: boolean): void {
   clearAuthToken()
 
-  if (rememberMe) {
-    localStorage.setItem(LOCAL_TOKEN_KEY, token)
-    return
+  try {
+    if (rememberMe) localStorage.setItem(LOCAL_TOKEN_KEY, token)
+    else sessionStorage.setItem(SESSION_TOKEN_KEY, token)
+    if (inMemoryToken === null) inMemoryToken = token
+  } catch {
+    inMemoryToken = token
   }
-
-  sessionStorage.setItem(SESSION_TOKEN_KEY, token)
 }
 
 export function clearAuthToken(): void {
-  localStorage.removeItem(LOCAL_TOKEN_KEY)
-  sessionStorage.removeItem(SESSION_TOKEN_KEY)
+  inMemoryToken = undefined
+  try {
+    localStorage.removeItem(LOCAL_TOKEN_KEY)
+  } catch {
+    inMemoryToken = null
+  }
+  try {
+    sessionStorage.removeItem(SESSION_TOKEN_KEY)
+  } catch {
+    inMemoryToken = null
+  }
 }

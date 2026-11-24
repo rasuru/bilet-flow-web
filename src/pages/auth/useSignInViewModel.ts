@@ -11,6 +11,7 @@ import {
 const schema = z.object({
   username: z
     .string()
+    .trim()
     .min(1, "Username or email is required")
     .max(254, "Username or email is too long"),
   password: z

@@ -39,7 +39,7 @@ const initialEvent = {
   visibility: "PUBLIC" as EventVisibility,
   startAt: "",
   endAt: "",
-  timeZone: "UTC",
+  timeZone: "UTC+05:00",
   registrationOpensAt: "",
   registrationClosesAt: "",
   venueName: "",
@@ -82,9 +82,15 @@ export type EventDraft = typeof initialEvent
 
 const minute = 60_000
 
-function dateTimeInput(timestamp: number, timeZone: string) {
+function dateTimeInput(
+  timestamp: number,
+  timeZone: string,
+  includeSeconds = false
+) {
   const offset = timeZone === "UTC" ? 0 : Number(timeZone.slice(4, 6)) * 60
-  return new Date(timestamp + offset * minute).toISOString().slice(0, 16)
+  return new Date(timestamp + offset * minute)
+    .toISOString()
+    .slice(0, includeSeconds ? 19 : 16)
 }
 
 export function createEventDraft(now: number): EventDraft {
@@ -110,19 +116,24 @@ export function sampleEventDraft(now: number): EventDraft {
   }
 }
 
+export function demoSchedule(now: number, timeZone: string) {
+  return {
+    startAt: dateTimeInput(now + 2 * minute, timeZone, true),
+    endAt: dateTimeInput(now + 120 * minute, timeZone, true),
+  }
+}
+
 export function defaultSalesWindow(event: EventDraft, openedAt: number) {
   const start = +instant(event.startAt, event.timeZone)
   const end = +instant(event.endAt, event.timeZone)
   if (!(start < end)) return { salesStartAt: "", salesEndAt: "" }
 
-  // Events can already be in progress. Use their end time in that case.
-  const closesAt = start > openedAt ? start : end
   return {
     salesStartAt: dateTimeInput(
-      Math.min(openedAt, closesAt - minute),
+      Math.min(openedAt, end - minute),
       event.timeZone
     ),
-    salesEndAt: closesAt === start ? event.startAt : event.endAt,
+    salesEndAt: event.endAt,
   }
 }
 

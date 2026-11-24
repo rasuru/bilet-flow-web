@@ -43,10 +43,12 @@ export function TicketDetailsPage({
   sessionId,
   ticketId,
   verifiedEmail,
+  accountName,
 }: {
   sessionId: number
   ticketId: string
   verifiedEmail: string | null
+  accountName: string
 }) {
   const model = useTicketDetailsViewModel(sessionId, ticketId, verifiedEmail)
   const [loadedQr, setLoadedQr] = useState<Blob>()
@@ -122,7 +124,14 @@ export function TicketDetailsPage({
                 </>
               )}
               <dt>{t("Attendee")}</dt>
-              <dd className="break-all">{model.attendee}</dd>
+              <dd className="break-words">
+                {model.attendeeName ||
+                  (verifiedEmail?.trim().toLowerCase() ===
+                  model.attendee.trim().toLowerCase()
+                    ? accountName
+                    : "")}
+                <span className="block break-all">{model.attendee}</span>
+              </dd>
               <dt>{t("Seating")}</dt>
               <dd>{model.seating}</dd>
             </dl>

@@ -23,6 +23,8 @@ import { CreateSupportPage } from "@/pages/support/CreateSupportPage"
 import { SupportCasePage } from "@/pages/support/SupportCasePage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 import { EventCampaignsPage } from "@/pages/organizer/EventCampaignsPage"
+import { EventActivationPage } from "@/pages/organizer/EventActivationPage"
+import { EventOrdersPage } from "@/pages/organizer/EventOrdersPage"
 import { CreateEventPage } from "@/pages/organizer/CreateEventPage"
 import { ManageEventPage } from "@/pages/organizer/ManageEventPage"
 import { OrganizerStartPage } from "@/pages/organizer/OrganizerStartPage"
@@ -150,6 +152,32 @@ export function App() {
           )}
         </SignedInRoute>
       </Route>
+      <Route path="/organizer/events/:eventId/activate">
+        {({ eventId }) => (
+          <SignedInRoute>
+            {({ sessionId }) => (
+              <EventActivationPage
+                key={`${sessionId}:${eventId}`}
+                eventId={eventId}
+                sessionId={sessionId}
+              />
+            )}
+          </SignedInRoute>
+        )}
+      </Route>
+      <Route path="/organizer/events/:eventId/orders">
+        {({ eventId }) => (
+          <SignedInRoute>
+            {({ sessionId }) => (
+              <EventOrdersPage
+                key={`${sessionId}:${eventId}`}
+                eventId={eventId}
+                sessionId={sessionId}
+              />
+            )}
+          </SignedInRoute>
+        )}
+      </Route>
       <Route path="/organizer/events/:eventId/campaigns">
         {({ eventId }) => (
           <SignedInRoute>
@@ -213,6 +241,9 @@ export function App() {
                 key={`${sessionId}:${ticketId}`}
                 sessionId={sessionId}
                 ticketId={ticketId}
+                accountName={[account.firstName, account.lastName]
+                  .join(" ")
+                  .trim()}
                 verifiedEmail={account.activated ? account.email : null}
               />
             )}

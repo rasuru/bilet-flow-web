@@ -55,6 +55,18 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         {...register("email")}
       />
       <AccountFormField
+        label={t("First name (optional)")}
+        autoComplete="given-name"
+        error={fieldErrors.firstName?.message}
+        {...register("firstName")}
+      />
+      <AccountFormField
+        label={t("Last name (optional)")}
+        autoComplete="family-name"
+        error={fieldErrors.lastName?.message}
+        {...register("lastName")}
+      />
+      <AccountFormField
         label={t("Password")}
         type="password"
         autoComplete="new-password"

@@ -27,6 +27,15 @@ async function readIfAvailable<T>(request: Promise<T>) {
 }
 
 export const ticketRepository = {
+  mineQuery(sessionId: number) {
+    return queryOptions({
+      queryKey: ["my-ticket-records", sessionId],
+      queryFn: () =>
+        sessionRepository.authenticatedRequest(sessionId, listMyTickets),
+      retry: false,
+    })
+  },
+
   detailQuery(sessionId: number, ticketId: string) {
     return queryOptions({
       queryKey: ["ticket", sessionId, ticketId],
@@ -50,7 +59,15 @@ export const ticketRepository = {
             ? await readIfAvailable(getVenueLayout(layoutId))
             : null
         const seat = layout?.seats.find((seat) => seat.seatId === ticket.seatId)
-        return { ticket, event, seat, linked: !!linked, orderId: order?.id }
+        return {
+          ticket,
+          attendeeName:
+            linked?.attendeeName?.trim() || issued?.attendeeName?.trim(),
+          event,
+          seat,
+          linked: !!linked,
+          orderId: order?.id,
+        }
       },
     })
   },

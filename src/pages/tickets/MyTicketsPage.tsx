@@ -3,6 +3,7 @@ import { t } from "@/i18n/locale"
 import { ArrowUpRightIcon } from "lucide-react"
 import { Link } from "wouter"
 
+import { OrderIdentifiers } from "@/checkout/OrderIdentifiers"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
@@ -141,6 +142,10 @@ export function MyTicketsPage({
                             <ArrowUpRightIcon aria-hidden="true" />
                           </Link>
                         </div>
+                        <OrderIdentifiers
+                          checkoutId={order.id}
+                          orderId={order.orderId}
+                        />
                         {order.tickets.length > 0 && (
                           <ul className="space-y-1 text-muted-foreground">
                             {order.tickets.map((ticket) => (

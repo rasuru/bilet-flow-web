@@ -10,6 +10,7 @@ export type Ticket = {
   eventId: string
   orderId: string
   attendeeEmail: string
+  attendeeName?: string | null
   ownerUserId: number | null
   seatId: string | null
   ticketCode: string

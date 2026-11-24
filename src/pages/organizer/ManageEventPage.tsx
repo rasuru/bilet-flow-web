@@ -1,3 +1,4 @@
+import { Link } from "wouter"
 import { BackLink } from "@/components/site/SitePage"
 import { useEffect, useRef } from "react"
 
@@ -85,6 +86,26 @@ export function ManageEventPage({
         )}
         {event && managedEvent && (
           <>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={
+                  "/organizer/events/" +
+                  encodeURIComponent(eventId) +
+                  "/activate"
+                }
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                {t("Activate Paid Sales")}
+              </Link>
+              <Link
+                href={
+                  "/organizer/events/" + encodeURIComponent(eventId) + "/orders"
+                }
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                {t("Orders & Manage")}
+              </Link>
+            </div>
             <nav
               aria-label={t("Event sections")}
               className="flex flex-wrap gap-2 border-b pb-3"

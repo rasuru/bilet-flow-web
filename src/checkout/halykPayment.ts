@@ -6,9 +6,12 @@ declare global {
   }
 }
 
-const allowedScripts = new Set([
+const sandboxScripts = [
   "https://test-epay.epayment.kz/payform/payment-api.js",
   "https://test-epay.homebank.kz/payform/payment-api.js",
+] as const
+const allowedScripts = new Set([
+  ...sandboxScripts,
   "https://epay.homebank.kz/payform/payment-api.js",
 ])
 
@@ -37,8 +40,12 @@ function loadPaymentScript(url: string) {
 
 export async function openHalykPayment(
   { auth, scriptUrl, paymentObject }: HalykPaymentSession,
-  orderPath: string
+  orderPath: string,
+  { sandboxOnly = false } = {}
 ) {
+  if (sandboxOnly && !sandboxScripts.some((url) => url === scriptUrl))
+    throw new Error("The payment service did not return a sandbox script.")
+
   const paymentAuth = paymentObject.auth ?? auth
   if (
     !paymentAuth ||

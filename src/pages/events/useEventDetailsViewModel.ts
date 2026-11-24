@@ -106,6 +106,7 @@ export function useEventDetailsViewModel(eventId: string) {
 
   return {
     status: "ready",
+    calendarEvent: event,
     event: {
       title: event.title,
       category: event.category,

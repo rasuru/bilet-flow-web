@@ -1,3 +1,4 @@
+import { EventCalendarActions } from "@/events/EventCalendarActions"
 import { useEventReturn } from "@/components/site/useEventReturn"
 import { BackLink, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
@@ -178,6 +179,8 @@ function EventDetails({
             </dl>
           </CardContent>
         </Card>
+
+        <EventCalendarActions event={model.calendarEvent} />
 
         {event.description && (
           <section className="space-y-2">
