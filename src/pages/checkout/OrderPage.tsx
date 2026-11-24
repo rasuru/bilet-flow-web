@@ -1,17 +1,20 @@
-import { t } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
-import { Link } from "wouter"
 import { OrderIdentifiers } from "@/checkout/OrderIdentifiers"
 import { Badge } from "@/components/ui/badge"
-
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { FieldError } from "@/components/ui/field"
-import { Spinner } from "@/components/ui/spinner"
 import { EventCalendarActions } from "@/events/EventCalendarActions"
 import { publicEventRepository } from "@/events/publicEventRepository"
-import { ticketDetailsPath } from "@/tickets/ticketPresentation"
 import { ticketRepository } from "@/tickets/ticketRepository"
+import { useEventReturn } from "@/components/site/useEventReturn"
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
+import { t } from "@/i18n/locale"
+import { Link } from "wouter"
+import { useHistoryState } from "wouter/use-browser-location"
+
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { FieldError } from "@/components/ui/field"
+import { Spinner } from "@/components/ui/spinner"
+import { ticketDetailsPath } from "@/tickets/ticketPresentation"
 
 import { useOrderViewModel } from "./useOrderViewModel"
 
@@ -39,31 +42,40 @@ export function OrderPage({
     order?.tickets.some((issued) => issued.id === ticket.id)
   )?.orderId
 
-  return (
-    <main className="mx-auto max-w-xl space-y-4 px-4 py-6 sm:px-6">
-      <Link
-        href={
-          model.status === "ready"
-            ? `/events/${encodeURIComponent(model.order.eventId)}`
-            : "/events"
-        }
-        className={buttonVariants({ variant: "ghost" })}
-      >
-        {model.status === "ready" ? t("Back to event") : t("Discover events")}
-      </Link>
+  const { href: eventReturn } = useEventReturn()
+  const state = useHistoryState<{ orderFrom?: string } | null>()
+  const eventParent =
+    model.status === "ready" && state?.orderFrom !== "/my-tickets"
 
-      <Link
-        href={`/support/new?orderId=${encodeURIComponent(orderId)}`}
-        className={buttonVariants({ variant: "outline" })}
+  return (
+    <SitePage width="form">
+      <BackLink
+        state={eventParent ? { eventReturn } : undefined}
+        href={
+          eventParent
+            ? `/events/${encodeURIComponent(model.order.eventId)}`
+            : "/my-tickets"
+        }
       >
-        {t("Get order support")}
-      </Link>
+        {t(eventParent ? "Back to event" : "My tickets")}
+      </BackLink>
+
+      <PageHeading
+        action={
+          <Link
+            href={`/support/new?orderId=${encodeURIComponent(orderId)}`}
+            className={buttonVariants({
+              variant: "outline",
+              className: "min-h-10",
+            })}
+          >
+            {t("Get order support")}
+          </Link>
+        }
+      >
+        {t("Your order")}
+      </PageHeading>
       <Card>
-        <CardHeader>
-          <CardTitle>
-            <h1>{t("Your order")}</h1>
-          </CardTitle>
-        </CardHeader>
         <CardContent className="space-y-4">
           {model.status === "loading" && (
             <p role="status" className="flex items-center gap-2">
@@ -89,7 +101,7 @@ export function OrderPage({
                 checkoutId={model.order.id}
                 orderId={issuedOrderId ?? linkedOrderId}
               />
-              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+              <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
                 <dt className="text-muted-foreground">{t("Status")}</dt>
                 <dd className="font-medium capitalize" role="status">
                   {model.statusLabel}
@@ -142,9 +154,7 @@ export function OrderPage({
                   <Button onClick={model.pay} disabled={model.busy}>
                     {model.paying
                       ? t("Opening Halyk ePay…")
-                      : model.order.sandbox
-                        ? t("Pay in Halyk sandbox")
-                        : t("Pay with Halyk ePay")}
+                      : t("Pay with Halyk ePay")}
                   </Button>
                 )}
                 {model.canCancel && (
@@ -210,6 +220,6 @@ export function OrderPage({
           )}
         </CardContent>
       </Card>
-    </main>
+    </SitePage>
   )
 }

@@ -2,6 +2,7 @@ import { t } from "@/i18n/locale"
 import type { ReactNode } from "react"
 import { Link } from "wouter"
 
+import { AccountFlowPage } from "@/components/site/AccountFlowPage"
 import { Button } from "@/components/ui/button"
 import { AccountFormField } from "./AccountFormField"
 import { NewPasswordFields } from "./NewPasswordFields"
@@ -19,15 +20,13 @@ function ResetPage({
   children: ReactNode
 }) {
   return (
-    <main className="flex min-h-svh items-center justify-center p-6">
-      <section className="w-full max-w-sm space-y-5">
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        {children}
-        <Link to="/" replace className="text-sm underline underline-offset-4">
-          {t("Back to login")}
-        </Link>
-      </section>
-    </main>
+    <AccountFlowPage
+      title={title}
+      href="/sign-in"
+      backLabel={t("Back to login")}
+    >
+      {children}
+    </AccountFlowPage>
   )
 }
 
@@ -136,4 +135,3 @@ export function FinishPasswordResetPage() {
     </ResetPage>
   )
 }
-

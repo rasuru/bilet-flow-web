@@ -1,16 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { useRef, useState } from "react"
 
-import type {
-  RegistrationWindowRequest,
-  SeatingMode,
-  VenueLayout,
-  VenueRequest,
-} from "@/api/events"
+import type { SeatingMode, VenueLayout } from "@/api/events"
 import {
   allowsLocalEventSave,
   venueLayoutsQuery,
-  publishNewEvent,
+  saveNewEvent,
   saveLocalEvent,
   submissionError,
   type EventSubmission,
@@ -19,12 +14,18 @@ import {
 } from "@/events/organizerEventRepository"
 import { t } from "@/i18n/locale"
 import {
+  buildEventDetails,
+  buildVenue,
   createEventDraft,
   defaultSalesWindow,
   demoSchedule,
   instant,
   newTicket,
   sampleEventDraft,
+  validateEventBasics,
+  validateEventSchedule,
+  positiveInteger,
+  validPrice,
   type EventDraft,
   type TicketDraft,
 } from "./createEventDraft"
@@ -73,22 +74,6 @@ function failureText({ stage, detail }: SubmissionFailure) {
   }
 }
 
-function positiveInteger(value: string) {
-  return (
-    /^\d+$/.test(value) &&
-    Number.isSafeInteger(Number(value)) &&
-    Number(value) > 0
-  )
-}
-
-function httpUrl(value: string) {
-  try {
-    return ["http:", "https:"].includes(new URL(value).protocol)
-  } catch {
-    return false
-  }
-}
-
 export function useCreateEventViewModel(sessionId: number) {
   const queryClient = useQueryClient()
   const [openedAt] = useState(Date.now)
@@ -109,14 +94,17 @@ export function useCreateEventViewModel(sessionId: number) {
   >(null)
   const [busy, setBusy] = useState(false)
   const [publishStep, setPublishStep] = useState<Stage | null>(null)
-  const [result, setResult] = useState<{ id: string; local: boolean } | null>(
-    null
-  )
+  const [result, setResult] = useState<{
+    id: string
+    local: boolean
+    published: boolean
+  } | null>(null)
   const progress = useRef<SubmissionProgress>({ tickets: new Map() })
   const submissionInFlight = useRef(false)
   const [savedDraft, setSavedDraft] = useState<{
     id: string
     ticketKeys: string[]
+    venueAttached: boolean
   } | null>(null)
 
   const assigned = seatingMode === "ASSIGNED_SEATING"
@@ -224,31 +212,14 @@ export function useCreateEventViewModel(sessionId: number) {
 
   function validate(index: number): ValidationMessage | null {
     if (index === 0) {
-      if (!event.title.trim() || !event.category.trim())
-        return ["Enter an event title and category."]
-      if (event.imageUrl.trim() && !httpUrl(event.imageUrl.trim()))
-        return ["Enter an image URL starting with http:// or https://."]
+      const message = validateEventBasics(event)
+      if (message) return [message]
     }
     if (index === 1) {
-      const start = +instant(event.startAt, event.timeZone)
-      const end = +instant(event.endAt, event.timeZone)
-      const opens = +instant(event.registrationOpensAt, event.timeZone)
-      const closes = +instant(event.registrationClosesAt, event.timeZone)
-      if (!(start < end))
-        return ["Enter an event end time after the start time."]
-      if (
-        event.registrationClosesAt &&
-        (!event.registrationOpensAt || !(opens < closes))
-      ) {
-        return ["Enter a registration opening time before the closing time."]
-      }
-      if (
-        (event.registrationOpensAt && !(opens < end)) ||
-        (event.registrationClosesAt && !(closes <= end))
-      )
-        return ["Registration must take place before the event ends."]
+      const message = validateEventSchedule(event)
+      if (message) return [message]
     }
-    if (index === 2) {
+    if (index === 2 && !progress.current.venue) {
       if (!event.venueName.trim() || !event.venueAddress.trim())
         return ["Enter the venue name and address."]
       if (assigned && layoutError) return [layoutError]
@@ -268,10 +239,7 @@ export function useCreateEventViewModel(sessionId: number) {
         if (!name || names.has(name))
           return ["Ticket tier {0}: enter a unique name.", i + 1]
         names.add(name)
-        if (
-          !/^\d+(\.\d{1,2})?$/.test(ticket.price) ||
-          !Number.isFinite(Number(ticket.price))
-        )
+        if (!validPrice(ticket.price))
           return [
             "Ticket tier {0}: enter a nonnegative price with up to two decimal places.",
             i + 1,
@@ -289,10 +257,12 @@ export function useCreateEventViewModel(sessionId: number) {
             "Ticket tier {0}: max per order must be between 1 and the tier quantity.",
             i + 1,
           ]
-        const salesStart = +instant(ticket.salesStartAt, event.timeZone)
-        const salesEnd = +instant(ticket.salesEndAt, event.timeZone)
-        const eventEnd = +instant(event.endAt, event.timeZone)
-        if (!(salesStart < salesEnd && salesEnd <= eventEnd)) {
+        if (
+          !ticket.salesStartAt ||
+          !ticket.salesEndAt ||
+          ticket.salesStartAt >= ticket.salesEndAt ||
+          ticket.salesEndAt > event.endAt
+        ) {
           return [
             "Ticket tier {0}: enter a sales window that starts before it closes and ends by the event end time.",
             i + 1,
@@ -323,51 +293,16 @@ export function useCreateEventViewModel(sessionId: number) {
     setStep(target)
   }
 
-  function buildSubmission(): EventSubmission {
+  function buildSubmission(lastStep: number): EventSubmission {
     const toIso = (value: string) =>
       instant(value, event.timeZone).toISOString()
-    let registrationWindow: RegistrationWindowRequest = { mode: "ALWAYS_OPEN" }
-    if (event.registrationOpensAt) {
-      const startAt = toIso(event.registrationOpensAt)
-      registrationWindow = event.registrationClosesAt
-        ? {
-            mode: "BOUNDED",
-            startAt,
-            endAt: toIso(event.registrationClosesAt),
-          }
-        : { mode: "OPENS_AT", startAt }
-    }
-    const venueInfo = {
-      name: event.venueName.trim(),
-      address: event.venueAddress.trim(),
-    }
-    const venue: VenueRequest =
-      selectedLayout && assigned
-        ? {
-            ...venueInfo,
-            seatingMode: "ASSIGNED_SEATING",
-            capacity: selectedLayout.seats.length,
-            venueLayoutId: selectedLayout.layoutId,
-          }
-        : {
-            ...venueInfo,
-            seatingMode: "GENERAL_ADMISSION",
-            capacity: Number(event.venueCapacity),
-          }
-
     return {
-      details: {
-        title: event.title.trim(),
-        category: event.category.trim(),
-        description: event.description.trim() || null,
-        imageUrl: event.imageUrl.trim() || null,
-        visibility: event.visibility,
-        startAt: toIso(event.startAt),
-        endAt: toIso(event.endAt),
-        registrationWindow,
-      },
-      venue,
-      tickets: tickets.map((ticket) => {
+      details: buildEventDetails(event),
+      venue:
+        lastStep >= 2
+          ? buildVenue(event, seatingMode, selectedLayout)
+          : undefined,
+      tickets: (lastStep >= 3 ? tickets : []).map((ticket) => {
         const details = {
           name: ticket.name.trim(),
           description: ticket.description.trim(),
@@ -384,13 +319,15 @@ export function useCreateEventViewModel(sessionId: number) {
     }
   }
 
-  async function submit() {
+  async function submit(intent: "draft" | "publish") {
     if (submissionInFlight.current || result) return
-    if (step < 4) {
+    const publish = intent === "publish"
+    if (publish && step < 4) {
       navigate(step + 1)
       return
     }
-    for (let index = 0; index < 4; index++) {
+    const lastStep = publish ? 3 : Math.min(3, Math.max(1, step))
+    for (let index = 0; index <= lastStep; index++) {
       const message = validate(index)
       if (message) {
         setStep(index)
@@ -400,13 +337,20 @@ export function useCreateEventViewModel(sessionId: number) {
     }
     submissionInFlight.current = true
     setBusy(true)
-    setPublishStep({ kind: "checkConnection" })
+    const firstStage = {
+      kind: publish ? "checkConnection" : "createDraft",
+    } as const
+    setPublishStep(firstStage)
     setError(null)
-    let recoveryStep = 4
-    let stage: Stage = { kind: "checkConnection" }
+    let recoveryStep = step
+    let stage: Stage = firstStage
     try {
-      const submission = buildSubmission()
-      if (!progress.current.draftEventId && allowsLocalEventSave) {
+      const submission = buildSubmission(lastStep)
+      if (
+        allowsLocalEventSave &&
+        !progress.current.draftEventId &&
+        (publish || (lastStep >= 2 && assigned && layoutsOffline))
+      ) {
         const { offline } = await queryClient.fetchQuery(venueLayoutsQuery())
         if (assigned && offline !== layoutsOffline) {
           setStep(2)
@@ -418,26 +362,36 @@ export function useCreateEventViewModel(sessionId: number) {
           return
         }
         if (offline) {
-          setResult({ id: saveLocalEvent(submission), local: true })
+          if (!publish) throw new TypeError()
+          setResult({
+            id: saveLocalEvent(submission),
+            local: true,
+            published: false,
+          })
           return
         }
       }
-      const id = await publishNewEvent(
+      const id = await saveNewEvent(
         queryClient,
         sessionId,
         submission,
         progress.current,
+        publish,
         (nextStage, step) => {
           stage = nextStage
-          recoveryStep = step
+          recoveryStep = nextStage.kind === "createDraft" ? recoveryStep : step
           setPublishStep(nextStage)
         }
       )
-      setResult({ id, local: false })
+      setResult({ id, local: false, published: publish })
     } catch (err) {
-      const { draftEventId, tickets } = progress.current
+      const { draftEventId, tickets, venue } = progress.current
       if (draftEventId) {
-        setSavedDraft({ id: draftEventId, ticketKeys: [...tickets.keys()] })
+        setSavedDraft({
+          id: draftEventId,
+          ticketKeys: [...tickets.keys()],
+          venueAttached: Boolean(venue),
+        })
       }
       setStep(recoveryStep)
       setError({ stage, detail: submissionError(err) })
@@ -467,6 +421,7 @@ export function useCreateEventViewModel(sessionId: number) {
     publishStep: publishStep ? progressText(publishStep) : "",
     result,
     savedDraft,
+    venueSaved: Boolean(savedDraft?.venueAttached),
     navigate,
     submit,
     fillSample,
@@ -486,4 +441,3 @@ export function useCreateEventViewModel(sessionId: number) {
       setGaTickets((previous) => previous.filter((ticket) => ticket.id !== id)),
   }
 }
-

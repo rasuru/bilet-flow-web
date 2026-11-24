@@ -96,8 +96,11 @@ export function EventActivationPage({
 
   return (
     <main className="mx-auto max-w-xl space-y-4 px-4 py-6 sm:px-6">
-      <Link href="/organizer" className={buttonVariants({ variant: "ghost" })}>
-        {t("Back to organizer dashboard")}
+      <Link
+        href={"/organizer/events/" + encodeURIComponent(eventId)}
+        className={buttonVariants({ variant: "ghost" })}
+      >
+        {t("Manage event")}
       </Link>
       <Link
         href={`/organizer/events/${encodeURIComponent(eventId)}/orders`}
@@ -145,7 +148,7 @@ export function EventActivationPage({
                   )}
                   {payout.data === null && (
                     <Link
-                      href="/settings"
+                      href="/account/settings"
                       className={buttonVariants({ variant: "outline" })}
                     >
                       {t("Set up payout account")}

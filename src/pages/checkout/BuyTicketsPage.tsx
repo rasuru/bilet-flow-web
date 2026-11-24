@@ -1,8 +1,8 @@
+import { useEventReturn } from "@/components/site/useEventReturn"
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon } from "lucide-react"
-import { Link } from "wouter"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { TicketOrderForm } from "@/pages/events/TicketOrderForm"
@@ -13,33 +13,30 @@ import { useEventDetailsViewModel } from "@/pages/events/useEventDetailsViewMode
 export function BuyTicketsPage({ eventId }: { eventId: string }) {
   const model = useEventDetailsViewModel(eventId)
   const token = useCampaignToken()
+  const { href: eventReturn } = useEventReturn()
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-      <Link
+    <SitePage width="content">
+      <BackLink
         href={campaignEventPath(eventId, token)}
-        className={buttonVariants({ variant: "ghost" })}
+        state={{ eventReturn }}
       >
-        <ArrowLeftIcon aria-hidden="true" />
         {t("Back to event")}
-      </Link>
+      </BackLink>
 
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {t("Get tickets")}
-        </h1>
-        {model.status === "ready" && (
-          <>
-            <p className="text-lg font-medium">{model.event.title}</p>
-            <p className="text-sm text-muted-foreground">
-              <time dateTime={model.event.start.instant}>
-                {model.event.start.label}
-              </time>
-              {model.event.venue && <> · {model.event.venue.name}</>}
-            </p>
-          </>
-        )}
-      </header>
+      <PageHeading
+        description={model.status === "ready" ? model.event.title : undefined}
+      >
+        {t("Get tickets")}
+      </PageHeading>
+      {model.status === "ready" && (
+        <p className="flex flex-wrap gap-x-2 text-sm text-muted-foreground">
+          <time dateTime={model.event.start.instant}>
+            {model.event.start.label}
+          </time>
+          {model.event.venue && <span>{model.event.venue.name}</span>}
+        </p>
+      )}
 
       {model.status === "loading" && (
         <p role="status" className="flex items-center gap-2 text-sm">
@@ -99,7 +96,6 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
           )}
         </>
       )}
-    </main>
+    </SitePage>
   )
 }
-

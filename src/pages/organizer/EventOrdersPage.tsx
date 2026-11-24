@@ -48,8 +48,11 @@ export function EventOrdersPage(scope: EventScope) {
 
   return (
     <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
-      <Link href="/organizer" className={buttonVariants({ variant: "ghost" })}>
-        {t("Back to organizer dashboard")}
+      <Link
+        href={"/organizer/events/" + encodeURIComponent(eventId)}
+        className={buttonVariants({ variant: "ghost" })}
+      >
+        {t("Manage event")}
       </Link>
       <header className="space-y-2">
         <h1 className="text-3xl font-bold">{t("Orders & Manage")}</h1>

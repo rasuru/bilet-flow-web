@@ -1,6 +1,7 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query"
 
-import { ApiError } from "@/api/client"
+import { API_BASE_URL, ApiError } from "@/api/client"
+import { refreshManagedEvent } from "./managedEventRepository"
 import {
   attachVenue,
   createEvent,
@@ -26,7 +27,7 @@ export type TicketRequest =
 
 export type EventSubmission = {
   details: EventDetailsRequest
-  venue: VenueRequest
+  venue?: VenueRequest
   tickets: { key: string; request: TicketRequest }[]
 }
 
@@ -41,13 +42,9 @@ export type PublishStage =
   | { kind: "createDraft" | "updateDraft" | "saveVenue" | "publish" }
   | { kind: "saveTicket"; position: number; total: number }
 
-const apiBase = (
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"
-).replace(/\/+$/, "")
-
 export const allowsLocalEventSave =
   import.meta.env.DEV &&
-  /^http:\/\/(localhost|127\.0\.0\.1|\[::1\]):8080$/.test(apiBase)
+  /^http:\/\/(localhost|127\.0\.0\.1|\[::1\]):8080$/.test(API_BASE_URL)
 
 function mockLayout(
   layoutId: string,
@@ -103,91 +100,83 @@ export function venueLayoutsQuery() {
   })
 }
 
-async function refreshEventQueries(
-  client: QueryClient,
-  sessionId: number,
-  eventId: string
-) {
-  const queries = [
-    { queryKey: ["managed-events", sessionId] },
-    { queryKey: ["public-events"] },
-    { queryKey: ["public-event", eventId] },
-  ]
-  await Promise.all(queries.map((query) => client.cancelQueries(query)))
-  for (const query of queries) void client.invalidateQueries(query)
-}
-
-export async function publishNewEvent(
+export async function saveNewEvent(
   client: QueryClient,
   sessionId: number,
   submission: EventSubmission,
   progress: SubmissionProgress,
+  publish: boolean,
   onStep: (stage: PublishStage, recoveryStep: number) => void
 ) {
   const requestWithSession = <T>(request: (token: string) => Promise<T>) =>
     sessionRepository.authenticatedRequest(sessionId, request)
 
-  if (!progress.draftEventId) {
-    onStep({ kind: "createDraft" }, 4)
-    const { id } = await requestWithSession((token) =>
-      createEvent(token, submission.details)
-    )
-    progress.draftEventId = id
-    progress.details = submission.details
-    await refreshEventQueries(client, sessionId, id)
-  } else if (
-    JSON.stringify(progress.details) !== JSON.stringify(submission.details)
-  ) {
-    onStep({ kind: "updateDraft" }, 0)
-    const eventId = progress.draftEventId
-    await requestWithSession((token) =>
-      updateEvent(token, eventId, submission.details)
-    )
-    progress.details = submission.details
-  }
-
-  const eventId = progress.draftEventId
-  if (JSON.stringify(progress.venue) !== JSON.stringify(submission.venue)) {
-    onStep({ kind: "saveVenue" }, 2)
-    await requestWithSession((token) =>
-      attachVenue(token, eventId, submission.venue)
-    )
-    progress.venue = submission.venue
-  }
-
-  for (const [index, { key, request }] of submission.tickets.entries()) {
-    const saved = progress.tickets.get(key)
-    if (JSON.stringify(saved?.request) === JSON.stringify(request)) continue
-
-    onStep(
-      {
-        kind: "saveTicket",
-        position: index + 1,
-        total: submission.tickets.length,
-      },
-      3
-    )
-    if (saved) {
-      await requestWithSession((token) =>
-        "priceCategory" in request
-          ? updateAssignedSeatingTicketType(token, saved.id, request)
-          : updateGeneralAdmissionTicketType(token, saved.id, request)
-      )
-      saved.request = request
-    } else {
+  try {
+    if (!progress.draftEventId) {
+      onStep({ kind: "createDraft" }, 4)
       const { id } = await requestWithSession((token) =>
-        "priceCategory" in request
-          ? createAssignedSeatingTicketType(token, eventId, request)
-          : createGeneralAdmissionTicketType(token, eventId, request)
+        createEvent(token, submission.details)
       )
-      progress.tickets.set(key, { id, request })
+      progress.draftEventId = id
+      progress.details = submission.details
+    } else if (
+      JSON.stringify(progress.details) !== JSON.stringify(submission.details)
+    ) {
+      onStep({ kind: "updateDraft" }, 0)
+      const eventId = progress.draftEventId
+      await requestWithSession((token) =>
+        updateEvent(token, eventId, submission.details)
+      )
+      progress.details = submission.details
+    }
+
+    const eventId = progress.draftEventId
+    if (submission.venue && !progress.venue) {
+      const venue = submission.venue
+      onStep({ kind: "saveVenue" }, 2)
+      await requestWithSession((token) => attachVenue(token, eventId, venue))
+      progress.venue = venue
+    }
+
+    for (const [index, { key, request }] of submission.tickets.entries()) {
+      const saved = progress.tickets.get(key)
+      if (JSON.stringify(saved?.request) === JSON.stringify(request)) continue
+
+      onStep(
+        {
+          kind: "saveTicket",
+          position: index + 1,
+          total: submission.tickets.length,
+        },
+        3
+      )
+      if (saved) {
+        await requestWithSession((token) =>
+          "priceCategory" in request
+            ? updateAssignedSeatingTicketType(token, saved.id, request)
+            : updateGeneralAdmissionTicketType(token, saved.id, request)
+        )
+        saved.request = request
+      } else {
+        const { id } = await requestWithSession((token) =>
+          "priceCategory" in request
+            ? createAssignedSeatingTicketType(token, eventId, request)
+            : createGeneralAdmissionTicketType(token, eventId, request)
+        )
+        progress.tickets.set(key, { id, request })
+      }
+    }
+
+    if (publish) {
+      onStep({ kind: "publish" }, 4)
+      await requestWithSession((token) => publishEvent(token, eventId))
+    }
+    return eventId
+  } finally {
+    if (progress.draftEventId) {
+      await refreshManagedEvent(client, sessionId, progress.draftEventId)
     }
   }
-
-  onStep({ kind: "publish" }, 4)
-  await requestWithSession((token) => publishEvent(token, eventId))
-  await refreshEventQueries(client, sessionId, eventId)
-  return eventId
 }
 
 export function saveLocalEvent(submission: EventSubmission) {
@@ -215,4 +204,3 @@ export function submissionError(error: unknown) {
     return "Could not reach the event service. Check your connection and try again."
   return "Could not save the event. Please try again."
 }
-

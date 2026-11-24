@@ -2,6 +2,7 @@ import { t } from "@/i18n/locale"
 import { useId, useState } from "react"
 import { Controller } from "react-hook-form"
 
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -95,78 +96,90 @@ export function PayoutAccountSection({ sessionId }: { sessionId: number }) {
   const [saved, setSaved] = useState(false)
 
   return (
-    <section className="space-y-4 rounded-xl border p-5">
-      <h2 className="text-lg font-semibold">{t("Payout account")}</h2>
-      <p className="text-sm text-muted-foreground">
-        {t(
-          "BiletFlow simulates payouts. The backend checks the IBAN format and displays a masked account number."
-        )}
-      </p>
-      {model.isLoading ? (
-        <p role="status" className="text-sm text-muted-foreground">
-          {t("Loading payout account…")}
+    <section
+      id="payout"
+      className="scroll-mt-5"
+      aria-labelledby="payout-heading"
+    >
+      <Card className="gap-4 p-5">
+        <h2
+          id="payout-heading"
+          className="text-xl font-semibold tracking-tight"
+        >
+          {t("Payout account")}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {t(
+            "Your IBAN is checked for validity. Only a masked account number is displayed."
+          )}
         </p>
-      ) : model.account === undefined ? (
-        <>
-          <p role="alert" className="text-sm text-destructive">
-            {model.error || t("Could not load the payout account.")}
+        {model.isLoading ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            {t("Loading payout account…")}
           </p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void model.retry()}
-          >
-            {t("Try again")}
-          </Button>
-        </>
-      ) : isEditing ? (
-        <PayoutAccountForm
-          sessionId={sessionId}
-          holderName={model.account?.holderName ?? ""}
-          onCancel={() => setIsEditing(false)}
-          onSaved={() => {
-            setIsEditing(false)
-            setSaved(true)
-          }}
-        />
-      ) : (
-        <>
-          {model.account ? (
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-muted-foreground">{t("Account holder")}</dt>
-                <dd className="wrap-anywhere">{model.account.holderName}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">IBAN</dt>
-                <dd>{model.account.maskedIban}</dd>
-              </div>
-            </dl>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {t("You haven’t set up a payout account yet.")}
+        ) : model.account === undefined ? (
+          <>
+            <p role="alert" className="text-sm text-destructive">
+              {model.error || t("Could not load the payout account.")}
             </p>
-          )}
-          {saved && (
-            <p role="status" className="text-sm">
-              {t("Payout account saved.")}
-            </p>
-          )}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setSaved(false)
-              setIsEditing(true)
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void model.retry()}
+            >
+              {t("Try again")}
+            </Button>
+          </>
+        ) : isEditing ? (
+          <PayoutAccountForm
+            sessionId={sessionId}
+            holderName={model.account?.holderName ?? ""}
+            onCancel={() => setIsEditing(false)}
+            onSaved={() => {
+              setIsEditing(false)
+              setSaved(true)
             }}
-          >
-            {model.account
-              ? t("Replace payout account")
-              : t("Set up payout account")}
-          </Button>
-        </>
-      )}
+          />
+        ) : (
+          <>
+            {model.account ? (
+              <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-muted-foreground">
+                    {t("Account holder")}
+                  </dt>
+                  <dd className="wrap-anywhere">{model.account.holderName}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">IBAN</dt>
+                  <dd>{model.account.maskedIban}</dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {t("You haven’t set up a payout account yet.")}
+              </p>
+            )}
+            {saved && (
+              <p role="status" className="text-sm">
+                {t("Payout account saved.")}
+              </p>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setSaved(false)
+                setIsEditing(true)
+              }}
+            >
+              {model.account
+                ? t("Replace payout account")
+                : t("Set up payout account")}
+            </Button>
+          </>
+        )}
+      </Card>
     </section>
   )
 }
-

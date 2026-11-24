@@ -1,5 +1,6 @@
+import { BackLink, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon, DownloadIcon, PrinterIcon } from "lucide-react"
+import { DownloadIcon, PrinterIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Link } from "wouter"
 
@@ -53,27 +54,20 @@ export function TicketDetailsPage({
   const [loadedQr, setLoadedQr] = useState<Blob>()
 
   return (
-    <main className="mx-auto max-w-xl space-y-4 px-4 py-6 sm:px-6 print:max-w-none print:p-0">
-      <Link
-        href="/my-tickets"
-        className={buttonVariants({
-          variant: "ghost",
-          className: "print:hidden",
-        })}
-      >
-        <ArrowLeftIcon aria-hidden="true" />
-        {t("My tickets")}
-      </Link>
+    <SitePage width="form">
+      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
+        <BackLink href="/my-tickets">{t("My tickets")}</BackLink>
 
-      <Link
-        href={`/support/new?ticketId=${encodeURIComponent(ticketId)}`}
-        className={buttonVariants({
-          variant: "outline",
-          className: "print:hidden",
-        })}
-      >
-        {t("Get ticket support")}
-      </Link>
+        <Link
+          href={`/support/new?ticketId=${encodeURIComponent(ticketId)}`}
+          className={buttonVariants({
+            variant: "outline",
+            className: "print:hidden",
+          })}
+        >
+          {t("Get ticket support")}
+        </Link>
+      </div>
       {model.status === "loading" && (
         <p role="status" className="flex items-center gap-2 text-sm">
           <Spinner aria-hidden="true" /> {t("Loading your ticket…")}
@@ -97,7 +91,9 @@ export function TicketDetailsPage({
               {t("BiletFlow ticket")}
             </CardDescription>
             <CardTitle>
-              <h1 className="text-2xl font-semibold">{model.title}</h1>
+              <h1 className="text-[clamp(1.5rem,4vw,2rem)] leading-tight font-semibold">
+                {model.title}
+              </h1>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -221,7 +217,6 @@ export function TicketDetailsPage({
           </CardContent>
         </Card>
       )}
-    </main>
+    </SitePage>
   )
 }
-

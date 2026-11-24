@@ -73,8 +73,8 @@ export const russian: Readonly<Record<string, string>> = {
   "BiletFlow platform support": "Поддержка BiletFlow",
   "BiletFlow sends the user an email to set their password.":
     "BiletFlow отправит пользователю письмо для установки пароля.",
-  "BiletFlow simulates payouts. The backend checks the IBAN format and displays a masked account number.":
-    "BiletFlow имитирует выплаты. Сервер проверяет формат IBAN и скрывает часть номера счёта.",
+  "Your IBAN is checked for validity. Only a masked account number is displayed.":
+    "Проверяется корректность IBAN. Отображается только маскированный номер счёта.",
   "BiletFlow ticket": "Билет BiletFlow",
   "BiletFlow uses your account email for sign-in and password reset.":
     "BiletFlow использует вашу почту для входа и сброса пароля.",
@@ -127,8 +127,6 @@ export const russian: Readonly<Record<string, string>> = {
   Commerce: "Продажи",
   "Complete payment on Halyk ePay to receive your tickets.":
     "Оплатите заказ через Halyk ePay, чтобы получить билеты.",
-  "Complete the test payment on Halyk ePay to receive your tickets.":
-    "Завершите тестовую оплату в Halyk ePay, чтобы получить билеты.",
   Completed: "Завершено",
   "Confirm new password": "Подтвердите новый пароль",
   "Confirm password": "Подтвердите пароль",
@@ -478,7 +476,6 @@ export const russian: Readonly<Record<string, string>> = {
   "Password must be at most 100 characters":
     "Пароль не должен превышать 100 символов",
   "Passwords do not match": "Пароли не совпадают",
-  "Pay in Halyk sandbox": "Оплатить в тестовой среде Halyk",
   "Pay with Halyk ePay": "Оплатить через Halyk ePay",
   Payer: "Плательщик",
   "Payer ID": "ID плательщика",
@@ -932,6 +929,262 @@ export const russian: Readonly<Record<string, string>> = {
   "{0} ({1} seats)": "{0} (мест: {1})",
   "{0} tickets · Max {1} per order": "Билетов: {0} · до {1} на заказ",
   "{0} to {1}": "С {0} до {1}",
+  "Add a venue before publishing this draft.":
+    "Укажите место проведения перед публикацией черновика.",
+  "Admission not configured": "Тип рассадки не задан",
+  "Cancel event": "Отменить мероприятие",
+  Capacity: "Вместимость",
+  "Copy link": "Скопировать ссылку",
+  "Could not change the event status. Try again.":
+    "Не удалось изменить статус мероприятия. Повторите попытку.",
+  "Could not copy the link. Open the event and copy its address.":
+    "Не удалось скопировать ссылку. Откройте страницу мероприятия и скопируйте её адрес.",
+  "Could not load ticket inventory.": "Не удалось загрузить данные о билетах.",
+  Dashboard: "Панель управления",
+  "Displays the mobile sidebar.": "Боковое меню для мобильных устройств.",
+  Drafts: "Черновики",
+  "Event cancelled.": "Мероприятие отменено.",
+  "Event link copied.": "Ссылка на мероприятие скопирована.",
+  "Event published.": "Мероприятие опубликовано.",
+  "Event summary": "Сводка по мероприятиям",
+  "Event unpublished.": "Мероприятие снято с публикации.",
+  "Filter events by status": "Фильтр мероприятий по статусу",
+  "Loading ticket inventory…": "Загружаем данные о билетах…",
+  "No events match this status.": "Мероприятий с таким статусом нет.",
+  "Not scheduled": "Дата не назначена",
+  "Publish this event with its current visibility and schedule.":
+    "Опубликовать мероприятие с текущими настройками видимости и расписанием.",
+  Remaining: "Осталось",
+  Reserved: "Зарезервировано",
+  Sidebar: "Боковое меню",
+  Sold: "Продано",
+  "Stop new sales and admission. Attendees will be notified.":
+    "Продажа билетов и допуск на мероприятие прекратятся. Участники получат уведомление.",
+  "Take the event off sale and remove its public page.":
+    "Остановить продажу билетов и скрыть публичную страницу мероприятия.",
+  "This action is no longer available for this event.":
+    "Это действие больше недоступно для мероприятия.",
+  "This event is a draft.": "Это черновик мероприятия.",
+  "Ticket inventory": "Наличие билетов",
+  "Ticket inventory is not configured.": "Наличие билетов ещё не настроено.",
+  "Toggle sidebar": "Открыть или закрыть боковое меню",
+  "Unpublish event": "Снять мероприятие с публикации",
+  Upcoming: "Предстоящие",
+  "Update the schedule before publishing this draft.":
+    "Обновите расписание перед публикацией черновика.",
+  "Venue not set": "Место проведения не задано",
+  "View details": "Подробнее",
+  "{0} of {1} events": "Мероприятий: {0} из {1}",
+  "{0} sold": "Продано: {0}",
+  "{0}?": "{0}?",
+  "All time": "За всё время",
+  "Analytics are unavailable for this event.":
+    "Аналитика по этому мероприятию недоступна.",
+  Attendance: "Посещаемость",
+  "Attendance is available once the event starts.":
+    "Данные о посещаемости появятся с началом мероприятия.",
+  "Attributed tickets": "Билеты по акции",
+  "Attribution for the selected orders and ticket types":
+    "Результаты по выбранным заказам и типам билетов",
+  "By order date": "По дате заказа",
+  "Campaign or code": "Кампания или код",
+  "Campaigns and promo codes": "Кампании и промокоды",
+  "Capacity sold": "Процент проданных мест",
+  "Check-in rate": "Доля отметившихся на входе",
+  "Check-in status for tickets in the report":
+    "Отметки о входе по билетам в отчёте",
+  "Confirmed refunds": "Подтверждённые возвраты",
+  "Could not load analytics.": "Не удалось загрузить аналитику.",
+  "Could not load this event.": "Не удалось загрузить мероприятие.",
+  "Current inventory for the shared seat category":
+    "Текущая доступность мест в общей категории",
+  "Current inventory · all dates": "Текущая доступность · за всё время",
+  "End date": "Дата окончания",
+  "Event analytics": "Аналитика мероприятия",
+  "From {0}": "С {0}",
+  "Gross sales": "Продажи до вычетов",
+  "Gross sales less discounts and confirmed refunds":
+    "Продажи за вычетом скидок и подтверждённых возвратов",
+  "Loading analytics…": "Загружаем аналитику…",
+  "Manage event": "Управление мероприятием",
+  "Net revenue": "Чистая выручка",
+  "No confirmed redemptions for these filters.":
+    "По выбранным фильтрам нет подтверждённых применений.",
+  "No dated sales for these filters.":
+    "По выбранным фильтрам нет продаж с указанной датой.",
+  "Not checked in": "Не отметились на входе",
+  "Order dates use Kazakhstan time (Asia/Almaty).":
+    "Даты заказов указаны по времени Казахстана (Asia/Almaty).",
+  Registered: "Зарегистрированы",
+  "Report filters": "Фильтры отчёта",
+  "Sales by ticket type": "Продажи по типам билетов",
+  "Sales chart metric": "Показатель на графике продаж",
+  "Sales over time": "Динамика продаж",
+  "Start date": "Дата начала",
+  "The end date must be on or after the start date.":
+    "Дата окончания не может быть раньше даты начала.",
+  "This event has no ticket types yet.":
+    "У этого мероприятия пока нет типов билетов.",
+  "Through {0}": "По {0} включительно",
+  "Ticket type": "Тип билета",
+  "Ticket type {0}": "Тип билета {0}",
+  "Track ticket sales, revenue, and attendance across your events.":
+    "Отслеживайте продажи билетов, выручку и посещаемость ваших мероприятий.",
+  "View analytics": "Открыть аналитику",
+  "View chart values": "Показать значения на графике",
+  "{0} tickets have no recorded order date and are omitted from the chart.":
+    "На графике отсутствуют билеты без даты заказа ({0}).",
+  "{0} tickets temporarily held": "Временно зарезервировано билетов: {0}",
+  "{0} · {1}": "{0} · {1}",
+  "All events overview": "Сводка по всем мероприятиям",
+  "Events that have started": "Мероприятия, которые уже начались",
+  "Attendance is available once an event starts.":
+    "Данные о посещаемости появятся с началом первого мероприятия.",
+  "All statuses": "Все статусы",
+  Manage: "Управлять",
+  "Event or venue": "Событие или площадка",
+  "No events match your search and filters.":
+    "По вашему запросу и фильтрам ничего не найдено.",
+  "{0} sold of {1} capacity \u00b7 {2} available \u00b7 {3} held":
+    "Продано {0} из {1} · доступно {2} · в резерве {3}",
+  "{0} check-in rate": "{0} отметились на входе",
+  "{0} of {1} checked in \u00b7 {2} not checked in":
+    "Отметились {0} из {1} · не отметились {2}",
+  "{0} confirmed redemptions \u00b7 {1} attributed tickets":
+    "Подтверждённых применений: {0} · билетов по акции: {1}",
+  "All ticket prices": "Любая цена билета",
+  "Has paid tickets": "Есть платные билеты",
+  "Paid tickets only": "Только платные билеты",
+  "Free tickets only": "Только бесплатные билеты",
+  "No ticket types": "Нет типов билетов",
+  "Schedule priority": "По приоритету расписания",
+  "Most tickets sold": "Больше всего билетов продано",
+  "Highest gross sales": "Наибольшие продажи до вычетов",
+  "Highest net revenue": "Наибольшая чистая выручка",
+  "Earliest start date": "Сначала ранние даты",
+  "Latest start date": "Сначала поздние даты",
+  "Event name": "По названию",
+  "Paid only": "Только платные",
+  "Free only": "Только бесплатные",
+  "Paid and free": "Платные и бесплатные",
+  "Filter events by ticket price": "Фильтр мероприятий по цене билетов",
+  "Sort events by": "Сортировать мероприятия по",
+  "Sales or ticket prices are unavailable for some events.":
+    "Для некоторых мероприятий недоступны продажи или цены билетов.",
+  "Loading event sales and ticket prices\u2026":
+    "Загружаем данные о продажах и ценах билетов…",
+  "This view needs sales and ticket prices. Try again or change the sort or filters.":
+    "Для этого списка нужны данные о продажах и ценах билетов. Повторите попытку или измените сортировку или фильтры.",
+  "Retry sales data": "Повторить загрузку продаж",
+  "Account username": "Имя пользователя",
+  "Add a venue before setting up ticket tiers.":
+    "Добавьте площадку, чтобы настроить категории билетов.",
+  "Add venue": "Добавить площадку",
+  "Already assigned": "Уже назначен",
+  "Assign administrator": "Назначить администратором",
+  "Assigned {0}": "Назначен {0}",
+  "Could not find accounts. Try searching again.":
+    "Не удалось выполнить поиск аккаунтов. Попробуйте ещё раз.",
+  "Could not load ticket tiers.": "Не удалось загрузить категории билетов.",
+  "Could not load venue layouts.": "Не удалось загрузить схемы площадок.",
+  "Could not load the venue layout.": "Не удалось загрузить схему площадки.",
+  "Draft saved.": "Черновик сохранён.",
+  "Edit event details": "Редактировать данные мероприятия",
+  "Edit price": "Изменить цену",
+  "Edit price for {0}": "Изменить цену билета «{0}»",
+  "Enter 0 for a free ticket.": "Укажите 0 для бесплатного билета.",
+  "Enter a nonnegative price with up to two decimal places.":
+    "Укажите неотрицательную цену с максимум двумя знаками после запятой.",
+  "Enter a sales window that starts before it closes and ends by the event end time.":
+    "Укажите период продаж, который начинается до закрытия продаж и заканчивается не позднее окончания мероприятия.",
+  "Enter a ticket tier name.": "Укажите название категории билетов.",
+  "Enter an account username.": "Введите имя пользователя.",
+  "Event administrator assigned.": "Администратор мероприятия назначен.",
+  "Event administrator removed.": "Администратор мероприятия удалён.",
+  "Event administrators": "Администраторы мероприятия",
+  "Event administrators can check in attendees and handle event support requests.":
+    "Администраторы могут регистрировать участников на входе и обрабатывать обращения по мероприятию.",
+  "Event details saved.": "Данные мероприятия сохранены.",
+  "Event sections": "Разделы мероприятия",
+  "Find account": "Найти аккаунт",
+  "Loading ticket tiers…": "Загрузка категорий билетов…",
+  "Max per order must be between 1 and the tier quantity.":
+    "Лимит на заказ должен быть от 1 до количества билетов в категории.",
+  "More event information": "Дополнительная информация о мероприятии",
+  "No account found. Check the username and search again.":
+    "Аккаунт не найден. Проверьте имя пользователя и повторите поиск.",
+  "No event administrators assigned.":
+    "Администраторы мероприятия не назначены.",
+  "Open saved draft": "Открыть сохранённый черновик",
+  "Remove administrator": "Удалить администратора",
+  "Remove event administrator?": "Удалить администратора мероприятия?",
+  "Save a draft to add a venue and tickets later.":
+    "Сохраните черновик, чтобы добавить площадку и билеты позже.",
+  "Save draft": "Сохранить черновик",
+  "Save price": "Сохранить цену",
+  "Save ticket tier": "Сохранить категорию билетов",
+  "Save venue": "Сохранить площадку",
+  "Searching…": "Поиск…",
+  "Seat price category": "Ценовая категория мест",
+  "Select a seat price category": "Выберите ценовую категорию мест",
+  "Select a seat price category.": "Выберите ценовую категорию мест.",
+  "The new price applies to future purchases.":
+    "Новая цена применяется к будущим покупкам.",
+  "This event has no ticket tiers yet.":
+    "Для этого мероприятия пока нет категорий билетов.",
+  "This layout has no seat price categories.":
+    "В этой схеме нет ценовых категорий мест.",
+  "Ticket price saved.": "Цена билета сохранена.",
+  "Ticket tier added.": "Категория билетов добавлена.",
+  "User #{0}": "Пользователь №{0}",
+  "Venue added.": "Площадка добавлена.",
+  "Venue and admission settings are fixed after you save them.":
+    "Площадку и параметры входа нельзя изменить после сохранения.",
+  "{0} of {1} sold": "Продано {0} из {1}",
+  "{0} will lose administrator access to this event.":
+    "Пользователь {0} потеряет права администратора этого мероприятия.",
+  "Become an organizer": "Стать организатором",
+  "Browse events": "Смотреть мероприятия",
+  "Browse public events": "Смотреть публичные мероприятия",
+  "No image available": "Нет изображения",
+  "This is a demo. All transactions are simulated.":
+    "Это демонстрационная версия. Все транзакции имитируются.",
+  "Theme ({0})": "Тема ({0})",
+  System: "Системная",
+  Light: "Светлая",
+  Dark: "Тёмная",
+  "Choose admission, ticket quantities and prices.":
+    "Выберите тип входа, количество билетов и цены.",
+  "Couldn’t load administrator usernames.":
+    "Не удалось загрузить имена администраторов.",
+  "Create a draft and set up ticket sales when you’re ready.":
+    "Создайте черновик и настройте продажу билетов, когда будете готовы.",
+  "Create a draft with your BiletFlow account. Add a venue and tickets when you’re ready, then publish from your organizer dashboard.":
+    "Создайте черновик в своём аккаунте BiletFlow. Добавьте площадку и билеты, затем опубликуйте мероприятие в кабинете организатора.",
+  "Email verification pending": "Почта ещё не подтверждена",
+  "Find upcoming events, get tickets, or start organizing your own.":
+    "Находите ближайшие мероприятия, покупайте билеты или организуйте своё.",
+  "Find your next event": "Найдите интересное мероприятие",
+  "Helpful links": "Полезные ссылки",
+  "Invite event administrators and track ticket sales.":
+    "Приглашайте администраторов и отслеживайте продажи билетов.",
+  "Loading account…": "Загрузка аккаунта…",
+  "Main navigation": "Основная навигация",
+  Organize: "Организаторам",
+  "Organize an event": "Организовать мероприятие",
+  "Planning an event?": "Планируете мероприятие?",
+  "Run your event": "Управляйте мероприятием",
+  "Save a draft": "Сохранить черновик",
+  "Set up tickets": "Настройте билеты",
+  "Sign in to create an event": "Войдите, чтобы создать мероприятие",
+  "Skip to main content": "Перейти к основному содержанию",
+  "Start a draft whenever you’re ready to plan your first event.":
+    "Создайте черновик, чтобы начать планировать первое мероприятие.",
+  "Start with the event name and schedule.":
+    "Начните с названия и расписания мероприятия.",
+  "Update your password": "Обновить пароль",
+  "View all events": "Все мероприятия",
+  "Welcome back, {0}": "С возвращением, {0}",
 }
 
 export const kazakh: Readonly<Record<string, string>> = {
@@ -1009,8 +1262,8 @@ export const kazakh: Readonly<Record<string, string>> = {
   "BiletFlow platform support": "BiletFlow қолдауы",
   "BiletFlow sends the user an email to set their password.":
     "BiletFlow пайдаланушыға құпиясөз орнату үшін хат жібереді.",
-  "BiletFlow simulates payouts. The backend checks the IBAN format and displays a masked account number.":
-    "BiletFlow төлемдерді модельдейді. Сервер IBAN пішімін тексеріп, шот нөмірінің бір бөлігін жасырады.",
+  "Your IBAN is checked for validity. Only a masked account number is displayed.":
+    "IBAN жарамдылығы тексеріледі. Шот нөмірі ішінара жасырылып көрсетіледі.",
   "BiletFlow ticket": "BiletFlow билеті",
   "BiletFlow uses your account email for sign-in and password reset.":
     "BiletFlow электрондық поштаңызды кіру және құпиясөзді қалпына келтіру үшін қолданады.",
@@ -1063,8 +1316,6 @@ export const kazakh: Readonly<Record<string, string>> = {
   Commerce: "Сауда",
   "Complete payment on Halyk ePay to receive your tickets.":
     "Билеттерді алу үшін Halyk ePay арқылы төлеңіз.",
-  "Complete the test payment on Halyk ePay to receive your tickets.":
-    "Билеттерді алу үшін Halyk ePay жүйесінде сынақ төлемін аяқтаңыз.",
   Completed: "Аяқталды",
   "Confirm new password": "Жаңа құпиясөзді растаңыз",
   "Confirm password": "Құпиясөзді растаңыз",
@@ -1419,7 +1670,6 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Password must be at most 100 characters":
     "Құпиясөз 100 таңбадан аспауы керек",
   "Passwords do not match": "Құпиясөздер сәйкес келмейді",
-  "Pay in Halyk sandbox": "Halyk сынақ ортасында төлеу",
   "Pay with Halyk ePay": "Halyk ePay арқылы төлеу",
   Payer: "Төлеуші",
   "Payer ID": "Төлеушінің ID",
@@ -1871,5 +2121,262 @@ export const kazakh: Readonly<Record<string, string>> = {
   "{0} tickets · Max {1} per order":
     "{0} билет · бір тапсырысқа {1} билетке дейін",
   "{0} to {1}": "{0} – {1}",
+  "Add a venue before publishing this draft.":
+    "Нобайды жарияламас бұрын өтетін орынды көрсетіңіз.",
+  "Admission not configured": "Орындарды бөлу түрі көрсетілмеген",
+  "Cancel event": "Іс-шарадан бас тарту",
+  Capacity: "Сыйымдылық",
+  "Copy link": "Сілтемені көшіру",
+  "Could not change the event status. Try again.":
+    "Іс-шара күйін өзгерту мүмкін болмады. Қайталап көріңіз.",
+  "Could not copy the link. Open the event and copy its address.":
+    "Сілтемені көшіру мүмкін болмады. Іс-шара бетін ашып, мекенжайын көшіріңіз.",
+  "Could not load ticket inventory.": "Билет қорын жүктеу мүмкін болмады.",
+  Dashboard: "Басқару тақтасы",
+  "Displays the mobile sidebar.":
+    "Мобильді құрылғыларға арналған бүйірлік мәзір.",
+  Drafts: "Нобайлар",
+  "Event cancelled.": "Іс-шара өтпейтін болды.",
+  "Event link copied.": "Іс-шара сілтемесі көшірілді.",
+  "Event published.": "Іс-шара жарияланды.",
+  "Event summary": "Іс-шаралар шолуы",
+  "Event unpublished.": "Іс-шара жарияланымнан алынды.",
+  "Filter events by status": "Іс-шараларды күйі бойынша сүзу",
+  "Loading ticket inventory…": "Билет қоры жүктеліп жатыр…",
+  "No events match this status.": "Мұндай күйдегі іс-шаралар жоқ.",
+  "Not scheduled": "Күні белгіленбеген",
+  "Publish this event with its current visibility and schedule.":
+    "Іс-шараны ағымдағы көріну параметрлері мен кестесі бойынша жариялау.",
+  Remaining: "Қалғаны",
+  Reserved: "Брондалғаны",
+  Sidebar: "Бүйірлік мәзір",
+  Sold: "Сатылғаны",
+  "Stop new sales and admission. Attendees will be notified.":
+    "Билет сату және іс-шараға кіргізу тоқтатылады. Қатысушыларға хабарлама жіберіледі.",
+  "Take the event off sale and remove its public page.":
+    "Билет сатуды тоқтатып, іс-шараның ашық бетін жасыру.",
+  "This action is no longer available for this event.":
+    "Бұл әрекет осы іс-шара үшін енді қолжетімсіз.",
+  "This event is a draft.": "Бұл іс-шараның нобайы.",
+  "Ticket inventory": "Билет қоры",
+  "Ticket inventory is not configured.": "Билет қоры әлі бапталмаған.",
+  "Toggle sidebar": "Бүйірлік мәзірді ашу немесе жабу",
+  "Unpublish event": "Іс-шараны жарияланымнан алу",
+  Upcoming: "Алдағы",
+  "Update the schedule before publishing this draft.":
+    "Нобайды жарияламас бұрын кестені жаңартыңыз.",
+  "Venue not set": "Өтетін орын көрсетілмеген",
+  "View details": "Толығырақ",
+  "{0} of {1} events": "{1} іс-шараның {0}-і",
+  "{0} sold": "{0} сатылды",
+  "{0}?": "{0}?",
+  "All time": "Барлық уақыт",
+  "Analytics are unavailable for this event.":
+    "Бұл іс-шараның аналитикасы қолжетімсіз.",
+  Attendance: "Қатысу",
+  "Attendance is available once the event starts.":
+    "Қатысу деректері іс-шара басталғанда қолжетімді болады.",
+  "Attributed tickets": "Науқан бойынша билеттер",
+  "Attribution for the selected orders and ticket types":
+    "Таңдалған тапсырыстар мен билет түрлері бойынша нәтижелер",
+  "By order date": "Тапсырыс күні бойынша",
+  "Campaign or code": "Науқан немесе код",
+  "Campaigns and promo codes": "Науқандар мен промокодтар",
+  "Capacity sold": "Сатылған орындар үлесі",
+  "Check-in rate": "Кіруде тіркелгендер үлесі",
+  "Check-in status for tickets in the report":
+    "Есептегі билеттер бойынша кіру мәртебесі",
+  "Confirmed refunds": "Расталған қайтарымдар",
+  "Could not load analytics.": "Аналитиканы жүктеу мүмкін болмады.",
+  "Could not load this event.": "Іс-шараны жүктеу мүмкін болмады.",
+  "Current inventory for the shared seat category":
+    "Ортақ санаттағы орындардың ағымдағы қолжетімділігі",
+  "Current inventory · all dates": "Ағымдағы қолжетімділік · барлық уақыт",
+  "End date": "Аяқталу күні",
+  "Event analytics": "Іс-шара аналитикасы",
+  "From {0}": "{0} бастап",
+  "Gross sales": "Жалпы сатылым",
+  "Gross sales less discounts and confirmed refunds":
+    "Сатылымнан жеңілдіктер мен расталған қайтарымдар шегеріледі",
+  "Loading analytics…": "Аналитика жүктелуде…",
+  "Manage event": "Іс-шараны басқару",
+  "Net revenue": "Таза түсім",
+  "No confirmed redemptions for these filters.":
+    "Таңдалған сүзгілер бойынша расталған қолданыс жоқ.",
+  "No dated sales for these filters.":
+    "Таңдалған сүзгілер бойынша күні көрсетілген сатылым жоқ.",
+  "Not checked in": "Кіруде тіркелмеген",
+  "Order dates use Kazakhstan time (Asia/Almaty).":
+    "Тапсырыс күндері Қазақстан уақытымен көрсетіледі (Asia/Almaty).",
+  Registered: "Тіркелген",
+  "Report filters": "Есеп сүзгілері",
+  "Sales by ticket type": "Билет түрлері бойынша сатылым",
+  "Sales chart metric": "Сатылым диаграммасының көрсеткіші",
+  "Sales over time": "Сатылым динамикасы",
+  "Start date": "Басталу күні",
+  "The end date must be on or after the start date.":
+    "Аяқталу күні басталу күнінен ерте болмауы керек.",
+  "This event has no ticket types yet.":
+    "Бұл іс-шарада әзірге билет түрлері жоқ.",
+  "Through {0}": "{0} қоса алғанда",
+  "Ticket type": "Билет түрі",
+  "Ticket type {0}": "Билет түрі {0}",
+  "Track ticket sales, revenue, and attendance across your events.":
+    "Іс-шараларыңыздың билет сатылымын, түсімін және қатысуын бақылаңыз.",
+  "View analytics": "Аналитиканы ашу",
+  "View chart values": "Диаграмма мәндерін көру",
+  "{0} tickets have no recorded order date and are omitted from the chart.":
+    "Тапсырыс күні жазылмаған {0} билет диаграммаға қосылмады.",
+  "{0} tickets temporarily held": "Уақытша броньдалған билеттер саны: {0}",
+  "{0} · {1}": "{0} · {1}",
+  "All events overview": "Барлық іс-шаралардың шолуы",
+  "Events that have started": "Басталған іс-шаралар",
+  "Attendance is available once an event starts.":
+    "Қатысу деректері алғашқы іс-шара басталғанда қолжетімді болады.",
+  "All statuses": "Барлық мәртебе",
+  Manage: "Басқару",
+  "Event or venue": "Атауы немесе орны",
+  "No events match your search and filters.":
+    "Сұрау мен сүзгілерге сай іс-шара табылмады.",
+  "{0} sold of {1} capacity \u00b7 {2} available \u00b7 {3} held":
+    "{1} орынның {0}-і сатылды · {2} бос · {3} броньда",
+  "{0} check-in rate": "{0} кіргенде тіркелді",
+  "{0} of {1} checked in \u00b7 {2} not checked in":
+    "{1} адамның {0}-і тіркелді · {2}-і тіркелмеді",
+  "{0} confirmed redemptions \u00b7 {1} attributed tickets":
+    "Расталған қолданыс: {0} · науқан бойынша билет: {1}",
+  "All ticket prices": "Барлық билет бағасы",
+  "Has paid tickets": "Ақылы билеттері бар",
+  "Paid tickets only": "Тек ақылы билеттер",
+  "Free tickets only": "Тек тегін билеттер",
+  "No ticket types": "Билет түрлері жоқ",
+  "Schedule priority": "Кесте басымдығы бойынша",
+  "Most tickets sold": "Ең көп билет сатылған",
+  "Highest gross sales": "Ең жоғары жалпы сатылым",
+  "Highest net revenue": "Ең жоғары таза түсім",
+  "Earliest start date": "Алдымен ерте басталатындар",
+  "Latest start date": "Алдымен кеш басталатындар",
+  "Event name": "Атауы бойынша",
+  "Paid only": "Тек ақылы",
+  "Free only": "Тек тегін",
+  "Paid and free": "Ақылы және тегін",
+  "Filter events by ticket price": "Іс-шараларды билет бағасы бойынша сүзу",
+  "Sort events by": "Іс-шараларды сұрыптау",
+  "Sales or ticket prices are unavailable for some events.":
+    "Кейбір іс-шаралардың сатылымы немесе билет бағалары қолжетімсіз.",
+  "Loading event sales and ticket prices\u2026":
+    "Сатылым мен билет бағалары жүктелуде…",
+  "This view needs sales and ticket prices. Try again or change the sort or filters.":
+    "Бұл тізімге сатылым мен билет бағалары қажет. Қайталап көріңіз немесе сұрыптау мен сүзгілерді өзгертіңіз.",
+  "Retry sales data": "Сатылымды қайта жүктеу",
+  "Account username": "Тіркелгідегі пайдаланушы аты",
+  "Add a venue before setting up ticket tiers.":
+    "Билет санаттарын баптау үшін өткізу орнын қосыңыз.",
+  "Add venue": "Өткізу орнын қосу",
+  "Already assigned": "Тағайындалған",
+  "Assign administrator": "Әкімші етіп тағайындау",
+  "Assigned {0}": "Тағайындалған күні: {0}",
+  "Could not find accounts. Try searching again.":
+    "Тіркелгілерді іздеу мүмкін болмады. Қайта іздеп көріңіз.",
+  "Could not load ticket tiers.": "Билет санаттарын жүктеу мүмкін болмады.",
+  "Could not load venue layouts.":
+    "Өткізу орындарының сызбаларын жүктеу мүмкін болмады.",
+  "Could not load the venue layout.":
+    "Өткізу орнының сызбасын жүктеу мүмкін болмады.",
+  "Draft saved.": "Нобай сақталды.",
+  "Edit event details": "Іс-шара мәліметтерін өңдеу",
+  "Edit price": "Бағаны өзгерту",
+  "Edit price for {0}": "«{0}» билетінің бағасын өзгерту",
+  "Enter 0 for a free ticket.": "Тегін билет үшін 0 енгізіңіз.",
+  "Enter a nonnegative price with up to two decimal places.":
+    "Теріс емес бағаны үтірден кейін ең көбі екі таңбамен енгізіңіз.",
+  "Enter a sales window that starts before it closes and ends by the event end time.":
+    "Сатылымның басталу уақыты аяқталуынан бұрын, ал аяқталу уақыты іс-шараның аяқталуынан кеш болмауы керек.",
+  "Enter a ticket tier name.": "Билет санатының атауын енгізіңіз.",
+  "Enter an account username.": "Тіркелгідегі пайдаланушы атын енгізіңіз.",
+  "Event administrator assigned.": "Іс-шара әкімшісі тағайындалды.",
+  "Event administrator removed.": "Іс-шара әкімшісінің рұқсаты алынды.",
+  "Event administrators": "Іс-шара әкімшілері",
+  "Event administrators can check in attendees and handle event support requests.":
+    "Әкімшілер қатысушыларды кіреберісте тіркеп, іс-шара бойынша қолдау өтініштерін қарай алады.",
+  "Event details saved.": "Іс-шара мәліметтері сақталды.",
+  "Event sections": "Іс-шара бөлімдері",
+  "Find account": "Тіркелгіні табу",
+  "Loading ticket tiers…": "Билет санаттары жүктелуде…",
+  "Max per order must be between 1 and the tier quantity.":
+    "Бір тапсырысқа шектеу 1 мен санаттағы билет санының арасында болуы керек.",
+  "More event information": "Іс-шара туралы қосымша ақпарат",
+  "No account found. Check the username and search again.":
+    "Тіркелгі табылмады. Пайдаланушы атын тексеріп, қайта іздеңіз.",
+  "No event administrators assigned.": "Іс-шара әкімшілері тағайындалмаған.",
+  "Open saved draft": "Сақталған нобайды ашу",
+  "Remove administrator": "Әкімші рұқсатын алу",
+  "Remove event administrator?": "Іс-шара әкімшісінің рұқсатын алу керек пе?",
+  "Save a draft to add a venue and tickets later.":
+    "Өткізу орны мен билеттерді кейін қосу үшін нобайды сақтаңыз.",
+  "Save draft": "Нобайды сақтау",
+  "Save price": "Бағаны сақтау",
+  "Save ticket tier": "Билет санатын сақтау",
+  "Save venue": "Өткізу орнын сақтау",
+  "Searching…": "Ізделуде…",
+  "Seat price category": "Орындардың баға санаты",
+  "Select a seat price category": "Орындардың баға санатын таңдаңыз",
+  "Select a seat price category.": "Орындардың баға санатын таңдаңыз.",
+  "The new price applies to future purchases.":
+    "Жаңа баға кейінгі сатып алуларға қолданылады.",
+  "This event has no ticket tiers yet.":
+    "Бұл іс-шарада әзірге билет санаттары жоқ.",
+  "This layout has no seat price categories.":
+    "Бұл сызбада орындардың баға санаттары жоқ.",
+  "Ticket price saved.": "Билет бағасы сақталды.",
+  "Ticket tier added.": "Билет санаты қосылды.",
+  "User #{0}": "№{0} пайдаланушы",
+  "Venue added.": "Өткізу орны қосылды.",
+  "Venue and admission settings are fixed after you save them.":
+    "Сақтағаннан кейін өткізу орнын және кіру параметрлерін өзгерту мүмкін емес.",
+  "{0} of {1} sold": "{1} билеттің {0}-і сатылды",
+  "{0} will lose administrator access to this event.":
+    "{0} пайдаланушысы осы іс-шараның әкімші рұқсатынан айырылады.",
+  "Become an organizer": "Ұйымдастырушы болу",
+  "Browse events": "Іс-шараларды қарау",
+  "Browse public events": "Жария іс-шараларды қарау",
+  "No image available": "Сурет жоқ",
+  "This is a demo. All transactions are simulated.":
+    "Бұл демо нұсқа. Барлық транзакциялар имитацияланады.",
+  "Theme ({0})": "Тақырып ({0})",
+  System: "Жүйелік",
+  Light: "Ашық",
+  Dark: "Қараңғы",
+  "Choose admission, ticket quantities and prices.":
+    "Кіру түрін, билет санын және бағасын таңдаңыз.",
+  "Couldn’t load administrator usernames.":
+    "Әкімшілердің пайдаланушы аттарын жүктеу мүмкін болмады.",
+  "Create a draft and set up ticket sales when you’re ready.":
+    "Нобай жасап, дайын болғанда билет сатылымын баптаңыз.",
+  "Create a draft with your BiletFlow account. Add a venue and tickets when you’re ready, then publish from your organizer dashboard.":
+    "BiletFlow тіркелгіңізде нобай жасаңыз. Өткізу орны мен билеттерді қосып, іс-шараны ұйымдастырушы панелінен жариялаңыз.",
+  "Email verification pending": "Электрондық пошта әлі расталмаған",
+  "Find upcoming events, get tickets, or start organizing your own.":
+    "Алдағы іс-шараларды тауып, билет алыңыз немесе өз іс-шараңызды ұйымдастырыңыз.",
+  "Find your next event": "Келесі іс-шараңызды табыңыз",
+  "Helpful links": "Пайдалы сілтемелер",
+  "Invite event administrators and track ticket sales.":
+    "Іс-шара әкімшілерін шақырып, билет сатылымын бақылаңыз.",
+  "Loading account…": "Тіркелгі жүктелуде…",
+  "Main navigation": "Негізгі навигация",
+  Organize: "Ұйымдастыру",
+  "Organize an event": "Іс-шара ұйымдастыру",
+  "Planning an event?": "Іс-шара жоспарлап жүрсіз бе?",
+  "Run your event": "Іс-шараңызды басқарыңыз",
+  "Save a draft": "Нобайды сақтау",
+  "Set up tickets": "Билеттерді баптаңыз",
+  "Sign in to create an event": "Іс-шара жасау үшін кіріңіз",
+  "Skip to main content": "Негізгі мазмұнға өту",
+  "Start a draft whenever you’re ready to plan your first event.":
+    "Алғашқы іс-шараңызды жоспарлау үшін нобай жасаңыз.",
+  "Start with the event name and schedule.":
+    "Іс-шараның атауы мен кестесінен бастаңыз.",
+  "Update your password": "Құпиясөзді жаңарту",
+  "View all events": "Барлық іс-шаралар",
+  "Welcome back, {0}": "Қайта қош келдіңіз, {0}",
 }
-

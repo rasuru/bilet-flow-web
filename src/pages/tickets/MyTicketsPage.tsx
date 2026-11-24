@@ -1,5 +1,6 @@
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon, ArrowUpRightIcon } from "lucide-react"
+import { ArrowUpRightIcon } from "lucide-react"
 import { Link } from "wouter"
 
 import { OrderIdentifiers } from "@/checkout/OrderIdentifiers"
@@ -21,12 +22,9 @@ export function MyTicketsPage({
   const activity = model.activity
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-      <Link href="/" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" />
-        {t("Home")}
-      </Link>
-      <h1 className="text-3xl font-bold tracking-tight">{t("My tickets")}</h1>
+    <SitePage width="content">
+      <BackLink href="/">{t("Home")}</BackLink>
+      <PageHeading>{t("My tickets")}</PageHeading>
 
       {model.loading && (
         <p role="status" className="flex items-center gap-2 text-sm">
@@ -60,6 +58,7 @@ export function MyTicketsPage({
                     >
                       <Link
                         href={event.href}
+                        state={{ eventReturn: "/my-tickets" }}
                         className="font-medium hover:underline"
                       >
                         {event.title}
@@ -124,6 +123,7 @@ export function MyTicketsPage({
                           </div>
                           <Link
                             href={order.href}
+                            state={{ orderFrom: "/my-tickets" }}
                             aria-label={t(
                               "{0} for {1}",
                               order.awaitingPayment
@@ -226,6 +226,6 @@ export function MyTicketsPage({
           </div>
         </div>
       )}
-    </main>
+    </SitePage>
   )
 }

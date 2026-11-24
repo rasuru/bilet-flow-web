@@ -77,10 +77,10 @@ async function loadEvents(eventIds: Iterable<string>) {
 }
 
 export const attendanceRepository = {
-  eventsQuery(sessionId: number | null, verifiedEmail: string | null) {
+  upcomingEventsQuery(sessionId: number | null, verifiedEmail: string | null) {
     const email = verifiedEmail?.trim().toLowerCase() || null
     return queryOptions({
-      queryKey: [...attendanceKey(sessionId), "events", email],
+      queryKey: [...attendanceKey(sessionId), "upcoming-events", email],
       queryFn:
         sessionId === null
           ? skipToken
@@ -89,7 +89,20 @@ export const attendanceRepository = {
                 sessionId,
                 !!email
               )
-              return loadEvents(attendingEventIds(tickets, orders, email))
+              const attending = attendingTickets(tickets, orders, email)
+              const events = await loadEvents(
+                new Set(attending.map(({ eventId }) => eventId))
+              )
+              const byEvent = new Map<string, string[]>()
+              for (const { eventId, id } of attending) {
+                const ids = byEvent.get(eventId)
+                if (ids) ids.push(id)
+                else byEvent.set(eventId, [id])
+              }
+              return events.map((event) => ({
+                event,
+                ticketIds: byEvent.get(event.id) ?? [],
+              }))
             },
     })
   },

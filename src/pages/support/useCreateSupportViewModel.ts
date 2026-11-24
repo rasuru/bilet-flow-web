@@ -21,6 +21,10 @@ export function useCreateSupportViewModel(sessionId: number) {
     orderId: params.get("orderId") || undefined,
     ticketId: params.get("ticketId") || undefined,
   }
+  const returnTo = contextLinks(context).at(-1) ?? {
+    href: "/support",
+    label: t("Support inbox"),
+  }
   const eventContext = !!(
     context.eventId ||
     context.orderId ||
@@ -65,6 +69,7 @@ export function useCreateSupportViewModel(sessionId: number) {
     onSuccess: (item) => navigate(supportPath(item.id)),
   })
   return {
+    returnTo,
     type,
     setType,
     category,
@@ -98,4 +103,3 @@ export function useCreateSupportViewModel(sessionId: number) {
     },
   }
 }
-
