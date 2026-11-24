@@ -22,6 +22,7 @@ import {
   useCampaignToken,
 } from "./useCampaignLinkViewModel"
 import { useEventTicketsViewModel } from "./useEventTicketsViewModel"
+import { ReportEvent } from "./ReportEvent"
 import { useEventDetailsViewModel } from "./useEventDetailsViewModel"
 
 export function EventDetailsPage({ eventId }: { eventId: string }) {
@@ -187,6 +188,7 @@ function EventDetails({
             </p>
           </section>
         )}
+        <ReportEvent key={eventId} eventId={eventId} />
       </article>
 
       <aside className="space-y-4">
@@ -359,3 +361,4 @@ function EventDetails({
     </div>
   )
 }
+
