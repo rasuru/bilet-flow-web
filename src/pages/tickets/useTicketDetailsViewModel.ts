@@ -28,11 +28,10 @@ export function useTicketDetailsViewModel(
     !detail.isError &&
     ticket?.status === "VALID" &&
     event?.status !== "CANCELLED"
-  const qr = useQuery(
-    ticketRepository.qrQuery(
-      sessionId,
-      mayAccessDocument && forAdmission ? ticketId : null
-    )
+  const admissionTicketId = mayAccessDocument && forAdmission ? ticketId : null
+  const qr = useQuery(ticketRepository.qrQuery(sessionId, admissionTicketId))
+  const admission = useQuery(
+    ticketRepository.admissionCodeQuery(sessionId, admissionTicketId)
   )
   const pdf = useMutation({
     mutationFn: () => ticketRepository.pdf(sessionId, ticketId),
@@ -69,6 +68,14 @@ export function useTicketDetailsViewModel(
       ? t("Assigned seat · details unavailable")
       : t("General admission")
 
+  const rawCode = admission.data?.manualCode
+  const manualCode =
+    admissionTicketId && !admission.isError && rawCode
+      ? `${rawCode.slice(0, 4)}-${rawCode.slice(4)}`
+      : null
+  const codeErrorStatus =
+    admission.error instanceof ApiError ? admission.error.status : 0
+
   return {
     ...state,
     status: "ready",
@@ -83,10 +90,16 @@ export function useTicketDetailsViewModel(
     venue: event?.venue,
     seating,
     attendee: record.ticket.attendeeEmail,
-    code:
-      "ticketCode" in record.ticket
-        ? record.ticket.ticketCode
-        : record.ticket.code,
+    manualCode,
+    legacyCode:
+      codeErrorStatus === 404
+        ? "ticketCode" in record.ticket
+          ? record.ticket.ticketCode
+          : record.ticket.code
+        : null,
+    manualCodeError:
+      admission.isError && ![403, 404, 409].includes(codeErrorStatus),
+    retryManualCode: () => void admission.refetch(),
     statusLabel: t(ticketStatusLabels[record.ticket.status]),
     eventCancelled: event?.status === "CANCELLED",
     mayAccessDocument,
@@ -104,4 +117,3 @@ export function useTicketDetailsViewModel(
     print: () => window.print(),
   } as const
 }
-

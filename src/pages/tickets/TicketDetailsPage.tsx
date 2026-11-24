@@ -136,26 +136,63 @@ export function TicketDetailsPage({
             ) : !model.forAdmission ? (
               <p>{t("This ticket is currently unavailable for admission.")}</p>
             ) : (
-              <div className="space-y-2 rounded-lg border p-4">
-                <h2 className="font-semibold">{t("Admission QR code")}</h2>
-                {model.qrImage ? (
-                  <>
-                    <AdmissionQr
-                      image={model.qrImage}
-                      onLoad={() => setLoadedQr(model.qrImage)}
-                    />
-                    <p className="font-mono break-all">{model.code}</p>
-                  </>
-                ) : model.qrError ? (
+              <div className="flex flex-wrap items-start gap-x-6 gap-y-4 rounded-lg border p-4">
+                <div className="min-w-0 space-y-2">
+                  <h2 className="font-semibold">{t("Admission QR code")}</h2>
+                  {model.qrImage ? (
+                    <>
+                      <AdmissionQr
+                        image={model.qrImage}
+                        onLoad={() => setLoadedQr(model.qrImage)}
+                      />
+                      {model.legacyCode && (
+                        <p className="max-w-56 font-mono break-all">
+                          {model.legacyCode}
+                        </p>
+                      )}
+                    </>
+                  ) : model.qrError ? (
+                    <div className="space-y-2 print:hidden">
+                      <FieldError>{t("Couldn’t load the QR code.")}</FieldError>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={model.retryQr}
+                      >
+                        {t("Retry QR code")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <p role="status">{t("Loading QR code…")}</p>
+                  )}
+                </div>
+                {model.manualCode ? (
+                  <div className="max-w-64 space-y-2">
+                    <h2 className="font-semibold">{t("Check-in code")}</h2>
+                    <code
+                      dir="ltr"
+                      className="block font-mono text-2xl font-semibold tracking-wider whitespace-nowrap"
+                    >
+                      {model.manualCode}
+                    </code>
+                    <p className="text-sm text-muted-foreground print:text-black">
+                      {t("If the QR code won’t scan, read this code to staff.")}
+                    </p>
+                  </div>
+                ) : model.manualCodeError ? (
                   <div className="space-y-2 print:hidden">
-                    <FieldError>{t("Couldn’t load the QR code.")}</FieldError>
-                    <Button variant="outline" size="sm" onClick={model.retryQr}>
-                      {t("Retry QR code")}
+                    <FieldError>
+                      {t("Couldn’t load the check-in code.")}
+                    </FieldError>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={model.retryManualCode}
+                    >
+                      {t("Try again")}
                     </Button>
                   </div>
-                ) : (
-                  <p role="status">{t("Loading QR code…")}</p>
-                )}
+                ) : null}
               </div>
             )}
 

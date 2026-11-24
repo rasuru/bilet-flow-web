@@ -3,7 +3,12 @@ import { queryOptions, skipToken } from "@tanstack/react-query"
 import { listMyCheckouts } from "@/api/checkouts"
 import { ApiError } from "@/api/client"
 import { getVenueLayout } from "@/api/events"
-import { getTicketPdf, getTicketQr, listMyTickets } from "@/api/tickets"
+import {
+  getTicketAdmissionCode,
+  getTicketPdf,
+  getTicketQr,
+  listMyTickets,
+} from "@/api/tickets"
 import { sessionRepository } from "@/auth/sessionRepository"
 import { publicEventRepository } from "@/events/publicEventRepository"
 
@@ -64,6 +69,21 @@ export const ticketRepository = {
           : () =>
               sessionRepository.authenticatedRequest(sessionId, (token) =>
                 getTicketQr(token, ticketId)
+              ),
+      retry: false,
+      gcTime: 0,
+    })
+  },
+
+  admissionCodeQuery(sessionId: number, ticketId: string | null) {
+    return queryOptions({
+      queryKey: ["ticket-admission-code", sessionId, ticketId],
+      queryFn:
+        ticketId === null
+          ? skipToken
+          : () =>
+              sessionRepository.authenticatedRequest(sessionId, (token) =>
+                getTicketAdmissionCode(token, ticketId)
               ),
       retry: false,
       gcTime: 0,
