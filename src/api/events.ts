@@ -69,13 +69,17 @@ export type ManagedEvent = PublicEvent & {
 export type VenueLayout = {
   layoutId: string
   name: string
+  width?: number
+  height?: number
+  focus?: { label: string; x: number; y: number; width: number; height: number } | null
   seats: {
     seatId: string
     section: string
     row: string
     seatNumber: string
-    accessible: boolean
     priceCategory: string | null
+    x?: number | null
+    y?: number | null
   }[]
 }
 
@@ -298,3 +302,4 @@ export function reinstateEvent(token: string, eventId: string) {
     method: "POST",
   })
 }
+

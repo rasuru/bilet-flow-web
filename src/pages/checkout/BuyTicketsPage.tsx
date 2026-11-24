@@ -86,7 +86,9 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
             )}
           {model.tickets.length > 0 && (
             <TicketOrderForm
-              key={token}
+              key={`${eventId}:${token ?? ""}`}
+              layout={model.layout}
+              seatAvailability={model.seatAvailability}
               eventId={eventId}
               campaignToken={token}
               tickets={model.tickets}
@@ -99,3 +101,4 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
     </SitePage>
   )
 }
+

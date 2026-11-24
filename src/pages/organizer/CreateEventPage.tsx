@@ -188,6 +188,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         seatingMode={seatingMode}
                         changeSeatingMode={vm.changeSeatingMode}
                         layouts={layouts}
+                        layoutPreviews={vm.layoutPreviews}
                         layoutsOffline={layoutsOffline}
                         loadingLayouts={loadingLayouts}
                         layoutError={layoutError}

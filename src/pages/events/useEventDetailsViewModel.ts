@@ -67,7 +67,7 @@ export function useEventDetailsViewModel(eventId: string) {
     ({ status }) => status !== "HIDDEN"
   )
   const loadAvailability =
-    !!event?.venue && !salesMessage && !!ticketTypes?.length
+    !!event?.venue && showTickets && (!!event.venue.venueLayoutId || (!salesMessage && !!ticketTypes?.length))
   const availability = useQuery(
     publicEventRepository.availabilityQuery(
       loadAvailability ? eventId : null,
@@ -120,6 +120,8 @@ export function useEventDetailsViewModel(eventId: string) {
           : t("General admission"),
     },
     salesMessage,
+    layout: layout ?? null,
+    seatAvailability: inventory?.seatAvailability ?? [],
     showTickets,
     loadingTickets: showTickets && ticketQuery.isPending,
     ticketError: showTickets && ticketQuery.isError,
@@ -138,11 +140,13 @@ export function useEventDetailsViewModel(eventId: string) {
       const remaining = assigned ? seats?.length : byTicketType.get(ticket.id)
       const active =
         !salesMessage &&
+        !ticketQuery.isError &&
         ticket.status === "ACTIVE" &&
         Date.parse(ticket.salesStartAt) <= now &&
         Date.parse(ticket.salesEndAt) > now
       return {
         id: ticket.id,
+        priceCategory: ticket.priceCategory,
         name: ticket.name,
         description: ticket.description,
         price:
@@ -161,11 +165,10 @@ export function useEventDetailsViewModel(eventId: string) {
           ? (seats ?? []).map((seat) => ({
               id: seat.seatId,
               label: t(
-                "{0} · Row {1} · Seat {2}{3}",
+                "{0} · Row {1} · Seat {2}",
                 seat.section,
                 seat.row,
-                seat.seatNumber,
-                seat.accessible ? " · " + t("Accessible") : ""
+                seat.seatNumber
               ),
             }))
           : null,

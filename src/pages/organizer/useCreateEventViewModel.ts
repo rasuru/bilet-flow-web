@@ -1,3 +1,4 @@
+import { buildLayoutPreview } from "@/events/seatMapPresentation"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRef, useState } from "react"
 
@@ -409,6 +410,7 @@ export function useCreateEventViewModel(sessionId: number) {
     tickets,
     hasPaidTickets: tickets.some(ticket => Number(ticket.price) > 0),
     layouts,
+    layoutPreviews: layouts.map(buildLayoutPreview),
     layoutsOffline,
     loadingLayouts,
     layoutError: t(layoutError),
@@ -437,3 +439,4 @@ export function useCreateEventViewModel(sessionId: number) {
       setGaTickets((previous) => previous.filter((ticket) => ticket.id !== id)),
   }
 }
+
