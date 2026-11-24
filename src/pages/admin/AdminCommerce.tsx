@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { Download } from "lucide-react"
 import { Link } from "wouter"
 
@@ -67,7 +68,7 @@ export function AdminOrders({
       <Filters onApply={filters.apply} onReset={filters.reset}>
         <FilterInput
           id="order-event"
-          label="Event ID"
+          label={t("Event ID")}
           pattern={uuidPattern}
           value={draft.eventId ?? ""}
           onChange={(e) =>
@@ -76,7 +77,7 @@ export function AdminOrders({
         />
         <FilterSelect
           id="order-status"
-          title="Order status"
+          title={t("Order status")}
           values={orderStatuses}
           value={draft.status}
           onChange={(value) => change("status", value)}
@@ -84,7 +85,7 @@ export function AdminOrders({
         {promotedOnly ? (
           <FilterInput
             id="promotion-id"
-            label="Promotion ID"
+            label={t("Promotion ID")}
             pattern={uuidPattern}
             value={draft.promotionId ?? ""}
             onChange={(e) =>
@@ -95,7 +96,7 @@ export function AdminOrders({
           <>
             <FilterInput
               id="order-id"
-              label="Order ID"
+              label={t("Order ID")}
               pattern={uuidPattern}
               value={draft.orderId ?? ""}
               onChange={(e) =>
@@ -104,7 +105,7 @@ export function AdminOrders({
             />
             <FilterInput
               id="order-owner"
-              label="Buyer ID"
+              label={t("Buyer ID")}
               type="number"
               min={1}
               step={1}
@@ -123,13 +124,13 @@ export function AdminOrders({
         )}
       </Filters>
       <AdminTable
-        caption={promotedOnly ? "Promotion activity" : "Orders"}
+        caption={promotedOnly ? t("Promotion activity") : t("Orders")}
         columns={[
-          "Order ID",
-          "Status",
-          promotedOnly ? "Promotion ID" : "Event ID",
-          promotedOnly ? "Discount" : "Buyer",
-          "Total",
+          t("Order ID"),
+          t("Status"),
+          promotedOnly ? t("Promotion ID") : t("Event ID"),
+          promotedOnly ? t("Discount") : t("Buyer"),
+          t("Total"),
           "",
         ]}
         items={query.data?.items ?? []}
@@ -137,8 +138,8 @@ export function AdminOrders({
         state={query}
         empty={
           promotedOnly
-            ? "No attributed orders match these filters."
-            : "No orders match these filters."
+            ? t("No attributed orders match these filters.")
+            : t("No orders match these filters.")
         }
         pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
         cells={(item) => [
@@ -153,31 +154,33 @@ export function AdminOrders({
           <span className="whitespace-nowrap tabular-nums">
             {formatAmount(item.totalAmount, item.totalCurrency)}
           </span>,
-          <RecordButton onClick={() => select(item)}>View order</RecordButton>,
+          <RecordButton onClick={() => select(item)}>
+            {t("View order")}
+          </RecordButton>,
         ]}
       />
       {selected && (
-        <AdminDialog title="Order details" onClose={() => select(null)}>
+        <AdminDialog title={t("Order details")} onClose={() => select(null)}>
           <Details
             fields={[
-              ["Order ID", <RecordId value={selected.id} />],
-              ["Status", <StatusBadge value={selected.status} />],
-              ["Event ID", <RecordId value={selected.eventId} />],
-              ["Buyer ID", selected.ownerId],
+              [t("Order ID"), <RecordId value={selected.id} />],
+              [t("Status"), <StatusBadge value={selected.status} />],
+              [t("Event ID"), <RecordId value={selected.eventId} />],
+              [t("Buyer ID"), selected.ownerId],
               [
-                "Total",
+                t("Total"),
                 formatAmount(selected.totalAmount, selected.totalCurrency),
               ],
               [
-                "Discount",
+                t("Discount"),
                 formatAmount(
                   selected.discountAmount,
                   selected.discountCurrency
                 ),
               ],
-              ["Promotion ID", <RecordId value={selected.promotionId} />],
-              ["Payment ID", <RecordId value={selected.paymentId} />],
-              ["Refund ID", <RecordId value={selected.refundId} />],
+              [t("Promotion ID"), <RecordId value={selected.promotionId} />],
+              [t("Payment ID"), <RecordId value={selected.paymentId} />],
+              [t("Refund ID"), <RecordId value={selected.refundId} />],
             ]}
           />
           <Link
@@ -187,7 +190,7 @@ export function AdminOrders({
               className: "justify-self-start",
             })}
           >
-            View event
+            {t("View event")}
           </Link>
         </AdminDialog>
       )}
@@ -213,21 +216,21 @@ export function AdminPayments({
       <Filters onApply={filters.apply} onReset={filters.reset}>
         <FilterSelect
           id="payment-status"
-          title="Payment status"
+          title={t("Payment status")}
           values={paymentStatuses}
           value={draft.status}
           onChange={(value) => change("status", value)}
         />
         <FilterSelect
           id="payment-purpose"
-          title="Purpose"
+          title={t("Purpose")}
           values={paymentPurposes}
           value={draft.purpose}
           onChange={(value) => change("purpose", value)}
         />
         <FilterInput
           id="payment-event"
-          label="Event ID"
+          label={t("Event ID")}
           pattern={uuidPattern}
           value={draft.eventId ?? ""}
           onChange={(e) =>
@@ -236,7 +239,7 @@ export function AdminPayments({
         />
         <FilterInput
           id="payment-payer"
-          label="Payer ID"
+          label={t("Payer ID")}
           type="number"
           min={1}
           step={1}
@@ -253,19 +256,19 @@ export function AdminPayments({
         />
       </Filters>
       <AdminTable
-        caption="Payments"
+        caption={t("Payments")}
         columns={[
-          "Payment",
-          "Status",
-          "Amount",
-          "Payer",
-          "Paid or failed at",
+          t("Payment"),
+          t("Status"),
+          t("Amount"),
+          t("Payer"),
+          t("Paid or failed at"),
           "",
         ]}
         items={query.data?.items ?? []}
         rowKey={(item) => item.id}
         state={query}
-        empty="No payments match these filters."
+        empty={t("No payments match these filters.")}
         pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
         cells={(item) => [
           <div className="min-w-36">
@@ -275,7 +278,7 @@ export function AdminPayments({
           <div className="space-y-1">
             <StatusBadge value={item.status} />
             {item.reviewRequired && (
-              <p className="text-xs text-destructive">Review required</p>
+              <p className="text-xs text-destructive">{t("Review required")}</p>
             )}
           </div>,
           <span className="whitespace-nowrap tabular-nums">
@@ -286,31 +289,37 @@ export function AdminPayments({
             {formatDate(item.failedAt ?? item.paidAt)}
           </span>,
           <RecordButton onClick={() => select(item)}>
-            View payment
+            {t("View payment")}
           </RecordButton>,
         ]}
       />
       {selected && (
-        <AdminDialog title="Payment details" onClose={() => select(null)}>
+        <AdminDialog title={t("Payment details")} onClose={() => select(null)}>
           <Details
             fields={[
-              ["Payment ID", <RecordId value={selected.id} />],
-              ["Status", <StatusBadge value={selected.status} />],
-              ["Purpose", label(selected.purpose)],
-              ["Environment", selected.sandbox ? "Sandbox" : "Production"],
-              ["Amount", formatAmount(selected.amountKzt)],
-              ["Estimated fee", formatAmount(selected.estimatedFeeKzt)],
-              ["Event ID", <RecordId value={selected.eventId} />],
-              ["Order ID", <RecordId value={selected.orderId} />],
-              ["Payer ID", selected.payerId],
-              ["Organizer ID", selected.organizerId],
-              ["Paid", formatDate(selected.paidAt)],
-              ["Failed", formatDate(selected.failedAt)],
+              [t("Payment ID"), <RecordId value={selected.id} />],
+              [t("Status"), <StatusBadge value={selected.status} />],
+              [t("Purpose"), label(selected.purpose)],
               [
-                "Operation state",
+                t("Environment"),
+                selected.sandbox ? t("Sandbox") : t("Production"),
+              ],
+              [t("Amount"), formatAmount(selected.amountKzt)],
+              [t("Estimated fee"), formatAmount(selected.estimatedFeeKzt)],
+              [t("Event ID"), <RecordId value={selected.eventId} />],
+              [t("Order ID"), <RecordId value={selected.orderId} />],
+              [t("Payer ID"), selected.payerId],
+              [t("Organizer ID"), selected.organizerId],
+              [t("Paid"), formatDate(selected.paidAt)],
+              [t("Failed"), formatDate(selected.failedAt)],
+              [
+                t("Operation state"),
                 selected.operationState ? label(selected.operationState) : null,
               ],
-              ["Review required", selected.reviewRequired ? "Yes" : "No"],
+              [
+                t("Review required"),
+                selected.reviewRequired ? t("Yes") : t("No"),
+              ],
             ]}
           />
           {selected.failureReason && (
@@ -326,7 +335,7 @@ export function AdminPayments({
                 className: "justify-self-start",
               })}
             >
-              View order
+              {t("View order")}
             </Link>
           )}
         </AdminDialog>
@@ -344,19 +353,25 @@ export function AdminActivations({ sessionId }: { sessionId: number }) {
       <Filters onApply={filters.apply} onReset={filters.reset}>
         <FilterSelect
           id="activation-status"
-          title="Activation status"
+          title={t("Activation status")}
           values={activationStatuses}
           value={filters.draft.status}
           onChange={(value) => filters.change("status", value)}
         />
       </Filters>
       <AdminTable
-        caption="Paid-sales activations"
-        columns={["Event ID", "Status", "Organizer", "Requested", ""]}
+        caption={t("Paid-sales activations")}
+        columns={[
+          t("Event ID"),
+          t("Status"),
+          t("Organizer"),
+          t("Requested"),
+          "",
+        ]}
         items={query.data?.items ?? []}
         rowKey={(item) => item.eventId}
         state={query}
-        empty="No activations match this filter."
+        empty={t("No activations match this filter.")}
         pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
         cells={(item) => [
           <RecordId value={item.eventId} />,
@@ -366,7 +381,7 @@ export function AdminActivations({ sessionId }: { sessionId: number }) {
             {formatDate(item.createdAt)}
           </span>,
           <RecordButton onClick={() => select(item)}>
-            View activation
+            {t("View activation")}
           </RecordButton>,
         ]}
       />
@@ -393,22 +408,22 @@ function ActivationDialog({
   const model = useSuspendActivationViewModel(sessionId, record, onClose)
   return (
     <AdminDialog
-      title="Paid-sales activation"
+      title={t("Paid-sales activation")}
       onClose={onClose}
       pending={model.pending}
     >
       <Details
         fields={[
-          ["Event ID", <RecordId value={record.eventId} />],
-          ["Status", <StatusBadge value={record.status} />],
-          ["Payment ID", <RecordId value={record.paymentId} />],
-          ["Organizer ID", record.organizerId],
-          ["Requested", formatDate(record.createdAt)],
-          ["Suspended", formatDate(record.suspendedAt)],
-          ["Terms version", record.termsVersion],
+          [t("Event ID"), <RecordId value={record.eventId} />],
+          [t("Status"), <StatusBadge value={record.status} />],
+          [t("Payment ID"), <RecordId value={record.paymentId} />],
+          [t("Organizer ID"), record.organizerId],
+          [t("Requested"), formatDate(record.createdAt)],
+          [t("Suspended"), formatDate(record.suspendedAt)],
+          [t("Terms version"), record.termsVersion],
           [
-            "Verification simulated",
-            record.verificationSimulated ? "Yes" : "No",
+            t("Verification simulated"),
+            record.verificationSimulated ? t("Yes") : t("No"),
           ],
         ]}
       />
@@ -421,7 +436,7 @@ function ActivationDialog({
         <form className="grid gap-3 border-t pt-4" onSubmit={model.submit}>
           <Field>
             <FieldLabel htmlFor="activation-reason">
-              Suspension reason
+              {t("Suspension reason")}
             </FieldLabel>
             <Textarea
               id="activation-reason"
@@ -432,7 +447,9 @@ function ActivationDialog({
               disabled={model.pending}
             />
             <FieldDescription>
-              This pauses paid sales for the event. Existing tickets stay valid.
+              {t(
+                "This pauses paid sales for the event. Existing tickets stay valid."
+              )}
             </FieldDescription>
           </Field>
           <ActionFeedback error={model.error} />
@@ -442,7 +459,7 @@ function ActivationDialog({
             className="justify-self-end"
             disabled={model.pending}
           >
-            {model.pending ? "Suspending…" : "Suspend paid sales"}
+            {model.pending ? t("Suspending…") : t("Suspend paid sales")}
           </Button>
         </form>
       )}
@@ -457,10 +474,10 @@ function ActivationFeeCard({ sessionId }: { sessionId: number }) {
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2>Activation fee</h2>
+          <h2>{t("Activation fee")}</h2>
         </CardTitle>
         <CardDescription>
-          Applies to new paid-sales activation requests.
+          {t("Applies to new paid-sales activation requests.")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -470,7 +487,8 @@ function ActivationFeeCard({ sessionId }: { sessionId: number }) {
               <div className="flex flex-wrap items-end gap-3">
                 <Field className="w-full sm:max-w-56">
                   <FieldLabel htmlFor="fee-amount">
-                    Amount ({fee.currency})
+                    {t("Amount (")}
+                    {fee.currency})
                   </FieldLabel>
                   <Input
                     id="fee-amount"
@@ -483,13 +501,13 @@ function ActivationFeeCard({ sessionId }: { sessionId: number }) {
                   />
                 </Field>
                 <Button type="submit" disabled={!model.canSave}>
-                  {model.pending ? "Saving…" : "Save fee"}
+                  {model.pending ? t("Saving…") : t("Save fee")}
                 </Button>
               </div>
               {fee.updatedAt && (
                 <p className="text-xs text-muted-foreground">
-                  Updated {formatDate(fee.updatedAt)}
-                  {fee.updatedBy ? ` by user ${fee.updatedBy}` : ""}.
+                  {t("Updated")} {formatDate(fee.updatedAt)}
+                  {fee.updatedBy ? t(" by user {0}", fee.updatedBy) : ""}.
                 </p>
               )}
               <ActionFeedback error={model.error} success={model.success} />
@@ -507,17 +525,20 @@ export function AdminExports({ sessionId }: { sessionId: number }) {
     <Card className="max-w-xl">
       <CardHeader>
         <CardTitle>
-          <h2>Operations summary</h2>
+          <h2>{t("Operations summary")}</h2>
         </CardTitle>
         <CardDescription>
-          The CSV includes counts for events, orders, payments, refunds,
-          tickets, activations, event reports, and platform support cases.
+          {t(
+            "The CSV includes counts for events, orders, payments, refunds, tickets, activations, event reports, and platform support cases."
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="grid gap-4" onSubmit={model.submit}>
           <Field>
-            <FieldLabel htmlFor="export-event">Event ID (optional)</FieldLabel>
+            <FieldLabel htmlFor="export-event">
+              {t("Event ID (optional)")}
+            </FieldLabel>
             <Input
               id="export-event"
               name="eventId"
@@ -525,7 +546,7 @@ export function AdminExports({ sessionId }: { sessionId: number }) {
               disabled={model.pending}
             />
             <FieldDescription>
-              Leave blank to export platform-wide counts.
+              {t("Leave blank to export platform-wide counts.")}
             </FieldDescription>
           </Field>
           <ActionFeedback error={model.error} success={model.success} />
@@ -535,10 +556,12 @@ export function AdminExports({ sessionId }: { sessionId: number }) {
             disabled={model.pending}
           >
             <Download aria-hidden="true" />{" "}
-            {model.pending ? "Preparing CSV…" : "Download CSV"}
+            {model.pending ? t("Preparing CSV…") : t("Download CSV")}
           </Button>
         </form>
       </CardContent>
     </Card>
   )
 }
+
+

@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon, CalendarDaysIcon, MapPinIcon } from "lucide-react"
 import { Link } from "wouter"
 
@@ -28,20 +29,25 @@ export function EventDetailsPage({ eventId }: { eventId: string }) {
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
       <Link href="/events" className={buttonVariants({ variant: "ghost" })}>
         <ArrowLeftIcon aria-hidden="true" />
-        Discover events
+        {t("Discover events")}
       </Link>
 
-      <Link href={`/support/new?eventId=${encodeURIComponent(eventId)}`} className={buttonVariants({ variant: "outline" })}>Get event support</Link>
-      {model.status === "loading" && <Loading>Loading event…</Loading>}
+      <Link
+        href={`/support/new?eventId=${encodeURIComponent(eventId)}`}
+        className={buttonVariants({ variant: "outline" })}
+      >
+        {t("Get event support")}
+      </Link>
+      {model.status === "loading" && <Loading>{t("Loading event…")}</Loading>}
 
       {model.status === "missing" && (
         <Card>
           <CardHeader>
             <CardTitle>
-              <h1>Event unavailable</h1>
+              <h1>{t("Event unavailable")}</h1>
             </CardTitle>
             <CardDescription>
-              This event is no longer available or the link is incorrect.
+              {t("This event is no longer available or the link is incorrect.")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -51,12 +57,12 @@ export function EventDetailsPage({ eventId }: { eventId: string }) {
         <Card>
           <CardHeader>
             <CardTitle>
-              <h1>Couldn’t load event</h1>
+              <h1>{t("Couldn’t load event")}</h1>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Button variant="outline" onClick={model.retry}>
-              Try again
+              {t("Try again")}
             </Button>
           </CardContent>
         </Card>
@@ -132,13 +138,13 @@ function EventDetails({
                   className="mt-0.5 size-4 shrink-0"
                 />
                 <div>
-                  <dt className="font-medium">Date and time</dt>
+                  <dt className="font-medium">{t("Date and time")}</dt>
                   <dd className="text-muted-foreground">
                     <time dateTime={event.start.instant}>
                       {event.start.label}
                     </time>
                     <span className="block">
-                      Ends{" "}
+                      {t("Ends")}{" "}
                       <time dateTime={event.end.instant}>
                         {event.end.label}
                       </time>
@@ -152,7 +158,7 @@ function EventDetails({
                   className="mt-0.5 size-4 shrink-0"
                 />
                 <div>
-                  <dt className="font-medium">Venue</dt>
+                  <dt className="font-medium">{t("Venue")}</dt>
                   <dd className="text-muted-foreground">
                     {event.venue ? (
                       <>
@@ -160,7 +166,7 @@ function EventDetails({
                         {event.venue.address}
                       </>
                     ) : (
-                      "Venue details pending"
+                      t("Venue details pending")
                     )}
                   </dd>
                 </div>
@@ -171,7 +177,7 @@ function EventDetails({
 
         {event.description && (
           <section className="space-y-2">
-            <h2 className="text-lg font-semibold">About the event</h2>
+            <h2 className="text-lg font-semibold">{t("About the event")}</h2>
             <p className="leading-relaxed break-words whitespace-pre-wrap">
               {event.description}
             </p>
@@ -185,12 +191,15 @@ function EventDetails({
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2 id="your-event-tickets">Your tickets</h2>
+                  <h2 id="your-event-tickets">{t("Your tickets")}</h2>
                 </CardTitle>
                 <CardDescription>
                   {yourTickets.length === 1
-                    ? "You have a ticket for this event."
-                    : `You have ${yourTickets.length} tickets for this event.`}
+                    ? t("You have a ticket for this event.")
+                    : t(
+                        "You have {0} tickets for this event.",
+                        yourTickets.length
+                      )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -208,13 +217,13 @@ function EventDetails({
                       </div>
                       <Link
                         href={ticket.href}
-                        aria-label={`Open ticket for ${ticket.attendee}`}
+                        aria-label={t("Open ticket for {0}", ticket.attendee)}
                         className={buttonVariants({
                           variant: "outline",
                           size: "sm",
                         })}
                       >
-                        Open ticket
+                        {t("Open ticket")}
                       </Link>
                     </li>
                   ))}
@@ -227,7 +236,7 @@ function EventDetails({
           <Card>
             <CardHeader>
               <CardTitle>
-                <h2 id="event-tickets">Tickets</h2>
+                <h2 id="event-tickets">{t("Tickets")}</h2>
               </CardTitle>
               {event.venue && model.showTickets && (
                 <CardDescription>{event.seatingLabel}</CardDescription>
@@ -235,12 +244,14 @@ function EventDetails({
             </CardHeader>
             <CardContent className="space-y-4">
               {promo.status === "loading" && (
-                <Loading>Checking promo link…</Loading>
+                <Loading>{t("Checking promo link…")}</Loading>
               )}
               {promo.status === "ready" && (
                 <p role="status" className="text-sm">
-                  Promo code <strong>{promo.code}</strong> will be checked when
-                  you choose tickets.
+                  {t(
+                    "Promo code {0} will be checked when you choose tickets.",
+                    promo.code
+                  )}
                 </p>
               )}
               {promo.status === "error" && (
@@ -248,7 +259,7 @@ function EventDetails({
                   <FieldError>{promo.message}</FieldError>
                   {promo.retry && (
                     <Button variant="outline" size="sm" onClick={promo.retry}>
-                      Try promo link again
+                      {t("Try promo link again")}
                     </Button>
                   )}
                 </div>
@@ -256,16 +267,18 @@ function EventDetails({
               {model.salesMessage && (
                 <p className="font-medium">{model.salesMessage}</p>
               )}
-              {model.loadingTickets && <Loading>Loading tickets…</Loading>}
+              {model.loadingTickets && (
+                <Loading>{t("Loading tickets…")}</Loading>
+              )}
               {model.ticketError && (
                 <div className="space-y-2">
-                  <p role="alert">Couldn’t load ticket types.</p>
+                  <p role="alert">{t("Couldn’t load ticket types.")}</p>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={model.retryTickets}
                   >
-                    Try again
+                    {t("Try again")}
                   </Button>
                 </div>
               )}
@@ -274,21 +287,21 @@ function EventDetails({
                 !model.ticketError &&
                 !model.tickets.length && (
                   <p className="text-muted-foreground">
-                    There are no tickets listed for this event.
+                    {t("There are no tickets listed for this event.")}
                   </p>
                 )}
               {model.loadingAvailability && (
-                <Loading>Checking availability…</Loading>
+                <Loading>{t("Checking availability…")}</Loading>
               )}
               {model.availabilityError && (
                 <div className="space-y-2">
-                  <p role="alert">Couldn’t check ticket availability.</p>
+                  <p role="alert">{t("Couldn’t check ticket availability.")}</p>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={model.retryAvailability}
                   >
-                    Try again
+                    {t("Try again")}
                   </Button>
                 </div>
               )}
@@ -331,7 +344,7 @@ function EventDetails({
                       className: "w-full",
                     })}
                   >
-                    Get tickets
+                    {t("Get tickets")}
                   </Link>
                 )}
             </CardContent>

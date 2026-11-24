@@ -105,6 +105,7 @@ export type ApiErrorBody = {
   params?: unknown
   fieldErrors: ApiFieldError[]
   unavailableSeatIds?: string[]
+  reason?: string
   ticketStatus?: string
 }
 
@@ -158,6 +159,7 @@ function parseProblem(value: unknown): ApiErrorBody | undefined {
           (id): id is string => typeof id === "string"
         )
       : undefined,
+    reason: readString(value.reason),
     ticketStatus: readString(value.ticketStatus),
   }
 }
@@ -189,3 +191,5 @@ export class ApiError extends Error {
     return this.body?.fieldErrors ?? []
   }
 }
+
+

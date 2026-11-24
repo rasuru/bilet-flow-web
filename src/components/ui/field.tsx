@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { t, uiText, useLanguage } from "@/i18n/locale"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
@@ -179,32 +179,27 @@ function FieldError({
 }: React.ComponentProps<"div"> & {
   errors?: Array<{ message?: string } | undefined>
 }) {
-  const content = useMemo(() => {
-    if (children) {
-      return children
-    }
-
-    if (!errors?.length) {
-      return null
-    }
-
-    const uniqueErrors = [
-      ...new Map(errors.map((error) => [error?.message, error])).values(),
-    ]
-
-    if (uniqueErrors?.length == 1) {
-      return uniqueErrors[0]?.message
-    }
-
-    return (
-      <ul className="ml-4 flex list-disc flex-col gap-1">
-        {uniqueErrors.map(
-          (error, index) =>
-            error?.message && <li key={index}>{error.message}</li>
-        )}
-      </ul>
+  useLanguage()
+  const messages = [
+    ...new Set(
+      errors?.flatMap((error) => (error?.message ? [error.message] : []))
+    ),
+  ]
+  const content = children ? (
+    typeof children === "string" ? (
+      t(children)
+    ) : (
+      children
     )
-  }, [children, errors])
+  ) : messages.length > 1 ? (
+    <ul className="ml-4 flex list-disc flex-col gap-1">
+      {messages.map((message) => (
+        <li key={message}>{t(message)}</li>
+      ))}
+    </ul>
+  ) : (
+    uiText(messages[0])
+  )
 
   if (!content) {
     return null
@@ -234,3 +229,5 @@ export {
   FieldContent,
   FieldTitle,
 }
+
+

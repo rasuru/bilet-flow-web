@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowUpRight } from "lucide-react"
 import { Link } from "wouter"
 
@@ -58,7 +59,7 @@ export function AdminOverview({ sessionId }: { sessionId: number }) {
               href={queue.href}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              View queue <ArrowUpRight aria-hidden="true" />
+              {t("View queue")} <ArrowUpRight aria-hidden="true" />
             </Link>
           </CardFooter>
         </Card>
@@ -66,3 +67,5 @@ export function AdminOverview({ sessionId }: { sessionId: number }) {
     </div>
   )
 }
+
+

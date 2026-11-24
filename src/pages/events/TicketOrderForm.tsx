@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useId } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -52,7 +53,7 @@ export function TicketOrderForm({
       <Card>
         <CardHeader>
           <CardTitle>
-            <h2>Choose tickets</h2>
+            <h2>{t("Choose tickets")}</h2>
           </CardTitle>
           <CardDescription>{seatingLabel}</CardDescription>
         </CardHeader>
@@ -80,15 +81,17 @@ export function TicketOrderForm({
                         </p>
                       )}
                       <p className="text-muted-foreground">
-                        Limit {ticket.maxPerOrder} per order
+                        {t("Limit {0} per order", ticket.maxPerOrder)}
                       </p>
                       {ticket.availability && <p>{ticket.availability}</p>}
                     </div>
                     {(ticket.orderLimit > 0 || attendees.length > 0) && (
                       <Field>
                         <FieldLabel htmlFor={quantityId}>
-                          Quantity{" "}
-                          <span className="sr-only">for {ticket.name}</span>
+                          {t("Quantity")}{" "}
+                          <span className="sr-only">
+                            {t("for")} {ticket.name}
+                          </span>
                         </FieldLabel>
                         <NativeSelect
                           id={quantityId}
@@ -105,7 +108,7 @@ export function TicketOrderForm({
                               value={attendees.length}
                               disabled
                             >
-                              {attendees.length} (unavailable)
+                              {attendees.length} {t("(unavailable)")}
                             </NativeSelectOption>
                           )}
                           {Array.from(
@@ -131,11 +134,13 @@ export function TicketOrderForm({
                           className="space-y-2 rounded-lg border p-3"
                           key={id}
                         >
-                          <p className="font-medium">Ticket {index + 1}</p>
+                          <p className="font-medium">
+                            {t("Ticket {0}", index + 1)}
+                          </p>
                           {seats && (
                             <Field>
                               <FieldLabel htmlFor={`seat-${id}`}>
-                                Seat
+                                {t("Seat")}
                               </FieldLabel>
                               <NativeSelect
                                 id={`seat-${id}`}
@@ -147,7 +152,7 @@ export function TicketOrderForm({
                                 }
                               >
                                 <NativeSelectOption value="">
-                                  Choose a seat
+                                  {t("Choose a seat")}
                                 </NativeSelectOption>
                                 {attendee.seatId &&
                                   !seats.some(
@@ -157,7 +162,7 @@ export function TicketOrderForm({
                                       value={attendee.seatId}
                                       disabled
                                     >
-                                      Seat no longer available
+                                      {t("Seat no longer available")}
                                     </NativeSelectOption>
                                   )}
                                 {seats.map((seat) => (
@@ -174,7 +179,7 @@ export function TicketOrderForm({
                           {signedIn && (
                             <Field>
                               <FieldLabel htmlFor={`email-${id}`}>
-                                Attendee email
+                                {t("Attendee email")}
                               </FieldLabel>
                               <Input
                                 id={`email-${id}`}
@@ -203,13 +208,13 @@ export function TicketOrderForm({
       <Card>
         <CardHeader>
           <CardTitle>
-            <h2>Order summary</h2>
+            <h2>{t("Order summary")}</h2>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={promo.apply} className="space-y-2">
             <Field>
-              <FieldLabel htmlFor={promoInputId}>Promo code</FieldLabel>
+              <FieldLabel htmlFor={promoInputId}>{t("Promo code")}</FieldLabel>
               <div className="flex gap-2">
                 <Input
                   id={promoInputId}
@@ -237,28 +242,28 @@ export function TicketOrderForm({
                     model.retryingOrder
                   }
                 >
-                  Apply
+                  {t("Apply")}
                 </Button>
               </div>
             </Field>
             {promo.pending && (
               <p role="status" className="flex items-center gap-2 text-sm">
-                <Spinner aria-hidden="true" /> Checking promo…
+                <Spinner aria-hidden="true" /> {t("Checking promo…")}
               </p>
             )}
             {promo.appliedCode && (
               <p role="status" className="text-sm font-medium">
-                Code {promo.appliedCode} applied
+                {t("Code {0} applied", promo.appliedCode)}
               </p>
             )}
             {promo.awaitingSelection && (
               <p className="text-sm text-muted-foreground">
-                Choose tickets to check this code.
+                {t("Choose tickets to check this code.")}
               </p>
             )}
             {promo.error && (
               <FieldError id={`${promoInputId}-error`}>
-                {promo.error}
+                {t(promo.error)}
               </FieldError>
             )}
             <div className="flex flex-wrap gap-2 empty:hidden">
@@ -270,7 +275,7 @@ export function TicketOrderForm({
                   onClick={promo.retryLink}
                   disabled={model.isSubmitting || model.retryingOrder}
                 >
-                  Retry promo link
+                  {t("Retry promo link")}
                 </Button>
               )}
               {promo.canRemove && (
@@ -281,7 +286,7 @@ export function TicketOrderForm({
                   onClick={promo.remove}
                   disabled={model.isSubmitting || model.retryingOrder}
                 >
-                  Remove promo
+                  {t("Remove promo")}
                 </Button>
               )}
             </div>
@@ -304,17 +309,17 @@ export function TicketOrderForm({
               {promo.discount && (
                 <dl className="space-y-1 text-sm">
                   <div className="flex justify-between gap-2">
-                    <dt>Subtotal</dt>
+                    <dt>{t("Subtotal")}</dt>
                     <dd>{promo.discount.subtotal}</dd>
                   </div>
                   <div className="flex justify-between gap-2">
-                    <dt>Discount</dt>
+                    <dt>{t("Discount")}</dt>
                     <dd>−{promo.discount.amount}</dd>
                   </div>
                 </dl>
               )}
               <div className="flex justify-between font-semibold">
-                <span>Estimated total</span>
+                <span>{t("Estimated total")}</span>
                 <span>
                   {promo.chosen && !promo.appliedCode ? "—" : model.totalLabel}
                 </span>
@@ -322,23 +327,25 @@ export function TicketOrderForm({
               {model.maySubmit && (
                 <p className="text-sm text-muted-foreground">
                   {model.isFree
-                    ? "Free tickets are issued when you place the order."
-                    : "Paid orders continue to Halyk ePay after you reserve your tickets."}
+                    ? t("Free tickets are issued when you place the order.")
+                    : t(
+                        "Paid orders continue to Halyk ePay after you reserve your tickets."
+                      )}
                 </p>
               )}
               {model.formError && <FieldError>{model.formError}</FieldError>}
               {session.status === "restoring" && (
-                <p role="status">Checking your session…</p>
+                <p role="status">{t("Checking your session…")}</p>
               )}
               {session.status === "restoreFailed" && (
                 <div className="space-y-2">
-                  <FieldError>Couldn’t restore your session.</FieldError>
+                  <FieldError>{t("Couldn’t restore your session.")}</FieldError>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => void session.retry()}
                   >
-                    Try again
+                    {t("Try again")}
                   </Button>
                 </div>
               )}
@@ -350,14 +357,14 @@ export function TicketOrderForm({
                   disabled={model.isSubmitting || !model.maySubmit}
                 >
                   {model.isSubmitting
-                    ? "Placing order…"
+                    ? t("Placing order…")
                     : signedIn
                       ? model.retryingOrder
-                        ? "Retry order"
+                        ? t("Retry order")
                         : model.isFree
-                          ? "Get free tickets"
-                          : "Reserve tickets"
-                      : "Sign in to order"}
+                          ? t("Get free tickets")
+                          : t("Reserve tickets")
+                      : t("Sign in to order")}
                 </Button>
               )}
               <Button
@@ -366,23 +373,23 @@ export function TicketOrderForm({
                 disabled={model.isSubmitting || model.retryingOrder}
                 onClick={model.clearSelection}
               >
-                Clear selection
+                {t("Clear selection")}
               </Button>
             </div>
           ) : (
             <p className="text-muted-foreground">
-              Choose a quantity to see your order total.
+              {t("Choose a quantity to see your order total.")}
             </p>
           )}
           {showAuth && model.hasSelection && (
             <section
               className="space-y-3 border-t pt-4"
-              aria-label="Sign in to order"
+              aria-label={t("Sign in to order")}
             >
               <h3 className="font-semibold">
                 {model.authMode === "login"
-                  ? "Sign in to order"
-                  : "Create an account"}
+                  ? t("Sign in to order")
+                  : t("Create an account")}
               </h3>
               {model.authMode === "login" ? (
                 <LoginForm onRegister={() => model.setAuthMode("register")} />
@@ -396,3 +403,5 @@ export function TicketOrderForm({
     </div>
   )
 }
+
+

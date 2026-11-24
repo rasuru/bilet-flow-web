@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { ArrowLeft, ArrowRight, X } from "lucide-react"
 import type { ComponentProps, FormEventHandler, ReactNode } from "react"
@@ -32,7 +33,7 @@ export function QueryContent({
         className="flex min-h-32 items-center justify-center gap-2 text-sm text-muted-foreground"
         role="status"
       >
-        <Spinner aria-hidden="true" /> Loading…
+        <Spinner aria-hidden="true" /> {t("Loading…")}
       </div>
     )
   }
@@ -40,10 +41,10 @@ export function QueryContent({
     return (
       <div className="flex min-h-32 flex-col items-center justify-center gap-3 px-4 text-center">
         <p className="text-sm text-destructive" role="alert">
-          {state.error}
+          {t(state.error)}
         </p>
         <Button size="sm" variant="outline" onClick={state.retry}>
-          Try again
+          {t("Try again")}
         </Button>
       </div>
     )
@@ -90,7 +91,9 @@ export function AdminTable<T>({
                       className="px-4 py-3 text-xs font-medium whitespace-nowrap"
                       scope="col"
                     >
-                      {column || <span className="sr-only">Actions</span>}
+                      {column || (
+                        <span className="sr-only">{t("Actions")}</span>
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -116,17 +119,17 @@ export function AdminTable<T>({
           </div>
         ) : (
           <p className="px-4 py-12 text-center text-sm text-muted-foreground">
-            {empty}
+            {t(empty)}
           </p>
         )}
       </QueryContent>
       {pagination && (pagination.page > 0 || pagination.hasNext) && (
         <nav
-          aria-label={`${caption} pagination`}
+          aria-label={t("Pages for {0}", caption)}
           className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3"
         >
           <p className="text-xs text-muted-foreground">
-            Page {pagination.page + 1}
+            {t("Page")} {pagination.page + 1}
           </p>
           <div className="flex gap-2">
             <Button
@@ -135,7 +138,7 @@ export function AdminTable<T>({
               disabled={pagination.page === 0 || state.busy}
               onClick={pagination.previous}
             >
-              <ArrowLeft aria-hidden="true" /> Previous
+              <ArrowLeft aria-hidden="true" /> {t("Previous")}
             </Button>
             <Button
               variant="outline"
@@ -143,7 +146,7 @@ export function AdminTable<T>({
               disabled={!pagination.hasNext || state.busy}
               onClick={pagination.next}
             >
-              Next <ArrowRight aria-hidden="true" />
+              {t("Next")} <ArrowRight aria-hidden="true" />
             </Button>
           </div>
         </nav>
@@ -220,9 +223,9 @@ export function Filters({
       <form onSubmit={onApply} className="flex flex-wrap items-end gap-3">
         {children}
         <div className="flex shrink-0 gap-2">
-          <Button type="submit">Apply filters</Button>
+          <Button type="submit">{t("Apply filters")}</Button>
           <Button type="button" variant="ghost" onClick={onReset}>
-            Reset
+            {t("Reset")}
           </Button>
         </div>
       </form>
@@ -250,7 +253,7 @@ export function FilterSelect<T extends string>({
   values,
   value,
   onChange,
-  allLabel = "All",
+  allLabel = t("All"),
 }: {
   id: string
   title: string
@@ -320,7 +323,7 @@ export function AdminDialog({
                   variant="ghost"
                   size="icon-sm"
                   disabled={pending}
-                  aria-label="Close dialog"
+                  aria-label={t("Close dialog")}
                 />
               }
             >
@@ -358,14 +361,16 @@ export function ActionFeedback({
     <>
       {error && (
         <p role="alert" className="text-sm text-destructive">
-          {error}
+          {t(error)}
         </p>
       )}
       {success && (
         <p role="status" className="text-sm text-muted-foreground">
-          {success}
+          {t(success)}
         </p>
       )}
     </>
   )
 }
+
+

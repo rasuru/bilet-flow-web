@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { Link } from "wouter"
 
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -27,54 +28,61 @@ export function OrderPage({
         }
         className={buttonVariants({ variant: "ghost" })}
       >
-        {model.status === "ready" ? "Back to event" : "Discover events"}
+        {model.status === "ready" ? t("Back to event") : t("Discover events")}
       </Link>
 
-      <Link href={`/support/new?orderId=${encodeURIComponent(orderId)}`} className={buttonVariants({ variant: "outline" })}>Get order support</Link>
+      <Link
+        href={`/support/new?orderId=${encodeURIComponent(orderId)}`}
+        className={buttonVariants({ variant: "outline" })}
+      >
+        {t("Get order support")}
+      </Link>
       <Card>
         <CardHeader>
           <CardTitle>
-            <h1>Your order</h1>
+            <h1>{t("Your order")}</h1>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {model.status === "loading" && (
             <p role="status" className="flex items-center gap-2">
-              <Spinner aria-hidden="true" /> Loading order…
+              <Spinner aria-hidden="true" /> {t("Loading order…")}
             </p>
           )}
           {model.status === "error" && (
             <>
               <FieldError>{model.error}</FieldError>
               <Button variant="outline" onClick={model.refresh}>
-                Try again
+                {t("Try again")}
               </Button>
             </>
           )}
           {model.status === "ready" && (
             <>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-                <dt className="text-muted-foreground">Status</dt>
+                <dt className="text-muted-foreground">{t("Status")}</dt>
                 <dd className="font-medium capitalize" role="status">
                   {model.statusLabel}
                 </dd>
-                <dt className="text-muted-foreground">Order ID</dt>
+                <dt className="text-muted-foreground">{t("Order ID")}</dt>
                 <dd className="break-all">{model.order.id}</dd>
                 {model.promotion && (
                   <>
-                    <dt className="text-muted-foreground">Subtotal</dt>
+                    <dt className="text-muted-foreground">{t("Subtotal")}</dt>
                     <dd>{model.promotion.subtotal}</dd>
                     <dt className="text-muted-foreground">
-                      Promo {model.promotion.code}
+                      {t("Promo")} {model.promotion.code}
                     </dt>
                     <dd>−{model.promotion.discount}</dd>
                   </>
                 )}
-                <dt className="text-muted-foreground">Total</dt>
+                <dt className="text-muted-foreground">{t("Total")}</dt>
                 <dd>{model.total}</dd>
                 {model.expiresAt && (
                   <>
-                    <dt className="text-muted-foreground">Hold expires</dt>
+                    <dt className="text-muted-foreground">
+                      {t("Hold expires")}
+                    </dt>
                     <dd>
                       <time dateTime={model.order.expiresAt}>
                         {model.expiresAt}
@@ -91,10 +99,10 @@ export function OrderPage({
                 {model.pay && (
                   <Button onClick={model.pay} disabled={model.busy}>
                     {model.paying
-                      ? "Opening Halyk ePay…"
+                      ? t("Opening Halyk ePay…")
                       : model.order.sandbox
-                        ? "Pay in Halyk sandbox"
-                        : "Pay with Halyk ePay"}
+                        ? t("Pay in Halyk sandbox")
+                        : t("Pay with Halyk ePay")}
                   </Button>
                 )}
                 {model.canCancel && (
@@ -103,7 +111,7 @@ export function OrderPage({
                     onClick={model.cancel}
                     disabled={model.busy}
                   >
-                    {model.cancelling ? "Cancelling…" : "Cancel order"}
+                    {model.cancelling ? t("Cancelling…") : t("Cancel order")}
                   </Button>
                 )}
                 <Button
@@ -111,13 +119,13 @@ export function OrderPage({
                   onClick={model.refresh}
                   disabled={model.refreshing || model.busy}
                 >
-                  Refresh status
+                  {t("Refresh status")}
                 </Button>
               </div>
               {model.tickets.length > 0 && (
                 <section className="space-y-2 border-t pt-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h2 className="font-semibold">Issued tickets</h2>
+                    <h2 className="font-semibold">{t("Issued tickets")}</h2>
                     <Link
                       href="/"
                       className={buttonVariants({
@@ -125,7 +133,7 @@ export function OrderPage({
                         size: "sm",
                       })}
                     >
-                      Go to home
+                      {t("Go to home")}
                     </Link>
                   </div>
                   <ul className="divide-y">
@@ -140,13 +148,16 @@ export function OrderPage({
                         </span>
                         <Link
                           href={ticketDetailsPath(ticket.id)}
-                          aria-label={`Open ticket for ${ticket.attendeeEmail}`}
+                          aria-label={t(
+                            "Open ticket for {0}",
+                            ticket.attendeeEmail
+                          )}
                           className={buttonVariants({
                             variant: "outline",
                             size: "sm",
                           })}
                         >
-                          Open ticket
+                          {t("Open ticket")}
                         </Link>
                       </li>
                     ))}

@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useId } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -42,14 +43,14 @@ export function CampaignForm({
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2>Create campaign</h2>
+          <h2>{t("Create campaign")}</h2>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={model.submit} noValidate>
           <FieldSet disabled={model.pending}>
             <Field>
-              <FieldLabel htmlFor={`${id}-name`}>Name</FieldLabel>
+              <FieldLabel htmlFor={`${id}-name`}>{t("Name")}</FieldLabel>
               <Input
                 id={`${id}-name`}
                 autoFocus
@@ -61,7 +62,9 @@ export function CampaignForm({
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor={`${id}-kind`}>Discount type</FieldLabel>
+                <FieldLabel htmlFor={`${id}-kind`}>
+                  {t("Discount type")}
+                </FieldLabel>
                 <NativeSelect
                   id={`${id}-kind`}
                   value={draft.discountType}
@@ -75,16 +78,16 @@ export function CampaignForm({
                   }
                 >
                   <NativeSelectOption value="PERCENTAGE">
-                    Percentage
+                    {t("Percentage")}
                   </NativeSelectOption>
                   <NativeSelectOption value="FIXED_KZT">
-                    Fixed KZT
+                    {t("Fixed KZT")}
                   </NativeSelectOption>
                 </NativeSelect>
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${id}-value`}>
-                  {percentage ? "Discount (%)" : "Discount (KZT)"}
+                  {percentage ? t("Discount (%)") : t("Discount (KZT)")}
                 </FieldLabel>
                 <Input
                   id={`${id}-value`}
@@ -97,7 +100,7 @@ export function CampaignForm({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor={`${id}-start`}>Starts</FieldLabel>
+                <FieldLabel htmlFor={`${id}-start`}>{t("Starts")}</FieldLabel>
                 <Input
                   id={`${id}-start`}
                   type="datetime-local"
@@ -107,7 +110,7 @@ export function CampaignForm({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor={`${id}-end`}>Ends</FieldLabel>
+                <FieldLabel htmlFor={`${id}-end`}>{t("Ends")}</FieldLabel>
                 <Input
                   id={`${id}-end`}
                   type="datetime-local"
@@ -118,10 +121,12 @@ export function CampaignForm({
               </Field>
             </div>
             <FieldDescription>
-              Dates and times use your device’s time zone.
+              {t("Dates and times use your device’s time zone.")}
             </FieldDescription>
             <Field>
-              <FieldLabel htmlFor={`${id}-limit`}>Redemption limit</FieldLabel>
+              <FieldLabel htmlFor={`${id}-limit`}>
+                {t("Redemption limit")}
+              </FieldLabel>
               <Input
                 id={`${id}-limit`}
                 inputMode="numeric"
@@ -132,11 +137,13 @@ export function CampaignForm({
                 }
               />
               <FieldDescription id={`${id}-limit-hint`}>
-                Leave blank for unlimited redemptions.
+                {t("Leave blank for unlimited redemptions.")}
               </FieldDescription>
             </Field>
             <Field>
-              <FieldLabel htmlFor={`${id}-scope`}>Eligible tickets</FieldLabel>
+              <FieldLabel htmlFor={`${id}-scope`}>
+                {t("Eligible tickets")}
+              </FieldLabel>
               <NativeSelect
                 id={`${id}-scope`}
                 value={draft.ticketScope}
@@ -148,18 +155,20 @@ export function CampaignForm({
                 }
               >
                 <NativeSelectOption value="all">
-                  All ticket types
+                  {t("All ticket types")}
                 </NativeSelectOption>
                 <NativeSelectOption value="selected">
-                  Selected ticket types
+                  {t("Selected ticket types")}
                 </NativeSelectOption>
               </NativeSelect>
             </Field>
             {draft.ticketScope === "selected" && (
               <FieldSet className="gap-3">
-                <FieldLegend variant="label">Select ticket types</FieldLegend>
+                <FieldLegend variant="label">
+                  {t("Select ticket types")}
+                </FieldLegend>
                 {ticketTypesLoading && (
-                  <p role="status">Loading ticket types…</p>
+                  <p role="status">{t("Loading ticket types…")}</p>
                 )}
                 {ticketTypesError && (
                   <div className="space-y-2">
@@ -169,7 +178,7 @@ export function CampaignForm({
                       variant="outline"
                       onClick={retryTicketTypes}
                     >
-                      Retry ticket types
+                      {t("Retry ticket types")}
                     </Button>
                   </div>
                 )}
@@ -177,7 +186,7 @@ export function CampaignForm({
                   !ticketTypesError &&
                   ticketTypes.length === 0 && (
                     <p className="text-sm text-muted-foreground">
-                      No ticket types are configured for this event.
+                      {t("No ticket types are configured for this event.")}
                     </p>
                   )}
                 {ticketTypes.map((ticket) => (
@@ -196,10 +205,10 @@ export function CampaignForm({
                 ))}
               </FieldSet>
             )}
-            {model.error && <FieldError>{model.error}</FieldError>}
+            {model.error && <FieldError>{t(model.error)}</FieldError>}
             <div>
               <Button type="submit">
-                {model.pending ? "Creating…" : "Create campaign"}
+                {model.pending ? t("Creating…") : t("Create campaign")}
               </Button>
             </div>
           </FieldSet>
@@ -208,3 +217,5 @@ export function CampaignForm({
     </Card>
   )
 }
+
+

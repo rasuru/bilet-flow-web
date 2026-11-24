@@ -1,3 +1,4 @@
+import { t, dateFormat, numberFormat } from "@/i18n/locale"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 
@@ -7,15 +8,15 @@ import { managedEventRepository } from "@/events/managedEventRepository"
 import { campaignEventPath } from "@/promotions/campaignLinks"
 import { campaignRepository } from "@/promotions/campaignRepository"
 
-const dateTime = new Intl.DateTimeFormat(undefined, {
+const dateTime = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
-const money = new Intl.NumberFormat(undefined, {
+const money = numberFormat({
   style: "currency",
   currency: "KZT",
 })
-const percent = new Intl.NumberFormat(undefined, {
+const percent = numberFormat({
   style: "percent",
   maximumFractionDigits: 4,
 })
@@ -38,36 +39,39 @@ function presentCampaign(
     name: campaign.name,
     discount:
       campaign.discountType === "PERCENTAGE"
-        ? `${percent.format(campaign.discountValue / 100)} off`
-        : `${money.format(campaign.discountValue)} off`,
+        ? t("{0} off", percent.format(campaign.discountValue / 100))
+        : t("{0} off", money.format(campaign.discountValue)),
     status: ended
-      ? "Ended"
+      ? t("Ended")
       : expired
-        ? "Expired"
+        ? t("Expired")
         : Date.parse(campaign.validFrom) > now
-          ? "Scheduled"
-          : "Active",
+          ? t("Scheduled")
+          : t("Active"),
     canEnd: !ended && !expired,
     dates: `${dateTime.format(new Date(campaign.validFrom))} – ${dateTime.format(new Date(campaign.validUntil))}`,
     ticketTypes: campaign.applicableTicketTypeIds.length
       ? campaign.applicableTicketTypeIds
-          .map((id) => ticketNames.get(id) ?? "Ticket type unavailable")
+          .map((id) => ticketNames.get(id) ?? t("Ticket type unavailable"))
           .join(", ")
-      : "All ticket types",
+      : t("All ticket types"),
     metrics: [
-      { label: "Confirmed redemptions", value: campaign.confirmedRedemptions },
       {
-        label: "Remaining redemptions",
-        value: campaign.remainingRedemptions ?? "Unlimited",
+        label: t("Confirmed redemptions"),
+        value: campaign.confirmedRedemptions,
       },
-      { label: "Tickets sold", value: campaign.ticketsSold },
-      { label: "Gross", value: money.format(campaign.grossRevenue.amount) },
       {
-        label: "Discounts",
+        label: t("Remaining redemptions"),
+        value: campaign.remainingRedemptions ?? t("Unlimited"),
+      },
+      { label: t("Tickets sold"), value: campaign.ticketsSold },
+      { label: t("Gross"), value: money.format(campaign.grossRevenue.amount) },
+      {
+        label: t("Discounts"),
         value: money.format(campaign.totalDiscountGiven.amount),
       },
       {
-        label: "Net before refunds",
+        label: t("Net before refunds"),
         value: money.format(campaign.netRevenue.amount),
       },
     ],
@@ -109,7 +113,7 @@ export function useCampaignsViewModel(sessionId: number, eventId: string) {
       event.isError || campaigns.isError
         ? campaignActionError(
             event.error ?? campaigns.error,
-            "Couldn’t load campaigns."
+            t("Couldn’t load campaigns.")
           )
         : null,
     retry: () => {
@@ -119,7 +123,7 @@ export function useCampaignsViewModel(sessionId: number, eventId: string) {
     ticketTypes: ticketTypes.data?.map(({ id, name }) => ({ id, name })) ?? [],
     ticketTypesLoading: ticketTypes.isPending && event.isSuccess,
     ticketTypesError: ticketTypes.isError
-      ? campaignActionError(ticketTypes.error, "Couldn’t load ticket types.")
+      ? campaignActionError(ticketTypes.error, t("Couldn’t load ticket types."))
       : null,
     retryTicketTypes: () => void ticketTypes.refetch(),
   }
@@ -153,8 +157,8 @@ export function useCampaignActions(
             operation.enabled
           )
           return operation.enabled
-            ? "Promo code enabled."
-            : "Promo code disabled."
+            ? t("Promo code enabled.")
+            : t("Promo code disabled.")
         case "download": {
           const file = await campaignRepository.qr(
             sessionId,
@@ -178,8 +182,8 @@ export function useCampaignActions(
               : operation.value
           )
           return operation.isLink
-            ? "Campaign link copied."
-            : "Promo code copied."
+            ? t("Campaign link copied.")
+            : t("Promo code copied.")
       }
     },
     onSuccess: (_, operation) => {
@@ -196,9 +200,11 @@ export function useCampaignActions(
       ? campaignActionError(
           action.error,
           action.variables?.kind === "copy"
-            ? "Couldn’t copy to the clipboard."
-            : "Couldn’t complete this action. Try again."
+            ? t("Couldn’t copy to the clipboard.")
+            : t("Couldn’t complete this action. Try again.")
         )
       : null,
   }
 }
+
+

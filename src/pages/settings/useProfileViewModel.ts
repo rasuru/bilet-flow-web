@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -103,9 +104,11 @@ export function useProfileViewModel(
           message:
             error instanceof Error
               ? error.message
-              : "Could not save your profile.",
+              : t("Could not save your profile."),
         })
       }
     }),
   }
 }
+
+

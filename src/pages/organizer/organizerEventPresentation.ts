@@ -1,3 +1,4 @@
+import { dateFormat, numberFormat, t } from "@/i18n/locale"
 import type { ManagedEvent } from "@/api/events"
 import type { EventInventory } from "@/api/inventory"
 import type { ManagedEventAction } from "@/events/managedEventRepository"
@@ -28,14 +29,14 @@ const visibilityLabels = {
   PRIVATE: "Private",
 }
 
-const dateTime = new Intl.DateTimeFormat(undefined, {
+const dateTime = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
 
 function formatDateTime(value: string) {
   const time = Date.parse(value)
-  return Number.isFinite(time) ? dateTime.format(time) : "Not scheduled"
+  return Number.isFinite(time) ? dateTime.format(time) : t("Not scheduled")
 }
 
 function eventStatus(event: ManagedEvent, now: number): OrganizerEventStatus {
@@ -84,25 +85,25 @@ export function presentOrganizerEvent(event: ManagedEvent, now: number) {
     description: event.description,
     category: event.category,
     status,
-    statusLabel: eventStatusLabels[status],
+    statusLabel: t(eventStatusLabels[status]),
     draftMessage:
       status === "draft"
         ? !event.venue
-          ? "Add a venue before publishing this draft."
+          ? t("Add a venue before publishing this draft.")
           : Date.parse(event.endAt) > now
-            ? "This event is a draft."
-            : "Update the schedule before publishing this draft."
+            ? t("This event is a draft.")
+            : t("Update the schedule before publishing this draft.")
         : null,
-    visibility: visibilityLabels[event.visibility],
+    visibility: t(visibilityLabels[event.visibility]),
     starts: formatDateTime(event.startAt),
     ends: formatDateTime(event.endAt),
-    venue: event.venue?.name ?? "Venue not set",
+    venue: event.venue?.name ?? t("Venue not set"),
     address: event.venue?.address,
     admission: event.venue
       ? event.venue.seatingMode === "GENERAL_ADMISSION"
-        ? "General admission"
-        : "Assigned seating"
-      : "Admission not configured",
+        ? t("General admission")
+        : t("Assigned seating")
+      : t("Admission not configured"),
     publicPath,
     copyPath: event.visibility === "UNLISTED" ? publicPath : null,
     campaignsPath: organizerCampaignsPath(event.id),
@@ -139,7 +140,7 @@ function inventoryTotals(inventory: EventInventory | null | undefined) {
     : null
 }
 
-const percent = new Intl.NumberFormat(undefined, {
+const percent = numberFormat({
   style: "percent",
   maximumFractionDigits: 1,
 })
@@ -155,7 +156,7 @@ export function presentInventory(inventory: EventInventory | null | undefined) {
         ? null
         : {
             value: Math.min(sold * 100, 100),
-            label: `${percent.format(sold)} sold`,
+            label: t("{0} sold", percent.format(sold)),
           },
   }
 }

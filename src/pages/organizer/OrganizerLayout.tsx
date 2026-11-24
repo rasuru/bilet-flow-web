@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import type { ReactNode } from "react"
 import {
   CalendarDays,
@@ -65,8 +66,8 @@ export function OrganizerLayout({
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Organizer</SidebarGroupLabel>
-            <nav aria-label="Organizer">
+            <SidebarGroupLabel>{t("Organizer")}</SidebarGroupLabel>
+            <nav aria-label={t("Organizer")}>
               <SidebarMenu>
                 {navigation.map(({ section: key, href, label, Icon }) => (
                   <SidebarMenuItem key={key}>
@@ -80,7 +81,7 @@ export function OrganizerLayout({
                       }
                     >
                       <Icon aria-hidden="true" />
-                      <span>{label}</span>
+                      <span>{t(label)}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

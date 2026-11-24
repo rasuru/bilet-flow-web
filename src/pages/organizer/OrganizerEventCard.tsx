@@ -1,3 +1,4 @@
+import { numberFormat, t } from "@/i18n/locale"
 import { CalendarDays, MapPin, Users } from "lucide-react"
 import { Link } from "wouter"
 
@@ -11,6 +12,8 @@ import type { ManagedEventAction } from "@/events/managedEventRepository"
 import { eventActionLabels } from "./organizerEventPresentation"
 import type { OrganizerEventCardModel } from "./useOrganizerViewModel"
 
+const integer = numberFormat({ maximumFractionDigits: 0 })
+
 export function OrganizerInventory({
   inventory,
 }: {
@@ -22,7 +25,7 @@ export function OrganizerInventory({
         role="status"
         className="flex items-center gap-2 text-sm text-muted-foreground"
       >
-        <Spinner aria-hidden="true" /> Loading ticket inventory…
+        <Spinner aria-hidden="true" /> {t("Loading ticket inventory…")}
       </p>
     )
   }
@@ -30,10 +33,10 @@ export function OrganizerInventory({
     return (
       <div className="flex flex-wrap items-center gap-2">
         <p role="alert" className="text-sm text-destructive">
-          Could not load ticket inventory.
+          {t("Could not load ticket inventory.")}
         </p>
         <Button variant="ghost" size="sm" onClick={inventory.retry}>
-          Try again
+          {t("Try again")}
         </Button>
       </div>
     )
@@ -42,28 +45,32 @@ export function OrganizerInventory({
   if (!totals)
     return (
       <p className="text-sm text-muted-foreground">
-        Ticket inventory is not configured.
+        {t("Ticket inventory is not configured.")}
       </p>
     )
 
   return (
     <section className="space-y-2">
-      <h4 className="text-sm font-medium">Ticket inventory</h4>
+      <h4 className="text-sm font-medium">{t("Ticket inventory")}</h4>
       <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-        {[
-          ["Capacity", totals.capacity],
-          ["Sold", totals.sold],
-          ["Remaining", totals.available],
-          ["Reserved", totals.reserved],
-        ].map(([label, value]) => (
+        {(
+          [
+            [t("Capacity"), totals.capacity],
+            [t("Sold"), totals.sold],
+            [t("Remaining"), totals.available],
+            [t("Reserved"), totals.reserved],
+          ] as const
+        ).map(([label, value]) => (
           <div key={label}>
             <dt className="text-muted-foreground">{label}</dt>
-            <dd className="font-medium tabular-nums">{value}</dd>
+            <dd className="font-medium tabular-nums">
+              {integer.format(value)}
+            </dd>
           </div>
         ))}
       </dl>
       {totals.progress && (
-        <Progress value={totals.progress.value} aria-label="Tickets sold">
+        <Progress value={totals.progress.value} aria-label={t("Tickets sold")}>
           <span className="text-sm text-muted-foreground">
             {totals.progress.label}
           </span>
@@ -116,25 +123,26 @@ export function OrganizerEventCard({
         <OrganizerInventory inventory={event.inventory} />
         <div className="flex flex-wrap gap-2 border-t pt-4">
           <Button size="sm" variant="outline" onClick={onPreview}>
-            View details
+            {t("View details")}
           </Button>
           <Link
             href={event.campaignsPath}
+            aria-label={t("Manage campaigns for {0}", event.title)}
             className={buttonVariants({ size: "sm", variant: "outline" })}
           >
-            Manage campaigns
+            {t("Manage campaigns")}
           </Link>
           {event.publicPath && (
             <Link
               href={event.publicPath}
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
-              View event
+              {t("View event")}
             </Link>
           )}
           {event.copyPath && (
             <Button size="sm" variant="outline" onClick={onCopy}>
-              Copy link
+              {t("Copy link")}
             </Button>
           )}
           {event.actions.map((action) => (
@@ -144,7 +152,7 @@ export function OrganizerEventCard({
               variant={action === "cancel" ? "destructive" : "outline"}
               onClick={() => onAction(action)}
             >
-              {eventActionLabels[action]}
+              {t(eventActionLabels[action])}
             </Button>
           ))}
         </div>

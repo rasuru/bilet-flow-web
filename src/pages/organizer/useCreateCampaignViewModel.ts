@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 
@@ -38,14 +39,14 @@ function validate(draft: Draft): CreateCampaignRequest | string {
   const maxRedemptions = max === "" ? null : Number(max)
 
   if (!name || name.length > 100)
-    return "Enter a campaign name of up to 100 characters."
+    return t("Enter a campaign name of up to 100 characters.")
   if (
     !new RegExp(
       `^(?:\\d{1,15}(?:\\.\\d{1,${scale}})?|\\.\\d{1,${scale}})$`
     ).test(draft.discountValue) ||
     discountValue <= 0
   ) {
-    return `Enter a positive discount with up to ${scale} decimal places.`
+    return t("Enter a positive discount with up to {0} decimal places.", scale)
   }
   if (draft.discountType === "PERCENTAGE" && discountValue > 100)
     return "A percentage discount can’t exceed 100%."
@@ -54,7 +55,7 @@ function validate(draft: Draft): CreateCampaignRequest | string {
     !Number.isFinite(validUntil.valueOf()) ||
     validUntil <= validFrom
   ) {
-    return "Enter a start and end date, with the end after the start."
+    return t("Enter a start and end date, with the end after the start.")
   }
   if (
     maxRedemptions !== null &&
@@ -63,10 +64,10 @@ function validate(draft: Draft): CreateCampaignRequest | string {
       maxRedemptions < 1 ||
       maxRedemptions > 2_147_483_647)
   ) {
-    return "Enter a positive whole number for the redemption limit."
+    return t("Enter a positive whole number for the redemption limit.")
   }
   if (draft.ticketScope === "selected" && draft.ticketIds.length === 0)
-    return "Select at least one ticket type."
+    return t("Select at least one ticket type.")
 
   return {
     name,
@@ -121,7 +122,9 @@ export function useCreateCampaignViewModel(
     error:
       validationError ??
       (create.isError
-        ? campaignActionError(create.error, "Couldn’t create the campaign.")
+        ? campaignActionError(create.error, t("Couldn’t create the campaign."))
         : null),
   }
 }
+
+

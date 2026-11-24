@@ -1,3 +1,4 @@
+import { t, dateFormat } from "@/i18n/locale"
 import { ApiError } from "@/api/client"
 import type {
   SupportCategory,
@@ -22,7 +23,7 @@ export const statuses: { value: SupportStatus; label: string }[] = [
   { value: "WAITING_FOR_CUSTOMER", label: "Waiting for customer" },
   { value: "RESOLVED", label: "Resolved" },
 ]
-export const dateTime = new Intl.DateTimeFormat(undefined, {
+export const dateTime = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
@@ -36,15 +37,15 @@ export function supportNewPath(context: SupportContext = {}) {
 export function contextLinks(context: SupportContext) {
   return [
     context.eventId && {
-      label: "Event",
+      label: t("Event"),
       href: `/events/${encodeURIComponent(context.eventId)}`,
     },
     context.orderId && {
-      label: "Order",
+      label: t("Order"),
       href: `/orders/${encodeURIComponent(context.orderId)}`,
     },
     context.ticketId && {
-      label: "Ticket",
+      label: t("Ticket"),
       href: `/my-tickets/${encodeURIComponent(context.ticketId)}`,
     },
   ].filter((link): link is { label: string; href: string } => !!link)
@@ -60,4 +61,5 @@ export function supportError(error: unknown, fallback: string) {
 
 export const supportRecipient = (
   type: "PLATFORM_SUPPORT" | "ATTENDEE_SUPPORT"
-) => (type === "PLATFORM_SUPPORT" ? "Platform support" : "Event organizer")
+) =>
+  type === "PLATFORM_SUPPORT" ? t("Platform support") : t("Event organizer")

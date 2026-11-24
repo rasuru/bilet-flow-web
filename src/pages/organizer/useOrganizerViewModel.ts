@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import {
   useMutation,
   useQueries,
@@ -127,28 +128,28 @@ export function useOrganizerViewModel(sessionId: number) {
     loading: query.isPending,
     error: query.isError
       ? query.error instanceof ApiError
-        ? query.error.message
-        : "Couldn’t load your events."
+        ? t(query.error.message)
+        : t("Couldn’t load your events.")
       : null,
     retry: () => void query.refetch(),
     filter,
     setFilter,
     filters: [
-      { value: "all" as const, label: "All", count: events.length },
+      { value: "all" as const, label: t("All"), count: events.length },
       ...Object.entries(eventStatusLabels).map(([status, label]) => {
         const value = status as OrganizerEventStatus
-        return { value, label, count: counts.get(value) ?? 0 }
+        return { value, label: t(label), count: counts.get(value) ?? 0 }
       }),
     ],
     summary: [
-      { label: "Upcoming", count: counts.get("upcoming") ?? 0 },
-      { label: "Active", count: counts.get("active") ?? 0 },
-      { label: "Drafts", count: counts.get("draft") ?? 0 },
+      { label: t("Upcoming"), count: counts.get("upcoming") ?? 0 },
+      { label: t("Active"), count: counts.get("active") ?? 0 },
+      { label: t("Drafts"), count: counts.get("draft") ?? 0 },
     ],
     events: visible.map(withInventory),
     preview: preview ? withInventory(preview) : null,
     setPreviewId,
-    notice,
+    notice: notice ? { ...notice, text: t(notice.text) } : null,
     confirmation:
       pending && pendingEvent
         ? {
@@ -158,8 +159,8 @@ export function useOrganizerViewModel(sessionId: number) {
             busy: changeStatus.isPending,
             error: changeStatus.isError
               ? changeStatus.error instanceof ApiError
-                ? changeStatus.error.message
-                : "Could not change the event status. Try again."
+                ? t(changeStatus.error.message)
+                : t("Could not change the event status. Try again.")
               : null,
           }
         : null,

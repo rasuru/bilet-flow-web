@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -46,9 +47,11 @@ export function useChangePasswordViewModel(sessionId: number) {
           message:
             error instanceof Error
               ? error.message
-              : "Could not change your password.",
+              : t("Could not change your password."),
         })
       }
     }),
   }
 }
+
+

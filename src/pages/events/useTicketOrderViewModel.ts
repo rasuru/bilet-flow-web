@@ -1,3 +1,4 @@
+import { t, numberFormat } from "@/i18n/locale"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRef, useState, type FormEvent } from "react"
 import { useLocation } from "wouter"
@@ -20,7 +21,7 @@ export type OrderTicket = EventModel["tickets"][number]
 type Attendee = { email?: string; seatId: string }
 const blankAttendee: Attendee = { seatId: "" }
 const emailSchema = z.email()
-const kzt = new Intl.NumberFormat(undefined, {
+const kzt = numberFormat({
   style: "currency",
   currency: "KZT",
 })
@@ -45,7 +46,7 @@ export function useTicketOrderViewModel(
   const order = useMutation({
     mutationFn: async (request: CheckoutRequest) => {
       if (session.status !== "signedIn")
-        throw new Error("Sign in to place your order.")
+        throw new Error(t("Sign in to place your order."))
       return checkoutRepository.place(
         client,
         session.sessionId,
@@ -223,7 +224,7 @@ export function useTicketOrderViewModel(
     draft,
     selectedSeatIds,
     isFree: total === 0,
-    totalLabel: total === 0 ? "Free" : kzt.format(total),
+    totalLabel: total === 0 ? t("Free") : kzt.format(total),
     hasSelection: Object.values(draft).some(
       (attendees) => attendees.length > 0
     ),
@@ -244,3 +245,5 @@ export function useTicketOrderViewModel(
     },
   }
 }
+
+

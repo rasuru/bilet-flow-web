@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 
@@ -149,7 +150,7 @@ export function useAuthoritiesViewModel(sessionId: number) {
     },
     pending: create.isPending,
     error: adminError(create.error),
-    success: create.isSuccess ? "Authority created." : null,
+    success: create.isSuccess ? t("Authority created.") : null,
     target,
     deletionPending: remove.isPending,
     deletionError: adminError(remove.error),
@@ -162,3 +163,5 @@ export function useAuthoritiesViewModel(sessionId: number) {
     },
   }
 }
+
+

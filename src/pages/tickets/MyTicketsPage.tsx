@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon, ArrowUpRightIcon } from "lucide-react"
 import { Link } from "wouter"
 
@@ -22,20 +23,20 @@ export function MyTicketsPage({
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <Link href="/" className={buttonVariants({ variant: "ghost" })}>
         <ArrowLeftIcon aria-hidden="true" />
-        Home
+        {t("Home")}
       </Link>
-      <h1 className="text-3xl font-bold tracking-tight">My tickets</h1>
+      <h1 className="text-3xl font-bold tracking-tight">{t("My tickets")}</h1>
 
       {model.loading && (
         <p role="status" className="flex items-center gap-2 text-sm">
-          <Spinner aria-hidden="true" /> Loading your tickets…
+          <Spinner aria-hidden="true" /> {t("Loading your tickets…")}
         </p>
       )}
       {model.error && (
         <div className="space-y-2">
-          <FieldError>Couldn’t load your tickets and events.</FieldError>
+          <FieldError>{t("Couldn’t load your tickets and events.")}</FieldError>
           <Button variant="outline" onClick={model.retry}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       )}
@@ -45,7 +46,7 @@ export function MyTicketsPage({
           <Card>
             <CardHeader>
               <CardTitle>
-                <h2>Upcoming events</h2>
+                <h2>{t("Upcoming events")}</h2>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -74,7 +75,7 @@ export function MyTicketsPage({
               ) : (
                 <div className="space-y-3">
                   <p className="text-muted-foreground">
-                    You don’t have any upcoming events.
+                    {t("You don’t have any upcoming events.")}
                   </p>
                   <Link
                     href="/events"
@@ -83,7 +84,7 @@ export function MyTicketsPage({
                       size: "sm",
                     })}
                   >
-                    Discover events
+                    {t("Discover events")}
                   </Link>
                 </div>
               )}
@@ -94,7 +95,7 @@ export function MyTicketsPage({
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2>Ticket orders</h2>
+                  <h2>{t("Ticket orders")}</h2>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -113,7 +114,7 @@ export function MyTicketsPage({
                             </p>
                             {order.placedAt && (
                               <p className="text-sm text-muted-foreground">
-                                Placed{" "}
+                                {t("Placed")}{" "}
                                 <time dateTime={order.placedAt.instant}>
                                   {order.placedAt.label}
                                 </time>
@@ -122,15 +123,21 @@ export function MyTicketsPage({
                           </div>
                           <Link
                             href={order.href}
-                            aria-label={`${order.awaitingPayment ? "Continue payment" : "View order"} for ${order.title}`}
+                            aria-label={t(
+                              "{0} for {1}",
+                              order.awaitingPayment
+                                ? t("Continue payment")
+                                : t("View order"),
+                              order.title
+                            )}
                             className={buttonVariants({
                               variant: "outline",
                               size: "sm",
                             })}
                           >
                             {order.awaitingPayment
-                              ? "Continue payment"
-                              : "View order"}
+                              ? t("Continue payment")
+                              : t("View order")}
                             <ArrowUpRightIcon aria-hidden="true" />
                           </Link>
                         </div>
@@ -149,13 +156,16 @@ export function MyTicketsPage({
                                 </div>
                                 <Link
                                   href={ticket.href}
-                                  aria-label={`Open ticket for ${ticket.attendee}`}
+                                  aria-label={t(
+                                    "Open ticket for {0}",
+                                    ticket.attendee
+                                  )}
                                   className={buttonVariants({
                                     variant: "outline",
                                     size: "sm",
                                   })}
                                 >
-                                  Open ticket
+                                  {t("Open ticket")}
                                 </Link>
                               </li>
                             ))}
@@ -166,7 +176,7 @@ export function MyTicketsPage({
                   </ul>
                 ) : (
                   <p className="text-muted-foreground">
-                    You haven’t placed any ticket orders yet.
+                    {t("You haven’t placed any ticket orders yet.")}
                   </p>
                 )}
               </CardContent>
@@ -175,7 +185,7 @@ export function MyTicketsPage({
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    <h2>Other tickets in your account</h2>
+                    <h2>{t("Other tickets in your account")}</h2>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -189,13 +199,13 @@ export function MyTicketsPage({
                           <p className="font-medium">{ticket.title}</p>
                           <Link
                             href={ticket.href}
-                            aria-label={`Open ticket for ${ticket.title}`}
+                            aria-label={t("Open ticket for {0}", ticket.title)}
                             className={buttonVariants({
                               variant: "outline",
                               size: "sm",
                             })}
                           >
-                            Open ticket
+                            {t("Open ticket")}
                           </Link>
                         </div>
                         <p className="text-muted-foreground">
@@ -214,3 +224,5 @@ export function MyTicketsPage({
     </main>
   )
 }
+
+

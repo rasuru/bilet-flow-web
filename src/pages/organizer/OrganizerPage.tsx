@@ -1,3 +1,4 @@
+import { numberFormat, t } from "@/i18n/locale"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -9,7 +10,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
+import { Link } from "wouter"
+
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -25,6 +29,8 @@ import { OrganizerEventCard, OrganizerInventory } from "./OrganizerEventCard"
 import { eventActionLabels } from "./organizerEventPresentation"
 import { OrganizerLayout } from "./OrganizerLayout"
 import { useOrganizerViewModel } from "./useOrganizerViewModel"
+
+const integer = numberFormat({ maximumFractionDigits: 0 })
 
 const actionDescriptions = {
   publish: "Publish this event with its current visibility and schedule.",
@@ -46,13 +52,18 @@ export function OrganizerPage({
   return (
     <OrganizerLayout section={section}>
       <div className="mx-auto w-full max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {section === "dashboard" ? "Organizer dashboard" : "Events"}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {section === "dashboard" ? t("Organizer dashboard") : t("Events")}
+          </h1>
+          <Link href="/organizer/events/new" className={buttonVariants()}>
+            <Plus aria-hidden="true" /> {t("Create event")}
+          </Link>
+        </div>
 
         {model.loading && (
           <p role="status" className="flex items-center gap-2 text-sm">
-            <Spinner aria-hidden="true" /> Loading events…
+            <Spinner aria-hidden="true" /> {t("Loading events…")}
           </p>
         )}
         {model.error && (
@@ -60,7 +71,7 @@ export function OrganizerPage({
             <AlertDescription className="space-y-2">
               <p>{model.error}</p>
               <Button size="sm" variant="outline" onClick={model.retry}>
-                Try again
+                {t("Try again")}
               </Button>
             </AlertDescription>
           </Alert>
@@ -70,7 +81,7 @@ export function OrganizerPage({
           <Card className="shadow-none">
             <CardHeader>
               <CardTitle>
-                <h2>Event summary</h2>
+                <h2>{t("Event summary")}</h2>
               </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-3">
@@ -80,11 +91,19 @@ export function OrganizerPage({
                   value={count}
                   max={total}
                   aria-label={label}
-                  getAriaValueText={() => `${count} of ${total} events`}
+                  getAriaValueText={() =>
+                    t(
+                      "{0} of {1} events",
+                      integer.format(count),
+                      integer.format(total)
+                    )
+                  }
                 >
                   <span className="flex w-full justify-between text-sm">
                     {label}
-                    <strong className="tabular-nums">{count}</strong>
+                    <strong className="tabular-nums">
+                      {integer.format(count)}
+                    </strong>
                   </span>
                 </Progress>
               ))}
@@ -106,11 +125,11 @@ export function OrganizerPage({
         {total > 0 && (
           <section className="space-y-4" aria-labelledby="organizer-events">
             <h2 id="organizer-events" className="text-lg font-semibold">
-              Your events
+              {t("Your events")}
             </h2>
             <div
               role="group"
-              aria-label="Filter events by status"
+              aria-label={t("Filter events by status")}
               className="flex flex-wrap gap-2"
             >
               {model.filters.map(({ value, label, count }) => (
@@ -121,13 +140,14 @@ export function OrganizerPage({
                   aria-pressed={model.filter === value}
                   onClick={() => model.setFilter(value)}
                 >
-                  {label} <span className="tabular-nums">{count}</span>
+                  {label}{" "}
+                  <span className="tabular-nums">{integer.format(count)}</span>
                 </Button>
               ))}
             </div>
             {model.events.length === 0 && (
               <p role="status" className="text-sm text-muted-foreground">
-                No events match this status.
+                {t("No events match this status.")}
               </p>
             )}
             {model.events.map((event) => (
@@ -147,7 +167,7 @@ export function OrganizerPage({
         {!model.loading && !model.error && total === 0 && (
           <Card className="shadow-none">
             <CardContent className="text-sm text-muted-foreground">
-              You haven’t organized any events yet.
+              {t("You haven’t organized any events yet.")}
             </CardContent>
           </Card>
         )}
@@ -177,13 +197,13 @@ export function OrganizerPage({
               )}
               <dl className="grid gap-3 text-sm sm:grid-cols-2">
                 {[
-                  ["Starts", preview.starts],
-                  ["Ends", preview.ends],
+                  [t("Starts"), preview.starts],
+                  [t("Ends"), preview.ends],
                   [
-                    "Venue",
+                    t("Venue"),
                     [preview.venue, preview.address].filter(Boolean).join(", "),
                   ],
-                  ["Admission", preview.admission],
+                  [t("Admission"), preview.admission],
                 ].map(([label, value]) => (
                   <div key={label}>
                     <dt className="text-muted-foreground">{label}</dt>
@@ -206,24 +226,24 @@ export function OrganizerPage({
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {eventActionLabels[confirmation.action]}?
+                  {t("{0}?", t(eventActionLabels[confirmation.action]))}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
                   <span className="mb-2 block font-medium wrap-anywhere text-foreground">
                     {confirmation.title}
                   </span>
-                  {actionDescriptions[confirmation.action]}
+                  {t(actionDescriptions[confirmation.action])}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               {(confirmation.error || !confirmation.allowed) && (
                 <p role="alert" className="text-sm text-destructive">
                   {confirmation.error ??
-                    "This action is no longer available for this event."}
+                    t("This action is no longer available for this event.")}
                 </p>
               )}
               <AlertDialogFooter>
                 <AlertDialogCancel disabled={confirmation.busy}>
-                  Back
+                  {t("Back")}
                 </AlertDialogCancel>
                 <Button
                   variant={
@@ -233,7 +253,7 @@ export function OrganizerPage({
                   onClick={() => void model.confirmAction()}
                 >
                   {confirmation.busy && <Spinner aria-hidden="true" />}
-                  {eventActionLabels[confirmation.action]}
+                  {t(eventActionLabels[confirmation.action])}
                 </Button>
               </AlertDialogFooter>
             </AlertDialogContent>

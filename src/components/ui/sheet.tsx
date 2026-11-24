@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog"
 import { cn } from "cn"
@@ -68,9 +69,8 @@ function SheetContent({
               />
             }
           >
-            <XIcon
-            />
-            <span className="sr-only">Close</span>
+            <XIcon />
+            <span className="sr-only">{t("Close")}</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Popup>
@@ -134,3 +134,4 @@ export {
   SheetTitle,
   SheetDescription,
 }
+

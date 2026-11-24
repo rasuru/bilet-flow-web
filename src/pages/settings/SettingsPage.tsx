@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import type { ComponentProps } from "react"
 import { Link, useLocation } from "wouter"
 
@@ -16,9 +17,9 @@ export function SettingsPage({
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-5 p-6">
       <header className="space-y-2">
         <Link to="/" className="text-sm underline underline-offset-4">
-          Back to home
+          {t("Back to home")}
         </Link>
-        <h1 className="mt-8 text-2xl font-semibold">Account settings</h1>
+        <h1 className="mt-8 text-2xl font-semibold">{t("Account settings")}</h1>
       </header>
       <ProfileSection account={account} sessionId={sessionId} />
       <ChangePasswordSection sessionId={sessionId} />
@@ -30,8 +31,10 @@ export function SettingsPage({
           navigate("/")
         }}
       >
-        Log out
+        {t("Log out")}
       </Button>
     </main>
   )
 }
+
+

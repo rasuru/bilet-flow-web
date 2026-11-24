@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { Controller } from "react-hook-form"
 import { Link } from "wouter"
 
@@ -18,13 +19,13 @@ export function LoginForm({ onRegister }: LoginFormProps) {
   return (
     <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
       <AccountFormField
-        label="Username or email"
+        label={t("Username or email")}
         autoComplete="username"
         error={fieldErrors.username?.message}
         {...register("username")}
       />
       <AccountFormField
-        label="Password"
+        label={t("Password")}
         type="password"
         autoComplete="current-password"
         error={fieldErrors.password?.message}
@@ -47,14 +48,14 @@ export function LoginForm({ onRegister }: LoginFormProps) {
               />
             )}
           />
-          <FieldLabel htmlFor="remember-me">Remember me</FieldLabel>
+          <FieldLabel htmlFor="remember-me">{t("Remember me")}</FieldLabel>
         </Field>
 
         <Link
           to="/account/reset/request"
           className="underline underline-offset-4"
         >
-          Forgot password?
+          {t("Forgot password?")}
         </Link>
       </div>
 
@@ -65,20 +66,22 @@ export function LoginForm({ onRegister }: LoginFormProps) {
       )}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Logging in…" : "Log in"}
+        {isSubmitting ? t("Logging in…") : t("Log in")}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
+        {t("Don't have an account?")}{" "}
         <Button
           type="button"
           variant="link"
           className="h-auto px-0 text-foreground"
           onClick={onRegister}
         >
-          Sign up
+          {t("Sign up")}
         </Button>
       </p>
     </form>
   )
 }
+
+

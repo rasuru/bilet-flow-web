@@ -1,3 +1,4 @@
+import { t, dateFormat, numberFormat } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 
@@ -6,7 +7,7 @@ import type { PublicEvent } from "@/api/events"
 import type { TicketType } from "@/api/inventory"
 import { publicEventRepository } from "@/events/publicEventRepository"
 
-const dateTime = new Intl.DateTimeFormat(undefined, {
+const dateTime = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
@@ -16,14 +17,14 @@ function formatTime(instant: string) {
 }
 
 function eventSalesMessage(event: PublicEvent, now: number) {
-  if (event.status === "CANCELLED") return "This event was cancelled."
-  if (Date.parse(event.endAt) <= now) return "This event has ended."
+  if (event.status === "CANCELLED") return t("This event was cancelled.")
+  if (Date.parse(event.endAt) <= now) return t("This event has ended.")
 
   const { startAt, endAt } = event.registrationWindow
   if (startAt && Date.parse(startAt) > now) {
-    return `Registration opens ${formatTime(startAt)}.`
+    return t("Registration opens {0}.", formatTime(startAt))
   }
-  if (endAt && Date.parse(endAt) <= now) return "Registration is closed."
+  if (endAt && Date.parse(endAt) <= now) return t("Registration is closed.")
   return null
 }
 
@@ -33,15 +34,15 @@ function ticketAvailabilityLabel(
   now: number
 ) {
   if (ticket.status === "CLOSED" || Date.parse(ticket.salesEndAt) <= now) {
-    return "Sales closed"
+    return t("Sales closed")
   }
-  if (ticket.status === "PAUSED") return "Sales paused"
+  if (ticket.status === "PAUSED") return t("Sales paused")
   if (Date.parse(ticket.salesStartAt) > now) {
-    return `Sales open ${formatTime(ticket.salesStartAt)}`
+    return t("Sales open {0}", formatTime(ticket.salesStartAt))
   }
-  if (remaining === undefined) return "Availability unknown"
-  if (remaining === 0) return "Sold out"
-  return `${remaining} remaining`
+  if (remaining === undefined) return t("Availability unknown")
+  if (remaining === 0) return t("Sold out")
+  return t("{0} remaining", remaining)
 }
 
 export function useEventDetailsViewModel(eventId: string) {
@@ -115,8 +116,8 @@ export function useEventDetailsViewModel(eventId: string) {
       venue: event.venue,
       seatingLabel:
         event.venue?.seatingMode === "ASSIGNED_SEATING"
-          ? "Assigned seating"
-          : "General admission",
+          ? t("Assigned seating")
+          : t("General admission"),
     },
     salesMessage,
     showTickets,
@@ -146,8 +147,8 @@ export function useEventDetailsViewModel(eventId: string) {
         description: ticket.description,
         price:
           ticket.price.amount === 0
-            ? "Free"
-            : new Intl.NumberFormat(undefined, {
+            ? t("Free")
+            : numberFormat({
                 style: "currency",
                 currency: ticket.price.currency,
               }).format(ticket.price.amount),
@@ -159,7 +160,13 @@ export function useEventDetailsViewModel(eventId: string) {
         seats: assigned
           ? (seats ?? []).map((seat) => ({
               id: seat.seatId,
-              label: `${seat.section} · Row ${seat.row} · Seat ${seat.seatNumber}${seat.accessible ? " · Accessible" : ""}`,
+              label: t(
+                "{0} · Row {1} · Seat {2}{3}",
+                seat.section,
+                seat.row,
+                seat.seatNumber,
+                seat.accessible ? " · " + t("Accessible") : ""
+              ),
             }))
           : null,
         availability:
@@ -170,3 +177,5 @@ export function useEventDetailsViewModel(eventId: string) {
     }),
   } as const
 }
+
+

@@ -1,3 +1,4 @@
+import { t, dateFormat, uiText } from "@/i18n/locale"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { LucideClock, LucideMapPin } from "lucide-react"
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
@@ -41,14 +42,14 @@ const defaultFilters = {
   sort: "startAt,asc" as "startAt,asc" | "startAt,desc",
 }
 
-const shortDateTime = new Intl.DateTimeFormat("ru", {
+const shortDateTime = dateFormat({
   day: "numeric",
   month: "short",
   hour: "2-digit",
   minute: "2-digit",
 })
 
-const dateTimeWithYear = new Intl.DateTimeFormat("ru", {
+const dateTimeWithYear = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
@@ -93,7 +94,7 @@ function toCard(
     startAt: event.startAt,
     dateLabel: formatStartAt(event.startAt),
     venue,
-    salesLabel: salesLabels[event.salesStatus],
+    salesLabel: uiText(salesLabels[event.salesStatus]),
   }
 }
 
@@ -101,11 +102,14 @@ function toResults(page: DiscoveryPageResponse) {
   const pageNumber = page.page + 1
   return {
     cards: page.items.map(toCard),
-    countLabel: `${page.totalItems} ${page.totalItems === 1 ? "event" : "events"}`,
+    countLabel: t(
+      page.totalItems === 1 ? "{0} event" : "{0} events",
+      page.totalItems
+    ),
     totalPages: page.totalPages,
     pagination: {
       visible: page.totalPages > 1,
-      label: `Page ${pageNumber} of ${page.totalPages}`,
+      label: t("Page {0} of {1}", pageNumber, page.totalPages),
       canGoBack: page.page > 0,
       canGoForward: pageNumber < page.totalPages,
     },
@@ -159,7 +163,7 @@ function useEventDiscoveryViewModel() {
       page,
       size: pageSize,
     }),
-    select: toResults,
+    select: (result) => toResults(result),
     placeholderData: keepPreviousData,
   })
 
@@ -237,7 +241,7 @@ function useEventDiscoveryViewModel() {
       !shouldReplace,
     cards: shouldReplace ? [] : (results?.cards ?? []),
     resultLabel: events.isPlaceholderData
-      ? "Updating results…"
+      ? t("Updating results…")
       : results?.countLabel,
     pagination: shouldReplace ? undefined : results?.pagination,
     previousHref: canGoBack ? discoveryHref(search, filters, page - 1) : null,
@@ -306,9 +310,9 @@ export function EventDiscoveryPage() {
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
       <header className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Discover events</h1>
+        <h1 className="text-2xl font-bold">{t("Discover events")}</h1>
         <Link href="/" className={buttonVariants({ variant: "outline" })}>
-          Home
+          {t("Home")}
         </Link>
       </header>
 
@@ -317,28 +321,34 @@ export function EventDiscoveryPage() {
           <form onSubmit={viewModel.submitFilters} className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
               <Field>
-                <FieldLabel htmlFor="discovery-query">Search events</FieldLabel>
+                <FieldLabel htmlFor="discovery-query">
+                  {t("Search events")}
+                </FieldLabel>
                 <Input
                   id="discovery-query"
                   type="search"
                   value={viewModel.draft.query}
-                  placeholder="Search by title or description"
+                  placeholder={t("Search by title or description")}
                   onChange={viewModel.changeQuery}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="discovery-category">Category</FieldLabel>
+                <FieldLabel htmlFor="discovery-category">
+                  {t("Category")}
+                </FieldLabel>
                 <Input
                   id="discovery-category"
                   value={viewModel.draft.category}
-                  placeholder="Any category"
+                  placeholder={t("Any category")}
                   onChange={viewModel.changeCategory}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="discovery-sort">Sort by date</FieldLabel>
+                <FieldLabel htmlFor="discovery-sort">
+                  {t("Sort by date")}
+                </FieldLabel>
                 <NativeSelect
                   id="discovery-sort"
                   className="w-full"
@@ -346,10 +356,10 @@ export function EventDiscoveryPage() {
                   onChange={viewModel.changeSort}
                 >
                   <NativeSelectOption value="startAt,asc">
-                    Earliest first
+                    {t("Earliest first")}
                   </NativeSelectOption>
                   <NativeSelectOption value="startAt,desc">
-                    Latest first
+                    {t("Latest first")}
                   </NativeSelectOption>
                 </NativeSelect>
               </Field>
@@ -363,7 +373,7 @@ export function EventDiscoveryPage() {
                   onCheckedChange={viewModel.changeAvailability}
                 />
                 <FieldLabel htmlFor="discovery-available">
-                  Tickets available now
+                  {t("Tickets available now")}
                 </FieldLabel>
               </Field>
               <Button
@@ -371,27 +381,27 @@ export function EventDiscoveryPage() {
                 variant="ghost"
                 onClick={viewModel.clearFilters}
               >
-                Clear filters
+                {t("Clear filters")}
               </Button>
-              <Button type="submit">Search</Button>
+              <Button type="submit">{t("Search")}</Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
-      <section aria-label="Discovery results" aria-busy={viewModel.busy}>
+      <section aria-label={t("Discovery results")} aria-busy={viewModel.busy}>
         {viewModel.showLoading && (
           <div role="status" className="flex items-center gap-2 text-sm">
             <Spinner />
-            Loading events…
+            {t("Loading events…")}
           </div>
         )}
 
         {viewModel.showError && (
           <div role="alert" className="space-y-2">
-            <p>Couldn’t load events.</p>
+            <p>{t("Couldn’t load events.")}</p>
             <Button variant="outline" onClick={viewModel.retry}>
-              Try again
+              {t("Try again")}
             </Button>
           </div>
         )}
@@ -405,9 +415,9 @@ export function EventDiscoveryPage() {
         {viewModel.showEmpty && (
           <Card>
             <CardContent className="space-y-3">
-              <p>No events match your filters.</p>
+              <p>{t("No events match your filters.")}</p>
               <Button variant="outline" onClick={viewModel.clearFilters}>
-                Clear filters
+                {t("Clear filters")}
               </Button>
             </CardContent>
           </Card>
@@ -423,7 +433,7 @@ export function EventDiscoveryPage() {
 
         {viewModel.pagination?.visible && (
           <nav
-            aria-label="Event results pages"
+            aria-label={t("Event results pages")}
             className="mt-6 flex flex-wrap items-center justify-center gap-3"
           >
             {viewModel.previousHref ? (
@@ -431,11 +441,11 @@ export function EventDiscoveryPage() {
                 href={viewModel.previousHref}
                 className={buttonVariants({ variant: "outline" })}
               >
-                Previous
+                {t("Previous")}
               </Link>
             ) : (
               <Button variant="outline" disabled>
-                Previous
+                {t("Previous")}
               </Button>
             )}
             <span className="text-sm text-muted-foreground">
@@ -446,11 +456,11 @@ export function EventDiscoveryPage() {
                 href={viewModel.nextHref}
                 className={buttonVariants({ variant: "outline" })}
               >
-                Next
+                {t("Next")}
               </Link>
             ) : (
               <Button variant="outline" disabled>
-                Next
+                {t("Next")}
               </Button>
             )}
           </nav>
@@ -506,7 +516,7 @@ function toOrganizerOverview(events: PublicEvent[]) {
       .slice(0, overviewSize)
       .map((event) => ({
         ...toOverviewEvent(event),
-        statusLabel: organizerStatusLabels[event.status],
+        statusLabel: t(organizerStatusLabels[event.status]),
         href: organizerCampaignsPath(event.id),
       })),
   }
@@ -532,7 +542,7 @@ function useHomeViewModel() {
 
   const organized = useQuery({
     ...managedEventRepository.mineQuery(sessionId),
-    select: toOrganizerOverview,
+    select: (result) => toOrganizerOverview(result),
   })
   const attending = useQuery({
     ...attendanceRepository.eventsQuery(
@@ -541,11 +551,11 @@ function useHomeViewModel() {
         ? session.account.email
         : null
     ),
-    select: toAttendeeOverview,
+    select: (result) => toAttendeeOverview(result),
   })
   const discovery = useQuery({
     ...publicEventRepository.discoveryQuery({ page: 0, size: previewSize }),
-    select: toResults,
+    select: (result) => toResults(result),
   })
 
   const isSignedIn = sessionId !== null
@@ -559,8 +569,8 @@ function useHomeViewModel() {
       session.status === "restoring"
         ? null
         : isSignedIn
-          ? { href: "/account/settings", label: "Account" }
-          : { href: "/sign-in", label: "Sign in" },
+          ? { href: "/account/settings", label: t("Account") }
+          : { href: "/sign-in", label: t("Sign in") },
     showOrganizerOverview: isSignedIn && !!organized.data?.hasEvents,
     organizerItems,
     showOrganizerEmpty: organizerItems.length === 0,
@@ -630,10 +640,15 @@ export function HomePage() {
             href="/admin"
             className={buttonVariants({ variant: "outline" })}
           >
-            Administration
+            {t("Administration")}
           </Link>
         )}
-        <Link href="/support" className={buttonVariants({ variant: "outline" })}>Support</Link>
+        <Link
+          href="/support"
+          className={buttonVariants({ variant: "outline" })}
+        >
+          {t("Support")}
+        </Link>
         {viewModel.accountLink && (
           <Link
             href={viewModel.accountLink.href}
@@ -649,19 +664,19 @@ export function HomePage() {
           <Card>
             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle>
-                <h2>Events you organize</h2>
+                <h2>{t("Events you organize")}</h2>
               </CardTitle>
               <Link
                 href={organizerDashboardPath}
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
-                Organizer dashboard
+                {t("Organizer dashboard")}
               </Link>
             </CardHeader>
             <CardContent>
               {viewModel.showOrganizerEmpty ? (
                 <p className="text-sm text-muted-foreground">
-                  No current or draft events.
+                  {t("No current or draft events.")}
                 </p>
               ) : (
                 <OverviewList items={viewModel.organizerItems} />
@@ -674,19 +689,19 @@ export function HomePage() {
           <Card>
             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle>
-                <h2>Events you’re attending</h2>
+                <h2>{t("Events you’re attending")}</h2>
               </CardTitle>
               <Link
                 href="/my-tickets"
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
-                My tickets
+                {t("My tickets")}
               </Link>
             </CardHeader>
             <CardContent>
               {viewModel.showAttendeeEmpty ? (
                 <p className="text-sm text-muted-foreground">
-                  No upcoming events.
+                  {t("No upcoming events.")}
                 </p>
               ) : (
                 <OverviewList items={viewModel.attendeeItems} />
@@ -699,15 +714,15 @@ export function HomePage() {
       {viewModel.showOverviewLoading && (
         <p role="status" className="flex items-center gap-2 text-sm">
           <Spinner />
-          Loading your events…
+          {t("Loading your events…")}
         </p>
       )}
 
       {viewModel.showOverviewError && (
         <div role="alert" className="flex flex-wrap items-center gap-2 text-sm">
-          Some of your events couldn’t be loaded.
+          {t("Some of your events couldn’t be loaded.")}
           <Button variant="outline" size="sm" onClick={viewModel.retryOverview}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       )}
@@ -715,20 +730,20 @@ export function HomePage() {
       <section aria-labelledby="home-public-events">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 id="home-public-events" className="text-lg font-semibold">
-            Public events
+            {t("Public events")}
           </h2>
           <Link
             href={discoveryPath}
             className={buttonVariants({ variant: "secondary", size: "sm" })}
           >
-            View all
+            {t("View all")}
           </Link>
         </div>
 
         {viewModel.showPreviewLoading && (
           <p role="status" className="flex items-center gap-2 text-sm">
             <Spinner />
-            Loading public events…
+            {t("Loading public events…")}
           </p>
         )}
         {viewModel.showPreviewError && (
@@ -736,19 +751,19 @@ export function HomePage() {
             role="alert"
             className="flex flex-wrap items-center gap-2 text-sm"
           >
-            Couldn’t load public events.
+            {t("Couldn’t load public events.")}
             <Button
               variant="outline"
               size="sm"
               onClick={viewModel.retryPreview}
             >
-              Try again
+              {t("Try again")}
             </Button>
           </div>
         )}
         {viewModel.showPreviewEmpty && (
           <p className="text-sm text-muted-foreground">
-            No public events to show right now.
+            {t("No public events to show right now.")}
           </p>
         )}
 
@@ -763,6 +778,5 @@ export function HomePage() {
     </main>
   )
 }
-
 
 

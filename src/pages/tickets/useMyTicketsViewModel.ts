@@ -1,3 +1,4 @@
+import { t, dateFormat, numberFormat, statusText } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 
 import {
@@ -10,11 +11,11 @@ import {
   ticketStatusLabels,
 } from "@/tickets/ticketPresentation"
 
-const dateTime = new Intl.DateTimeFormat(undefined, {
+const dateTime = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
-const currency = new Intl.NumberFormat(undefined, {
+const currency = numberFormat({
   style: "currency",
   currency: "KZT",
 })
@@ -55,17 +56,17 @@ function toActivity(data: AttendanceActivity) {
       .map((order) => ({
         id: order.id,
         href: `/orders/${encodeURIComponent(order.id)}`,
-        title: eventsById.get(order.eventId)?.title ?? "Event unavailable",
+        title: eventsById.get(order.eventId)?.title ?? t("Event unavailable"),
         total:
-          order.amountKzt === 0 ? "Free" : currency.format(order.amountKzt),
+          order.amountKzt === 0 ? t("Free") : currency.format(order.amountKzt),
         status:
           order.refundState === "PENDING"
-            ? "Refund pending"
+            ? t("Refund pending")
             : order.refundState === "REFUNDED"
-              ? "Refunded"
+              ? t("Refunded")
               : order.status === "COMPLETED"
-                ? "Confirmed"
-                : order.status.toLowerCase().replaceAll("_", " "),
+                ? t("Confirmed")
+                : statusText(order.status),
         placedAt: order.createdAt
           ? {
               instant: order.createdAt,
@@ -77,7 +78,7 @@ function toActivity(data: AttendanceActivity) {
           id: ticket.id,
           attendee: ticket.attendeeEmail,
           href: ticketDetailsPath(ticket.id),
-          status: ticketStatusLabels[ticket.status],
+          status: t(ticketStatusLabels[ticket.status]),
         })),
       })),
     linkedTickets: data.tickets
@@ -86,10 +87,10 @@ function toActivity(data: AttendanceActivity) {
         const event = eventsById.get(ticket.eventId)
         return {
           id: ticket.id,
-          title: event?.title ?? "Event unavailable",
+          title: event?.title ?? t("Event unavailable"),
           href: ticketDetailsPath(ticket.id),
           code: ticket.ticketCode,
-          status: ticketStatusLabels[ticket.status],
+          status: t(ticketStatusLabels[ticket.status]),
         }
       }),
   }
@@ -101,7 +102,7 @@ export function useMyTicketsViewModel(
 ) {
   const query = useQuery({
     ...attendanceRepository.activityQuery(sessionId, verifiedEmail),
-    select: toActivity,
+    select: (data) => toActivity(data),
   })
   return {
     loading: query.isPending,
@@ -110,3 +111,5 @@ export function useMyTicketsViewModel(
     activity: query.data,
   }
 }
+
+

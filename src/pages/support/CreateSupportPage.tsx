@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon } from "lucide-react"
 import { Link } from "wouter"
 import type { SupportCategory, SupportType } from "@/api/support"
@@ -26,15 +27,15 @@ export function CreateSupportPage({
   return (
     <main className="mx-auto max-w-2xl space-y-5 px-4 py-6 sm:px-6">
       <Link href="/support" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> All requests
+        <ArrowLeftIcon aria-hidden="true" /> {t("All requests")}
       </Link>
       <Card>
         <CardHeader>
           <CardTitle>
-            <h1 className="text-2xl">Contact support</h1>
+            <h1 className="text-2xl">{t("Contact support")}</h1>
           </CardTitle>
           <CardDescription>
-            Describe your issue to start a support conversation.
+            {t("Describe your issue to start a support conversation.")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -47,7 +48,7 @@ export function CreateSupportPage({
             }}
           >
             <div className="space-y-2">
-              <Label htmlFor="support-recipient">Who can help?</Label>
+              <Label htmlFor="support-recipient">{t("Who can help?")}</Label>
               <NativeSelect
                 id="support-recipient"
                 value={model.type}
@@ -55,16 +56,16 @@ export function CreateSupportPage({
               >
                 {model.eventContext && (
                   <NativeSelectOption value="ATTENDEE_SUPPORT">
-                    Event organizer
+                    {t("Event organizer")}
                   </NativeSelectOption>
                 )}
                 <NativeSelectOption value="PLATFORM_SUPPORT">
-                  BiletFlow platform support
+                  {t("BiletFlow platform support")}
                 </NativeSelectOption>
               </NativeSelect>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="support-category">Issue category</Label>
+              <Label htmlFor="support-category">{t("Issue category")}</Label>
               <NativeSelect
                 id="support-category"
                 value={model.category}
@@ -74,25 +75,25 @@ export function CreateSupportPage({
               >
                 {categories.map((c) => (
                   <NativeSelectOption key={c.value} value={c.value}>
-                    {c.label}
+                    {t(c.label)}
                   </NativeSelectOption>
                 ))}
               </NativeSelect>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="support-subject">Subject</Label>
+              <Label htmlFor="support-subject">{t("Subject")}</Label>
               <Input
                 id="support-subject"
                 value={model.subject}
                 onChange={(e) => model.setSubject(e.target.value)}
                 maxLength={255}
-                placeholder="What do you need help with?"
+                placeholder={t("What do you need help with?")}
                 required
               />
             </div>
             {model.links.length > 0 && (
               <div className="space-y-1 text-sm">
-                <p className="font-medium">Related to</p>
+                <p className="font-medium">{t("Related to")}</p>
                 <div className="flex flex-wrap gap-3">
                   {model.links.map((link) => (
                     <Link
@@ -105,30 +106,33 @@ export function CreateSupportPage({
                   ))}
                 </div>
                 <p className="text-muted-foreground">
-                  These references will be included in your request.
+                  {t("These references will be included in your request.")}
                 </p>
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="support-message">Message</Label>
+              <Label htmlFor="support-message">{t("Message")}</Label>
               <Textarea
                 id="support-message"
                 value={model.message}
                 onChange={(e) => model.setMessage(e.target.value)}
                 maxLength={4000}
-                placeholder="Include details that will help support understand the problem…"
+                placeholder={t(
+                  "Include details that will help support understand the problem…"
+                )}
                 required
               />
             </div>
             {model.eventContext && !model.links.length && (
               <p className="text-sm text-muted-foreground">
-                For this platform request, include any relevant event or
-                purchase details in your message.
+                {t(
+                  "For this platform request, include any relevant event or purchase details in your message."
+                )}
               </p>
             )}
             {model.error && (
               <p role="alert" className="text-sm text-destructive">
-                {model.error}
+                {t(model.error)}
               </p>
             )}
             <div className="flex justify-end gap-2">
@@ -136,10 +140,10 @@ export function CreateSupportPage({
                 href="/support"
                 className={buttonVariants({ variant: "outline" })}
               >
-                Cancel
+                {t("Cancel")}
               </Link>
               <Button type="submit" disabled={model.busy}>
-                {model.busy ? "Creating…" : "Create request"}
+                {model.busy ? t("Creating…") : t("Create request")}
               </Button>
             </div>
           </form>
@@ -148,3 +152,5 @@ export function CreateSupportPage({
     </main>
   )
 }
+
+

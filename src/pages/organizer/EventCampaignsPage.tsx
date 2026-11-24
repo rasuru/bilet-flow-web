@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon, DownloadIcon, LinkIcon } from "lucide-react"
 import { useState } from "react"
 import { Link } from "wouter"
@@ -39,11 +40,13 @@ export function EventCampaignsPage({
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <Link href="/organizer" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> Organizer dashboard
+        <ArrowLeftIcon aria-hidden="true" /> {t("Organizer dashboard")}
       </Link>
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {t("Campaigns")}
+          </h1>
           {model.event && (
             <p className="text-muted-foreground">{model.event.title}</p>
           )}
@@ -54,20 +57,20 @@ export function EventCampaignsPage({
             aria-expanded={showForm}
             onClick={() => setShowForm(!showForm)}
           >
-            {showForm ? "Close form" : "New campaign"}
+            {showForm ? t("Close form") : t("New campaign")}
           </Button>
         )}
       </header>
       {model.loading && (
         <p role="status" className="flex items-center gap-2">
-          <Spinner aria-hidden="true" /> Loading campaigns…
+          <Spinner aria-hidden="true" /> {t("Loading campaigns…")}
         </p>
       )}
       {model.error && (
         <div className="space-y-2">
           <FieldError>{model.error}</FieldError>
           <Button variant="outline" onClick={model.retry}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       )}
@@ -86,7 +89,7 @@ export function EventCampaignsPage({
         <Card>
           <CardContent>
             <p className="text-muted-foreground">
-              This event has no campaigns yet.
+              {t("This event has no campaigns yet.")}
             </p>
           </CardContent>
         </Card>
@@ -134,7 +137,7 @@ function CampaignCard({
               disabled={actions.pending}
               onClick={() => actions.setConfirmEnd(true)}
             >
-              End campaign
+              {t("End campaign")}
             </Button>
           )}
         </div>
@@ -143,8 +146,9 @@ function CampaignCard({
         {actions.confirmEnd && campaign.canEnd && (
           <div className="space-y-2 rounded-md border p-3">
             <p className="text-sm">
-              End this campaign permanently? Its promo codes will stop accepting
-              new redemptions.
+              {t(
+                "End this campaign permanently? Its promo codes will stop accepting new redemptions."
+              )}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -153,7 +157,7 @@ function CampaignCard({
                 disabled={actions.pending}
                 onClick={() => actions.run({ kind: "end" })}
               >
-                End permanently
+                {t("End permanently")}
               </Button>
               <Button
                 size="sm"
@@ -161,18 +165,18 @@ function CampaignCard({
                 disabled={actions.pending}
                 onClick={() => actions.setConfirmEnd(false)}
               >
-                Keep campaign
+                {t("Keep campaign")}
               </Button>
             </div>
           </div>
         )}
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-muted-foreground">Validity</dt>
+            <dt className="text-muted-foreground">{t("Validity")}</dt>
             <dd>{campaign.dates}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Eligible tickets</dt>
+            <dt className="text-muted-foreground">{t("Eligible tickets")}</dt>
             <dd>{campaign.ticketTypes}</dd>
           </div>
         </dl>
@@ -189,7 +193,8 @@ function CampaignCard({
             <Separator />
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
-                Promo code · {code.enabled ? "Enabled" : "Disabled"}
+                {t("Promo code ·")}{" "}
+                {code.enabled ? t("Enabled") : t("Disabled")}
               </p>
               <code className="font-semibold select-all">{code.code}</code>
             </div>
@@ -202,7 +207,7 @@ function CampaignCard({
                   actions.run({ kind: "copy", value: code.code, isLink: false })
                 }
               >
-                Copy code
+                {t("Copy code")}
               </Button>
               <Button
                 size="sm"
@@ -216,7 +221,7 @@ function CampaignCard({
                   })
                 }
               >
-                <LinkIcon aria-hidden="true" /> Copy campaign link
+                <LinkIcon aria-hidden="true" /> {t("Copy campaign link")}
               </Button>
               <Button
                 size="sm"
@@ -230,7 +235,7 @@ function CampaignCard({
                   })
                 }
               >
-                <DownloadIcon aria-hidden="true" /> Download campaign QR
+                <DownloadIcon aria-hidden="true" /> {t("Download campaign QR")}
               </Button>
               {code.canToggle && (
                 <Button
@@ -245,7 +250,7 @@ function CampaignCard({
                     })
                   }
                 >
-                  {code.enabled ? "Disable code" : "Enable code"}
+                  {code.enabled ? t("Disable code") : t("Enable code")}
                 </Button>
               )}
             </div>
@@ -253,7 +258,7 @@ function CampaignCard({
         ))}
         {actions.message && (
           <p role="status" className="text-sm">
-            {actions.message}
+            {t(actions.message)}
           </p>
         )}
         {actions.error && <FieldError>{actions.error}</FieldError>}
@@ -261,3 +266,5 @@ function CampaignCard({
     </Card>
   )
 }
+
+

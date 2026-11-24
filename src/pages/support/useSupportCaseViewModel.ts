@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 
@@ -76,7 +77,7 @@ export function useSupportCaseViewModel(
     loading: query.isPending,
     error:
       query.isError && !unavailable
-        ? supportError(query.error, "Couldn’t load this conversation.")
+        ? supportError(query.error, t("Couldn’t load this conversation."))
         : null,
     missing: unavailable,
     retry: () => void query.refetch(),
@@ -94,30 +95,32 @@ export function useSupportCaseViewModel(
         managed.data?.some((event) => event.id === item.eventId),
       escalated: !!item.escalatedAt,
       status: item.status,
-      statusLabel:
+      statusLabel: t(
         statuses.find((entry) => entry.value === item.status)?.label ??
-        item.status,
+          item.status
+      ),
       statusChoices: statuses.filter(
         ({ value }) => value === item.status || (open && value !== "OPEN")
       ),
-      category:
+      category: t(
         categories.find((entry) => entry.value === item.category)?.label ??
-        item.category,
+          item.category
+      ),
       assignedTo:
         item.assignedSupportUserId === accountId
-          ? "You"
+          ? t("You")
           : item.assignedSupportUserId
-            ? `User ${item.assignedSupportUserId}`
-            : "Unassigned",
+            ? t("User {0}", item.assignedSupportUserId)
+            : t("Unassigned"),
       context: contextLinks(item),
       messages: item.messages.map((message) => ({
         ...message,
         authorLabel:
           message.authorUserId === accountId
-            ? "You"
+            ? t("You")
             : message.authorType === "REQUESTER"
-              ? "Requester"
-              : "Support team",
+              ? t("Requester")
+              : t("Support team"),
         own: message.authorUserId === accountId,
         createdLabel: dateTime.format(new Date(message.sentAt)),
       })),
@@ -132,7 +135,7 @@ export function useSupportCaseViewModel(
       (send.isError || update.isError
         ? supportError(
             send.error ?? update.error,
-            "That action failed. Try again."
+            t("That action failed. Try again.")
           )
         : null),
     send: () => {
@@ -154,3 +157,5 @@ export function useSupportCaseViewModel(
     escalate: () => run({ kind: "escalate" }),
   }
 }
+
+
