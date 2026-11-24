@@ -8,12 +8,7 @@ import { useState } from "react"
 import { Link } from "wouter"
 
 import { refundCheckout } from "@/api/checkouts"
-import {
-  cancelEvent,
-  duplicateEvent,
-  unpublishEvent,
-  type ManagedEvent,
-} from "@/api/events"
+import { duplicateEvent, type ManagedEvent } from "@/api/events"
 import { hideTicketType, unhideTicketType } from "@/api/inventory"
 import { getPayment } from "@/api/payments"
 import { getCheckInCounts, searchAttendees } from "@/api/tickets"
@@ -27,7 +22,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { managedEventRepository } from "@/events/managedEventRepository"
 import { publicEventRepository } from "@/events/publicEventRepository"
 import { statusText, t } from "@/i18n/locale"
-import { EditEventSection } from "./EditEventSection"
 
 type EventScope = { sessionId: number; eventId: string }
 
@@ -50,7 +44,6 @@ function refreshEvent(
 
 export function EventOrdersPage(scope: EventScope) {
   const { sessionId, eventId } = scope
-  const client = useQueryClient()
   const event = useQuery(managedEventRepository.eventQuery(sessionId, eventId))
 
   return (
@@ -79,16 +72,11 @@ export function EventOrdersPage(scope: EventScope) {
       <OrderRefunds {...scope} canSearch={event.isSuccess} />
       {event.isSuccess && (
         <>
-          <EditEventSection
-            event={event.data}
-            sessionId={sessionId}
-            refresh={() => refreshEvent(client, scope)}
-          />
           <TicketInventory
             {...scope}
             assigned={event.data.venue?.seatingMode === "ASSIGNED_SEATING"}
           />
-          <EventActions {...scope} event={event.data} />
+          <DuplicateEventSection {...scope} event={event.data} />
         </>
       )}
     </main>
@@ -445,7 +433,7 @@ function TicketInventory({
   )
 }
 
-function EventActions({
+function DuplicateEventSection({
   sessionId,
   eventId,
   event,
@@ -454,16 +442,8 @@ function EventActions({
   const [startAt, setStartAt] = useState("")
   const [scheduleError, setScheduleError] = useState("")
   const action = useMutation({
-    mutationFn: (newStart?: Date | "unpublish") =>
+    mutationFn: (newStart: Date) =>
       sessionRepository.authenticatedRequest(sessionId, async (token) => {
-        if (newStart === "unpublish") {
-          await unpublishEvent(token, eventId)
-          return { kind: "unpublished" } as const
-        }
-        if (!newStart) {
-          await cancelEvent(token, eventId)
-          return { kind: "cancelled" } as const
-        }
         const shift = +newStart - Date.parse(event.startAt)
         const move = (instant: string) =>
           new Date(Date.parse(instant) + shift).toISOString()
@@ -491,7 +471,7 @@ function EventActions({
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2>{t("Event controls")}</h2>
+          <h2>{t("Duplicate Event")}</h2>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -532,59 +512,8 @@ function EventActions({
           </Button>
         </form>
         {scheduleError && <FieldError>{scheduleError}</FieldError>}
-        <Button
-          type="button"
-          variant="outline"
-          disabled={
-            action.isPending ||
-            event.status !== "PUBLISHED" ||
-            action.data?.kind === "unpublished"
-          }
-          onClick={() => {
-            if (
-              window.confirm(
-                t("Unpublish {0} and remove it from public sale?", event.title)
-              )
-            ) {
-              setScheduleError("")
-              action.mutate("unpublish")
-            }
-          }}
-        >
-          {t("Unpublish Event")}
-        </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          disabled={
-            action.isPending ||
-            event.status === "CANCELLED" ||
-            action.data?.kind === "cancelled"
-          }
-          onClick={() => {
-            if (
-              window.confirm(
-                t(
-                  "Cancel {0}? This event will stop accepting orders.",
-                  event.title
-                )
-              )
-            ) {
-              setScheduleError("")
-              action.mutate(undefined)
-            }
-          }}
-        >
-          {t("Cancel Event")}
-        </Button>
         {action.isPending && <p role="status">{t("Updating event…")}</p>}
         {action.isError && <FieldError>{t(action.error.message)}</FieldError>}
-        {action.data?.kind === "cancelled" && (
-          <p role="status">{t("Event cancelled.")}</p>
-        )}
-        {action.data?.kind === "unpublished" && (
-          <p role="status">{t("Event unpublished.")}</p>
-        )}
         {action.data?.kind === "duplicated" && (
           <p role="status">
             {t("Draft created.")}{" "}
