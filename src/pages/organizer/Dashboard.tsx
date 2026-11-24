@@ -50,7 +50,7 @@ import {
 
 import { useQuery } from "@tanstack/react-query"
 import { getOrganizerEvents, type managedEvent, getEventInventory, getInventoryTotals } from "@/api/dashboard"
-import { useLocation } from "wouter"
+import { useLocation, Link } from "wouter"
 
 type EventStatus = "upcoming" | "active" | "draft"
   | "completed" | "cancelled" | "unpublished"
@@ -132,14 +132,19 @@ function MenuSidebar() {
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader>
-        <div className="flex items-center gap-2.5 px-2 py-1.5">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 rounded-md px-2 py-1.5"
+          aria-label="BiletFlow home"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Ticket className="h-4 w-4" />
           </div>
+
           <span className="text-lg font-semibold tracking-tight">
             BiletFlow
           </span>
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>
@@ -339,15 +344,15 @@ function EventCard({ event }: { event: Event }) {
             <div className="rounded-lg border border-orange-200 bg-orange-50/60 p-3 dark:border-orange-900 dark:bg-orange-950/20">
               <div className="flex items-start gap-3">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-orange-600 dark:text-orange-400" />
+
                 <div>
                   <p className="text-sm font-medium text-orange-900 dark:text-orange-200">
-                    Setup incomplete
+                    Draft event
                   </p>
-                  {!event.ticketTypesConfigured && (
-                    <p className="mt-0.5 text-xs text-orange-800/80 dark:text-orange-300/80">
-                      No ticket types configured
-                    </p>
-                  )}
+
+                  <p className="mt-0.5 text-xs text-orange-800/80 dark:text-orange-300/80">
+                    This event has not been published yet.
+                  </p>
                 </div>
               </div>
             </div>
@@ -366,31 +371,60 @@ function EventCard({ event }: { event: Event }) {
           )}
 
           {inventoryTotals && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Ticket inventory</span>
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium">Ticket inventory</h4>
 
-                <span className="font-medium">
-                  {inventoryTotals.sold} / {inventoryTotals.capacity} sold
-                </span>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Total capacity
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {inventoryTotals.capacity}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">Sold</p>
+                  <p className="text-lg font-semibold">
+                    {inventoryTotals.sold}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">Remaining</p>
+                  <p className="text-lg font-semibold">
+                    {inventoryTotals.remaining ?? "—"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Sold percentage
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {inventoryTotals.percentageSold === null
+                      ? "—"
+                      : `${inventoryTotals.percentageSold}%`}
+                  </p>
+                </div>
               </div>
 
-              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary transition-all"
+                  className="h-full rounded-full bg-primary"
                   style={{
-                    width: `${
-                      inventoryTotals.capacity > 0
-                        ? Math.min(
-                            100,
-                            (inventoryTotals.sold / inventoryTotals.capacity) *
-                              100
-                          )
-                        : 0
-                    }%`,
+                    width: `${inventoryTotals.percentageSold ?? 0}%`,
                   }}
                 />
               </div>
+
+              {inventoryTotals.reserved !== null &&
+                inventoryTotals.reserved > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {inventoryTotals.reserved} tickets currently reserved
+                  </p>
+                )}
             </div>
           )}
 

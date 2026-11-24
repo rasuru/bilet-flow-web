@@ -65,34 +65,84 @@ export async function getEventInventory(
   }
 }
 
+
 export function getInventoryTotals(
   inventory: EventInventoryView | null | undefined
-): { sold: number; capacity: number } | null {
+): {
+  sold: number
+  capacity: number
+  remaining: number | null
+  reserved: number | null
+  percentageSold: number | null
+} | null {
   if (!inventory) return null
+
+  let sold: number
+  let capacity: number
+  let remaining: number | null
+  let reserved: number | null
 
   if (inventory.inventoryKind === "GENERAL_ADMISSION") {
     const rows = inventory.gaAvailability ?? []
 
     if (rows.length === 0) return null
 
-    return {
-      sold: rows.reduce((sum, row) => sum + (row.sold ?? 0), 0),
-      capacity: rows.reduce((sum, row) => sum + (row.totalCapacity ?? 0), 0),
+    if (rows.some((row) => row.sold == null || row.totalCapacity == null)) {
+      return null
     }
-  }
 
-  if (inventory.inventoryKind === "ASSIGNED_SEATING") {
+    sold = rows.reduce((sum, row) => sum + row.sold!, 0)
+
+    capacity = rows.reduce((sum, row) => sum + row.totalCapacity!, 0)
+
+    reserved = rows.every((row) => row.reserved != null)
+      ? rows.reduce((sum, row) => sum + row.reserved!, 0)
+      : null
+
+    if (rows.every((row) => row.available != null)) {
+      remaining = rows.reduce((sum, row) => sum + row.available!, 0)
+    } else if (reserved !== null) {
+      remaining = Math.max(0, capacity - sold - reserved)
+    } else {
+      remaining = null
+    }
+  } else if (inventory.inventoryKind === "ASSIGNED_SEATING") {
     const seats = inventory.seatAvailability ?? []
 
     if (seats.length === 0) return null
 
-    return {
-      sold: seats.filter((seat) => seat.status === "SOLD").length,
-      capacity: seats.length,
+    if (
+      seats.some(
+        (seat) =>
+          seat.status !== "AVAILABLE" &&
+          seat.status !== "HELD" &&
+          seat.status !== "SOLD"
+      )
+    ) {
+      return null
     }
+
+    capacity = seats.length
+
+    sold = seats.filter((seat) => seat.status === "SOLD").length
+
+    reserved = seats.filter((seat) => seat.status === "HELD").length
+
+    remaining = seats.filter((seat) => seat.status === "AVAILABLE").length
+  } else {
+    return null
   }
 
-  return null
+  const percentageSold =
+    capacity > 0 ? Math.round((sold / capacity) * 1000) / 10 : null
+
+  return {
+    sold,
+    capacity,
+    remaining,
+    reserved,
+    percentageSold,
+  }
 }
 
 export function getOrganizerEvents(): Promise<managedEvent[]> {
