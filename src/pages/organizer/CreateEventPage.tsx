@@ -181,6 +181,14 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         refreshLayouts={() => void refreshLayouts()}
                       />
                     ))}
+                  {(step === 3 || step === 4) && vm.hasPaidTickets && (
+                    <Alert className="border-amber-500/40 bg-amber-50 text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
+                      <AlertDescription>
+                        <strong className="mb-1 block">{t("Paid sales require activation")}</strong>
+                        <span>{t("A one-time activation fee applies to events with paid tickets. You can save or publish now and activate paid sales from event management. Paid tickets cannot be purchased until activation is complete.")}</span>
+                      </AlertDescription>
+                    </Alert>
+                  )}
                   {step === 3 && (
                     <>
                       <FieldDescription>
@@ -306,3 +314,4 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
     </OrganizerLayout>
   )
 }
+

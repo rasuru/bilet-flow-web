@@ -407,6 +407,7 @@ export function useCreateEventViewModel(sessionId: number) {
     changeSeatingMode,
     assigned,
     tickets,
+    hasPaidTickets: tickets.some(ticket => Number(ticket.price) > 0),
     layouts,
     layoutsOffline,
     loadingLayouts,
@@ -435,3 +436,4 @@ export function useCreateEventViewModel(sessionId: number) {
       setGaTickets((previous) => previous.filter((ticket) => ticket.id !== id)),
   }
 }
+

@@ -11,19 +11,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import type { ManagedEventAction } from "@/events/managedEventRepository"
 import { t } from "@/i18n/locale"
 import { OrganizerAnalyticsPanel } from "./OrganizerAnalyticsPanel"
-import { AttachEventVenue, EditEventDetails } from "./OrganizerEventSettings"
-import { OrganizerEventStaff } from "./OrganizerEventStaff"
-import { OrganizerTicketTypes } from "./OrganizerTicketTypes"
 import { OrganizerEventCard } from "./OrganizerEventCard"
 import { eventActionLabels } from "./organizerEventPresentation"
+import { AttachEventVenue, EditEventDetails } from "./OrganizerEventSettings"
+import { OrganizerEventStaff } from "./OrganizerEventStaff"
 import { OrganizerLayout } from "./OrganizerLayout"
+import { OrganizerTicketTypes } from "./OrganizerTicketTypes"
+import { PaidSalesActivation } from "./PaidSalesActivation"
 import { useOrganizerViewModel } from "./useOrganizerViewModel"
+import { usePaidSalesViewModel } from "./usePaidSalesViewModel"
 
 const actionDescriptions = {
   publish: "Publish this event with its current visibility and schedule.",
@@ -40,6 +43,7 @@ export function ManageEventPage({
 }) {
   const model = useOrganizerViewModel(sessionId, eventId)
   const { event, managedEvent, confirmation } = model
+  const paidSales = usePaidSalesViewModel(sessionId, eventId)
   const title = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -53,13 +57,23 @@ export function ManageEventPage({
         <BackLink href={model.dashboardPath}>
           {t("Organizer dashboard")}
         </BackLink>
-        <h1
-          ref={title}
-          tabIndex={-1}
-          className="w-fit max-w-full rounded-sm text-[clamp(1.75rem,4vw,2.5rem)] leading-tight font-semibold tracking-tight wrap-anywhere outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
-        >
-          {event?.title ?? t("Manage event")}
-        </h1>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+          <h1
+            ref={title}
+            tabIndex={-1}
+            className="w-fit max-w-full rounded-sm text-[clamp(1.75rem,4vw,2.5rem)] leading-tight font-semibold tracking-tight wrap-anywhere outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+          >
+            {event?.title ?? t("Manage event")}
+          </h1>
+          {paidSales.loaded && paidSales.active && (
+            <Badge
+              variant="outline"
+              className="border-green-600/40 bg-green-500/10 leading-none text-green-700 dark:text-green-400"
+            >
+              {t("Paid sales activated")}
+            </Badge>
+          )}
+        </div>
 
         {model.loading && (
           <p role="status" className="flex items-center gap-2 text-sm">
@@ -85,6 +99,7 @@ export function ManageEventPage({
         )}
         {event && managedEvent && (
           <>
+            <PaidSalesActivation vm={paidSales} />
             <nav
               aria-label={t("Event sections")}
               className="flex flex-wrap gap-2 border-b pb-3"
