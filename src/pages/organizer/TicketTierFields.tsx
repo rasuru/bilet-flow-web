@@ -75,7 +75,7 @@ export function TicketTierFields({
       {input("name", t("Tier name"), { required: true })}
       {input("description", t("Ticket description (optional)"))}
       <div className="grid gap-4 sm:grid-cols-3">
-        {input("price", t("Price (KZT)"), {
+        {input("price", t("Price (₸)"), {
           type: "number",
           min: 0,
           step: "0.01",
@@ -165,3 +165,4 @@ export function TicketTierFields({
     </Card>
   )
 }
+

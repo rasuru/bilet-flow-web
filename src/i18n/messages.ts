@@ -79,6 +79,7 @@ export const russian: Readonly<Record<string, string>> = {
   "Already have an account?": "Уже есть аккаунт?",
   Amount: "Сумма",
   "Amount (": "Сумма (",
+  "Amount ({0})": "Сумма ({0})",
   "An order can include up to 100 tickets across 30 ticket types.":
     "В заказе может быть до 100 билетов и до 30 типов билетов.",
   "Any category": "Любая категория",
@@ -247,7 +248,7 @@ export const russian: Readonly<Record<string, string>> = {
   Disabled: "Отключено",
   Discount: "Скидка",
   "Discount (%)": "Скидка (%)",
-  "Discount (KZT)": "Скидка (₸)",
+  "Discount (₸)": "Скидка (₸)",
   "Discount type": "Тип скидки",
   Discounts: "Скидки",
   "Discover events": "Найти мероприятия",
@@ -286,7 +287,7 @@ export const russian: Readonly<Record<string, string>> = {
   "Enter a password": "Введите пароль",
   "Enter a positive discount with up to {0} decimal places.":
     "Введите положительную скидку, знаков после запятой не больше {0}.",
-  "Enter a positive fee in KZT with up to two decimal places.":
+  "Enter a positive fee in tenge with up to two decimal places.":
     "Введите положительную сумму в тенге с точностью до двух знаков после запятой.",
   "Enter a positive whole number for the redemption limit.":
     "Введите целое положительное число для лимита применений.",
@@ -344,7 +345,7 @@ export const russian: Readonly<Record<string, string>> = {
   "First name": "Имя",
   "First name must be at most 50 characters":
     "Имя не должно превышать 50 символов",
-  "Fixed KZT": "Фиксированная сумма в тенге",
+  "Fixed amount (₸)": "Фиксированная сумма в тенге",
   for: "для",
   "For this platform request, include any relevant event or purchase details in your message.":
     "В обращении к платформе укажите сведения о мероприятии или покупке.",
@@ -905,8 +906,8 @@ export const russian: Readonly<Record<string, string>> = {
   "Open when published": "Откроется после публикации",
   "Opens {0}": "Открывается {0}",
   "Paid ticket": "Платный билет",
-  "Price (KZT)": "Цена (₸)",
-  "Prices are in KZT. Enter 0 for a free ticket.":
+  "Price (₸)": "Цена (₸)",
+  "Prices are in tenge. Enter 0 for a free ticket.":
     "Цены указаны в тенге. Для бесплатного билета введите 0.",
   "Publish event": "Опубликовать мероприятие",
   "Publishing event…": "Публикуем мероприятие…",
@@ -1314,6 +1315,7 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Already have an account?": "Аккаунтыңыз бар ма?",
   Amount: "Сома",
   "Amount (": "Сома (",
+  "Amount ({0})": "Сома ({0})",
   "An order can include up to 100 tickets across 30 ticket types.":
     "Тапсырысқа 30 түрге дейінгі 100 билет қосуға болады.",
   "Any category": "Кез келген санат",
@@ -1485,7 +1487,7 @@ export const kazakh: Readonly<Record<string, string>> = {
   Disabled: "Өшірулі",
   Discount: "Жеңілдік",
   "Discount (%)": "Жеңілдік (%)",
-  "Discount (KZT)": "Жеңілдік (₸)",
+  "Discount (₸)": "Жеңілдік (₸)",
   "Discount type": "Жеңілдік түрі",
   Discounts: "Жеңілдіктер",
   "Discover events": "Іс-шараларды іздеу",
@@ -1524,7 +1526,7 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Enter a password": "Құпиясөзді енгізіңіз",
   "Enter a positive discount with up to {0} decimal places.":
     "Оң жеңілдік енгізіңіз, бөлшек бөлігінде {0} цифрға дейін.",
-  "Enter a positive fee in KZT with up to two decimal places.":
+  "Enter a positive fee in tenge with up to two decimal places.":
     "Теңгемен оң соманы енгізіңіз, бөлшек бөлігінде екі цифрға дейін.",
   "Enter a positive whole number for the redemption limit.":
     "Қолдану шегіне оң бүтін сан енгізіңіз.",
@@ -1582,7 +1584,7 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Find user": "Пайдаланушыны табу",
   "First name": "Аты",
   "First name must be at most 50 characters": "Аты 50 таңбадан аспауы керек",
-  "Fixed KZT": "Теңгемен белгіленген сома",
+  "Fixed amount (₸)": "Теңгемен белгіленген сома",
   for: "үшін",
   "For this platform request, include any relevant event or purchase details in your message.":
     "Платформаға өтініште іс-шара немесе сатып алу мәліметтерін көрсетіңіз.",
@@ -2141,8 +2143,8 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Open when published": "Жарияланған кезде ашылады",
   "Opens {0}": "{0} ашылады",
   "Paid ticket": "Ақылы билет",
-  "Price (KZT)": "Бағасы (₸)",
-  "Prices are in KZT. Enter 0 for a free ticket.":
+  "Price (₸)": "Бағасы (₸)",
+  "Prices are in tenge. Enter 0 for a free ticket.":
     "Бағалар теңгемен көрсетілген. Тегін билет үшін 0 енгізіңіз.",
   "Publish event": "Іс-шараны жариялау",
   "Publishing event…": "Іс-шара жарияланып жатыр…",
@@ -2472,3 +2474,4 @@ export const kazakh: Readonly<Record<string, string>> = {
   "View all events": "Барлық іс-шаралар",
   "Welcome back, {0}": "Қайта қош келдіңіз, {0}",
 }
+

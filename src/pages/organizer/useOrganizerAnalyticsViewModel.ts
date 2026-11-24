@@ -16,7 +16,6 @@ const integer = numberFormat({ maximumFractionDigits: 0 })
 const money = numberFormat({
   style: "currency",
   currency: "KZT",
-  currencyDisplay: "code",
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 })
@@ -246,3 +245,4 @@ export type OrganizerAnalyticsModel = ReturnType<
 export type OrganizerAnalyticsReport = NonNullable<
   OrganizerAnalyticsModel["report"]
 >
+

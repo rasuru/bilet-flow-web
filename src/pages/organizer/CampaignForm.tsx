@@ -81,13 +81,13 @@ export function CampaignForm({
                     {t("Percentage")}
                   </NativeSelectOption>
                   <NativeSelectOption value="FIXED_KZT">
-                    {t("Fixed KZT")}
+                    {t("Fixed amount (₸)")}
                   </NativeSelectOption>
                 </NativeSelect>
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${id}-value`}>
-                  {percentage ? t("Discount (%)") : t("Discount (KZT)")}
+                  {percentage ? t("Discount (%)") : t("Discount (₸)")}
                 </FieldLabel>
                 <Input
                   id={`${id}-value`}
