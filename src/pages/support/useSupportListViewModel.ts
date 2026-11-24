@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
@@ -30,12 +31,14 @@ export function useSupportListViewModel(sessionId: number, accountId: number) {
                 ? "PLATFORM_INBOX"
                 : "EVENT_INBOX",
           recipient: supportRecipient(item.type),
-          status:
+          status: t(
             statuses.find((entry) => entry.value === item.status)?.label ??
-            item.status,
-          category:
+              item.status
+          ),
+          category: t(
             categories.find((entry) => entry.value === item.category)?.label ??
-            item.category,
+              item.category
+          ),
           updatedAt: item.updatedAt,
           updatedLabel: dateTime.format(new Date(item.updatedAt)),
           preview: item.messages.at(-1)?.content,
@@ -44,10 +47,11 @@ export function useSupportListViewModel(sessionId: number, accountId: number) {
   return {
     loading: query.isPending,
     error: query.isError
-      ? supportError(query.error, "Couldn’t load requests.")
+      ? supportError(query.error, t("Couldn’t load requests."))
       : null,
     retry: () => void query.refetch(),
     cases: query.data ?? [],
     canAccessAdmin,
   }
 }
+

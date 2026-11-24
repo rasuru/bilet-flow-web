@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon, DownloadIcon, PrinterIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Link } from "wouter"
@@ -28,7 +29,7 @@ function AdmissionQr({ image, onLoad }: { image: Blob; onLoad: () => void }) {
   return (
     <img
       ref={ref}
-      alt="Admission QR code"
+      alt={t("Admission QR code")}
       width={224}
       height={224}
       onLoad={onLoad}
@@ -59,23 +60,31 @@ export function TicketDetailsPage({
         })}
       >
         <ArrowLeftIcon aria-hidden="true" />
-        My tickets
+        {t("My tickets")}
       </Link>
 
-      <Link href={`/support/new?ticketId=${encodeURIComponent(ticketId)}`} className={buttonVariants({ variant: "outline", className: "print:hidden" })}>Get ticket support</Link>
+      <Link
+        href={`/support/new?ticketId=${encodeURIComponent(ticketId)}`}
+        className={buttonVariants({
+          variant: "outline",
+          className: "print:hidden",
+        })}
+      >
+        {t("Get ticket support")}
+      </Link>
       {model.status === "loading" && (
         <p role="status" className="flex items-center gap-2 text-sm">
-          <Spinner aria-hidden="true" /> Loading your ticket…
+          <Spinner aria-hidden="true" /> {t("Loading your ticket…")}
         </p>
       )}
       {model.status === "missing" && (
-        <p>This ticket is unavailable in your account.</p>
+        <p>{t("This ticket is unavailable in your account.")}</p>
       )}
       {model.status === "error" && (
         <div className="space-y-2">
-          <FieldError>Couldn’t load this ticket.</FieldError>
+          <FieldError>{t("Couldn’t load this ticket.")}</FieldError>
           <Button variant="outline" onClick={model.retry}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       )}
@@ -83,7 +92,7 @@ export function TicketDetailsPage({
         <Card className="print:break-inside-avoid print:bg-white print:text-black print:ring-0">
           <CardHeader>
             <CardDescription className="print:text-black">
-              BiletFlow ticket
+              {t("BiletFlow ticket")}
             </CardDescription>
             <CardTitle>
               <h1 className="text-2xl font-semibold">{model.title}</h1>
@@ -91,14 +100,14 @@ export function TicketDetailsPage({
           </CardHeader>
           <CardContent className="space-y-5">
             <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
-              <dt>Status</dt>
+              <dt>{t("Status")}</dt>
               <dd className="font-semibold">
                 {model.statusLabel}
                 {model.eventCancelled && " · Event cancelled"}
               </dd>
               {model.date && (
                 <>
-                  <dt>Starts</dt>
+                  <dt>{t("Starts")}</dt>
                   <dd>
                     <time dateTime={model.date.instant}>
                       {model.date.label}
@@ -108,7 +117,7 @@ export function TicketDetailsPage({
               )}
               {model.venue && (
                 <>
-                  <dt>Venue</dt>
+                  <dt>{t("Venue")}</dt>
                   <dd>
                     {model.venue.name}
                     <br />
@@ -116,22 +125,23 @@ export function TicketDetailsPage({
                   </dd>
                 </>
               )}
-              <dt>Attendee</dt>
+              <dt>{t("Attendee")}</dt>
               <dd className="break-all">{model.attendee}</dd>
-              <dt>Seating</dt>
+              <dt>{t("Seating")}</dt>
               <dd>{model.seating}</dd>
             </dl>
 
             {!model.mayAccessDocument ? (
               <p className="text-muted-foreground">
-                The attendee can open the admission QR and PDF using their
-                verified account.
+                {t(
+                  "The attendee can open the admission QR and PDF using their verified account."
+                )}
               </p>
             ) : !model.forAdmission ? (
-              <p>This ticket is currently unavailable for admission.</p>
+              <p>{t("This ticket is currently unavailable for admission.")}</p>
             ) : (
               <div className="space-y-2 rounded-lg border p-4">
-                <h2 className="font-semibold">Admission QR code</h2>
+                <h2 className="font-semibold">{t("Admission QR code")}</h2>
                 {model.qrImage ? (
                   <>
                     <AdmissionQr
@@ -142,13 +152,13 @@ export function TicketDetailsPage({
                   </>
                 ) : model.qrError ? (
                   <div className="space-y-2 print:hidden">
-                    <FieldError>Couldn’t load the QR code.</FieldError>
+                    <FieldError>{t("Couldn’t load the QR code.")}</FieldError>
                     <Button variant="outline" size="sm" onClick={model.retryQr}>
-                      Retry QR code
+                      {t("Retry QR code")}
                     </Button>
                   </div>
                 ) : (
-                  <p role="status">Loading QR code…</p>
+                  <p role="status">{t("Loading QR code…")}</p>
                 )}
               </div>
             )}
@@ -165,7 +175,9 @@ export function TicketDetailsPage({
                       disabled={model.downloading}
                     >
                       <DownloadIcon aria-hidden="true" />
-                      {model.downloading ? "Downloading…" : "Download PDF"}
+                      {model.downloading
+                        ? t("Downloading…")
+                        : t("Download PDF")}
                     </Button>
                     <Button
                       variant="outline"
@@ -176,7 +188,7 @@ export function TicketDetailsPage({
                       }
                     >
                       <PrinterIcon aria-hidden="true" />
-                      Print ticket
+                      {t("Print ticket")}
                     </Button>
                   </>
                 )}
@@ -185,14 +197,14 @@ export function TicketDetailsPage({
                   onClick={model.retry}
                   disabled={model.refreshing}
                 >
-                  Refresh status
+                  {t("Refresh status")}
                 </Button>
                 {model.eventHref && (
                   <Link
                     href={model.eventHref}
                     className={buttonVariants({ variant: "ghost" })}
                   >
-                    View event
+                    {t("View event")}
                   </Link>
                 )}
               </div>
@@ -203,5 +215,4 @@ export function TicketDetailsPage({
     </main>
   )
 }
-
 

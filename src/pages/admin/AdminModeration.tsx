@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { Link } from "wouter"
 
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -50,7 +51,7 @@ export function AdminEvents({ sessionId, params }: SectionProps) {
       <Filters onApply={filters.apply} onReset={filters.reset}>
         <FilterInput
           id="event-search"
-          label="Title or category"
+          label={t("Title or category")}
           type="search"
           maxLength={255}
           value={draft.search ?? ""}
@@ -58,21 +59,21 @@ export function AdminEvents({ sessionId, params }: SectionProps) {
         />
         <FilterSelect
           id="event-status"
-          title="Event status"
+          title={t("Event status")}
           values={eventStatuses}
           value={draft.status}
           onChange={(value) => change("status", value)}
         />
         <FilterSelect
           id="event-visibility"
-          title="Visibility"
+          title={t("Visibility")}
           values={visibilities}
           value={draft.visibility}
           onChange={(value) => change("visibility", value)}
         />
         <FilterInput
           id="event-organizer"
-          label="Organizer ID"
+          label={t("Organizer ID")}
           type="number"
           min={1}
           step={1}
@@ -89,12 +90,19 @@ export function AdminEvents({ sessionId, params }: SectionProps) {
         />
       </Filters>
       <AdminTable
-        caption="Events"
-        columns={["Event", "Status", "Visibility", "Starts", "Organizer", ""]}
+        caption={t("Events")}
+        columns={[
+          t("Event"),
+          t("Status"),
+          t("Visibility"),
+          t("Starts"),
+          t("Organizer"),
+          "",
+        ]}
         items={query.data?.items ?? []}
         rowKey={(event) => event.id}
         state={query}
-        empty="No events match these filters."
+        empty={t("No events match these filters.")}
         pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
         cells={(event) => [
           <div className="min-w-40">
@@ -110,7 +118,7 @@ export function AdminEvents({ sessionId, params }: SectionProps) {
           </span>,
           <RecordId value={event.organizerId} />,
           <RecordButton onClick={() => select(event.id)}>
-            View event
+            {t("View event")}
           </RecordButton>,
         ]}
       />
@@ -140,7 +148,7 @@ function EventDialog({
   const { reinstating } = model
   return (
     <AdminDialog
-      title={event?.title ?? "Event details"}
+      title={event?.title ?? t("Event details")}
       onClose={onClose}
       pending={model.pending}
     >
@@ -149,14 +157,14 @@ function EventDialog({
           <div className="space-y-4">
             <Details
               fields={[
-                ["Status", <StatusBadge value={event.status} />],
-                ["Visibility", label(event.visibility)],
-                ["Starts", formatDate(event.startAt)],
-                ["Ends", formatDate(event.endAt)],
-                ["Venue", event.venue?.name],
-                ["Category", event.category],
-                ["Event ID", <RecordId value={event.id} />],
-                ["Assigned staff", event.staff.length],
+                [t("Status"), <StatusBadge value={event.status} />],
+                [t("Visibility"), label(event.visibility)],
+                [t("Starts"), formatDate(event.startAt)],
+                [t("Ends"), formatDate(event.endAt)],
+                [t("Venue"), event.venue?.name],
+                [t("Category"), event.category],
+                [t("Event ID"), <RecordId value={event.id} />],
+                [t("Assigned staff"), event.staff.length],
               ]}
             />
             {event.description && (
@@ -169,17 +177,20 @@ function EventDialog({
               <form className="grid gap-3" onSubmit={model.submit}>
                 {reinstating ? (
                   <p className="text-sm text-muted-foreground">
-                    The event will return to its status before suspension.
+                    {t(
+                      "The event will return to its status before suspension."
+                    )}
                   </p>
                 ) : (
                   <>
                     <p className="text-sm text-muted-foreground">
-                      Suspension hides the event page and blocks new checkout
-                      and check-in.
+                      {t(
+                        "Suspension hides the event page and blocks new checkout and check-in."
+                      )}
                     </p>
                     <Field>
                       <FieldLabel htmlFor="event-reason">
-                        Suspension reason
+                        {t("Suspension reason")}
                       </FieldLabel>
                       <Textarea
                         id="event-reason"
@@ -199,7 +210,7 @@ function EventDialog({
                     disabled={model.pending}
                     onClick={model.cancel}
                   >
-                    Cancel
+                    {t("Cancel")}
                   </Button>
                   <Button
                     type="submit"
@@ -207,10 +218,10 @@ function EventDialog({
                     disabled={model.pending}
                   >
                     {model.pending
-                      ? "Saving…"
+                      ? t("Saving…")
                       : reinstating
-                        ? "Confirm reinstatement"
-                        : "Confirm suspension"}
+                        ? t("Confirm reinstatement")
+                        : t("Confirm suspension")}
                   </Button>
                 </div>
               </form>
@@ -220,14 +231,14 @@ function EventDialog({
                   href={`/admin/event-reports?eventId=${encodeURIComponent(event.id)}`}
                   className={buttonVariants({ variant: "outline" })}
                 >
-                  Event reports
+                  {t("Event reports")}
                 </Link>
                 {model.canModerate && (
                   <Button
                     variant={reinstating ? "default" : "destructive"}
                     onClick={model.begin}
                   >
-                    {reinstating ? "Reinstate event" : "Suspend event"}
+                    {reinstating ? t("Reinstate event") : t("Suspend event")}
                   </Button>
                 )}
               </div>
@@ -249,26 +260,26 @@ export function AdminEventReports({ sessionId, params }: SectionProps) {
       <Filters onApply={filters.apply} onReset={filters.reset}>
         <FilterSelect
           id="report-status"
-          title="Review status"
+          title={t("Review status")}
           values={reportStatuses}
           value={filters.draft.status}
           onChange={(value) => filters.change("status", value)}
         />
         <FilterInput
           id="report-event"
-          label="Event ID"
+          label={t("Event ID")}
           pattern={uuidPattern}
           value={filters.draft.eventId}
           onChange={(e) => filters.change("eventId", e.currentTarget.value)}
         />
       </Filters>
       <AdminTable
-        caption="Event reports"
-        columns={["Reason", "Status", "Event ID", "Submitted", ""]}
+        caption={t("Event reports")}
+        columns={[t("Reason"), t("Status"), t("Event ID"), t("Submitted"), ""]}
         items={query.data?.items ?? []}
         rowKey={(report) => report.id}
         state={query}
-        empty="No event reports match these filters."
+        empty={t("No event reports match these filters.")}
         pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
         cells={(report) => [
           <p className="line-clamp-2 max-w-96 min-w-40 font-medium wrap-anywhere">
@@ -280,7 +291,7 @@ export function AdminEventReports({ sessionId, params }: SectionProps) {
             {formatDate(report.submittedAt)}
           </span>,
           <RecordButton onClick={() => select(report.id)}>
-            View report
+            {t("View report")}
           </RecordButton>,
         ]}
       />
@@ -308,7 +319,11 @@ function ReportDialog({
   const model = useEventReportViewModel(sessionId, id)
   const report = model.query.data
   return (
-    <AdminDialog title="Event report" onClose={onClose} pending={model.pending}>
+    <AdminDialog
+      title={t("Event report")}
+      onClose={onClose}
+      pending={model.pending}
+    >
       <QueryContent state={model.query}>
         {report && (
           <div className="space-y-4">
@@ -317,14 +332,17 @@ function ReportDialog({
             </p>
             <Details
               fields={[
-                ["Status", <StatusBadge value={report.status} />],
-                ["Submitted", formatDate(report.submittedAt)],
-                ["Reporter ID", <RecordId value={report.reporterId} />],
-                ["Event ID", <RecordId value={report.eventId} />],
+                [t("Status"), <StatusBadge value={report.status} />],
+                [t("Submitted"), formatDate(report.submittedAt)],
+                [t("Reporter ID"), <RecordId value={report.reporterId} />],
+                [t("Event ID"), <RecordId value={report.eventId} />],
                 ...(report.reviewedAt
                   ? ([
-                      ["Reviewed", formatDate(report.reviewedAt)],
-                      ["Reviewer ID", <RecordId value={report.reviewerId} />],
+                      [t("Reviewed"), formatDate(report.reviewedAt)],
+                      [
+                        t("Reviewer ID"),
+                        <RecordId value={report.reviewerId} />,
+                      ],
                     ] as [string, import("react").ReactNode][])
                   : []),
               ]}
@@ -338,7 +356,7 @@ function ReportDialog({
               href={`/admin/events?eventId=${encodeURIComponent(report.eventId)}`}
               className={buttonVariants({ variant: "outline" })}
             >
-              View reported event
+              {t("View reported event")}
             </Link>
             <ActionFeedback error={model.error} success={model.success} />
             {model.canReview && (
@@ -347,7 +365,9 @@ function ReportDialog({
                 className="grid gap-3 border-t pt-4"
               >
                 <Field>
-                  <FieldLabel htmlFor="review-decision">Decision</FieldLabel>
+                  <FieldLabel htmlFor="review-decision">
+                    {t("Decision")}
+                  </FieldLabel>
                   <NativeSelect
                     id="review-decision"
                     name="decision"
@@ -356,18 +376,20 @@ function ReportDialog({
                     disabled={model.pending}
                   >
                     <NativeSelectOption value="" disabled>
-                      Select decision
+                      {t("Select decision")}
                     </NativeSelectOption>
                     <NativeSelectOption value="CONFIRM">
-                      Confirm report
+                      {t("Confirm report")}
                     </NativeSelectOption>
                     <NativeSelectOption value="DISMISS">
-                      Dismiss report
+                      {t("Dismiss report")}
                     </NativeSelectOption>
                   </NativeSelect>
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="review-note">Review note</FieldLabel>
+                  <FieldLabel htmlFor="review-note">
+                    {t("Review note")}
+                  </FieldLabel>
                   <Textarea
                     id="review-note"
                     name="note"
@@ -382,7 +404,7 @@ function ReportDialog({
                   className="justify-self-end"
                   disabled={model.pending}
                 >
-                  {model.pending ? "Saving…" : "Save decision"}
+                  {model.pending ? t("Saving…") : t("Save decision")}
                 </Button>
               </form>
             )}
@@ -403,14 +425,14 @@ export function AdminSupport({ sessionId, params }: SectionProps) {
       <Filters onApply={filters.apply} onReset={filters.reset}>
         <FilterSelect
           id="support-status"
-          title="Case status"
+          title={t("Case status")}
           values={supportStatuses}
           value={filters.draft.status}
           onChange={(value) => filters.change("status", value)}
         />
         <FilterInput
           id="support-event"
-          label="Event ID"
+          label={t("Event ID")}
           pattern={uuidPattern}
           value={filters.draft.eventId ?? ""}
           onChange={(e) => filters.change("eventId", e.currentTarget.value)}
@@ -423,16 +445,18 @@ export function AdminSupport({ sessionId, params }: SectionProps) {
               filters.change("escalatedOnly", checked === true)
             }
           />
-          <FieldLabel htmlFor="escalated-only">Escalated only</FieldLabel>
+          <FieldLabel htmlFor="escalated-only">
+            {t("Escalated only")}
+          </FieldLabel>
         </div>
       </Filters>
       <AdminTable
-        caption="Support cases"
-        columns={["Subject", "Status", "Queue", "Updated", ""]}
+        caption={t("Support cases")}
+        columns={[t("Subject"), t("Status"), t("Queue"), t("Updated"), ""]}
         items={query.data?.items ?? []}
         rowKey={(item) => item.id}
         state={query}
-        empty="No support cases match these filters."
+        empty={t("No support cases match these filters.")}
         pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
         cells={(item) => [
           <div className="min-w-40">
@@ -442,12 +466,12 @@ export function AdminSupport({ sessionId, params }: SectionProps) {
             </div>
           </div>,
           <StatusBadge value={item.status} />,
-          item.escalatedAt ? "Escalated" : label(item.type),
+          item.escalatedAt ? t("Escalated") : label(item.type),
           <span className="whitespace-nowrap">
             {formatDate(item.updatedAt)}
           </span>,
           <RecordButton onClick={() => select(item.id)}>
-            View case
+            {t("View case")}
           </RecordButton>,
         ]}
       />
@@ -475,32 +499,32 @@ function SupportDialog({
   const query = useAdminSupportCaseViewModel(sessionId, id)
   const item = query.data?.supportCase
   return (
-    <AdminDialog title={item?.subject ?? "Support case"} onClose={onClose}>
+    <AdminDialog title={item?.subject ?? t("Support case")} onClose={onClose}>
       <QueryContent state={query}>
         {item && (
           <div className="space-y-4">
             <Details
               fields={[
-                ["Status", <StatusBadge value={item.status} />],
-                ["Category", label(item.category)],
-                ["Requester ID", <RecordId value={item.requesterUserId} />],
+                [t("Status"), <StatusBadge value={item.status} />],
+                [t("Category"), label(item.category)],
+                [t("Requester ID"), <RecordId value={item.requesterUserId} />],
                 [
-                  "Assignee ID",
+                  t("Assignee ID"),
                   <RecordId value={item.assignedSupportUserId} />,
                 ],
-                ["Event ID", <RecordId value={item.eventId} />],
-                ["Order ID", <RecordId value={item.orderId} />],
-                ["Ticket ID", <RecordId value={item.ticketId} />],
-                ["Escalated", formatDate(item.escalatedAt)],
+                [t("Event ID"), <RecordId value={item.eventId} />],
+                [t("Order ID"), <RecordId value={item.orderId} />],
+                [t("Ticket ID"), <RecordId value={item.ticketId} />],
+                [t("Escalated"), formatDate(item.escalatedAt)],
               ]}
             />
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold">Conversation</h3>
+              <h3 className="text-sm font-semibold">{t("Conversation")}</h3>
               <Link
                 className={buttonVariants({ variant: "outline", size: "sm" })}
                 href={`/support/${encodeURIComponent(item.id)}`}
               >
-                Open conversation
+                {t("Open conversation")}
               </Link>
               <ul className="space-y-2">
                 {query.data?.messages.map((message) => (
@@ -526,3 +550,4 @@ function SupportDialog({
     </AdminDialog>
   )
 }
+

@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 
@@ -47,7 +48,7 @@ export function useEventModerationViewModel(
     onSuccess: (_, command) => {
       setConfirming(false)
       setSuccess(
-        command === "reinstate" ? "Event reinstated." : "Event suspended."
+        command === "reinstate" ? t("Event reinstated.") : t("Event suspended.")
       )
     },
   })
@@ -62,7 +63,7 @@ export function useEventModerationViewModel(
     const reason = String(
       new FormData(form.currentTarget).get("reason") ?? ""
     ).trim()
-    setValidation(reason ? null : "Enter a suspension reason.")
+    setValidation(reason ? null : t("Enter a suspension reason."))
     if (reason) action.mutate({ reason })
   }
 
@@ -126,7 +127,7 @@ export function useEventReportViewModel(sessionId: number, reportId: string) {
     const values = new FormData(event.currentTarget)
     const decision = values.get("decision")
     const note = String(values.get("note") ?? "").trim()
-    setValidation(note ? null : "Enter a review note.")
+    setValidation(note ? null : t("Enter a review note."))
     if ((decision === "CONFIRM" || decision === "DISMISS") && note)
       review.mutate({ decision, note })
   }
@@ -137,7 +138,7 @@ export function useEventReportViewModel(sessionId: number, reportId: string) {
     submit,
     pending: review.isPending,
     error: validation ?? adminError(review.error),
-    success: review.isSuccess ? "Review saved." : null,
+    success: review.isSuccess ? t("Review saved.") : null,
   }
 }
 
@@ -172,3 +173,4 @@ export function useAdminSupportCaseViewModel(
     useQuery(adminRepository.supportCase(sessionId, caseId))
   )
 }
+

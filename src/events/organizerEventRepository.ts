@@ -37,6 +37,10 @@ export type SubmissionProgress = {
   tickets: Map<string, { id: string; request: TicketRequest }>
 }
 
+export type PublishStage =
+  | { kind: "createDraft" | "updateDraft" | "saveVenue" | "publish" }
+  | { kind: "saveTicket"; position: number; total: number }
+
 const apiBase = (
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080"
 ).replace(/\/+$/, "")
@@ -118,13 +122,13 @@ export async function publishNewEvent(
   sessionId: number,
   submission: EventSubmission,
   progress: SubmissionProgress,
-  onStep: (message: string, recoveryStep: number) => void
+  onStep: (stage: PublishStage, recoveryStep: number) => void
 ) {
   const requestWithSession = <T>(request: (token: string) => Promise<T>) =>
     sessionRepository.authenticatedRequest(sessionId, request)
 
   if (!progress.draftEventId) {
-    onStep("Creating event draft…", 4)
+    onStep({ kind: "createDraft" }, 4)
     const { id } = await requestWithSession((token) =>
       createEvent(token, submission.details)
     )
@@ -134,7 +138,7 @@ export async function publishNewEvent(
   } else if (
     JSON.stringify(progress.details) !== JSON.stringify(submission.details)
   ) {
-    onStep("Updating event draft…", 0)
+    onStep({ kind: "updateDraft" }, 0)
     const eventId = progress.draftEventId
     await requestWithSession((token) =>
       updateEvent(token, eventId, submission.details)
@@ -144,7 +148,7 @@ export async function publishNewEvent(
 
   const eventId = progress.draftEventId
   if (JSON.stringify(progress.venue) !== JSON.stringify(submission.venue)) {
-    onStep("Saving venue…", 2)
+    onStep({ kind: "saveVenue" }, 2)
     await requestWithSession((token) =>
       attachVenue(token, eventId, submission.venue)
     )
@@ -156,7 +160,11 @@ export async function publishNewEvent(
     if (JSON.stringify(saved?.request) === JSON.stringify(request)) continue
 
     onStep(
-      `Saving ticket tier ${index + 1} of ${submission.tickets.length}…`,
+      {
+        kind: "saveTicket",
+        position: index + 1,
+        total: submission.tickets.length,
+      },
       3
     )
     if (saved) {
@@ -176,7 +184,7 @@ export async function publishNewEvent(
     }
   }
 
-  onStep("Publishing event…", 4)
+  onStep({ kind: "publish" }, 4)
   await requestWithSession((token) => publishEvent(token, eventId))
   await refreshEventQueries(client, sessionId, eventId)
   return eventId
@@ -207,3 +215,4 @@ export function submissionError(error: unknown) {
     return "Could not reach the event service. Check your connection and try again."
   return "Could not save the event. Please try again."
 }
+

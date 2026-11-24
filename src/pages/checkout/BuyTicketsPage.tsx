@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon } from "lucide-react"
 import { Link } from "wouter"
 
@@ -20,11 +21,13 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
         className={buttonVariants({ variant: "ghost" })}
       >
         <ArrowLeftIcon aria-hidden="true" />
-        Back to event
+        {t("Back to event")}
       </Link>
 
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Get tickets</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {t("Get tickets")}
+        </h1>
         {model.status === "ready" && (
           <>
             <p className="text-lg font-medium">{model.event.title}</p>
@@ -40,15 +43,15 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
 
       {model.status === "loading" && (
         <p role="status" className="flex items-center gap-2 text-sm">
-          <Spinner aria-hidden="true" /> Loading event…
+          <Spinner aria-hidden="true" /> {t("Loading event…")}
         </p>
       )}
-      {model.status === "missing" && <p>This event is unavailable.</p>}
+      {model.status === "missing" && <p>{t("This event is unavailable.")}</p>}
       {model.status === "error" && (
         <div className="space-y-2">
-          <FieldError>Couldn’t load this event.</FieldError>
+          <FieldError>{t("Couldn’t load this event.")}</FieldError>
           <Button variant="outline" onClick={model.retry}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       )}
@@ -57,22 +60,24 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
           {model.salesMessage && <p role="status">{model.salesMessage}</p>}
           {model.loadingTickets || model.loadingAvailability ? (
             <p role="status" className="flex items-center gap-2 text-sm">
-              <Spinner aria-hidden="true" /> Checking tickets…
+              <Spinner aria-hidden="true" /> {t("Checking tickets…")}
             </p>
           ) : null}
           {model.ticketError && (
             <div className="space-y-2">
-              <FieldError>Couldn’t load ticket types.</FieldError>
+              <FieldError>{t("Couldn’t load ticket types.")}</FieldError>
               <Button variant="outline" onClick={model.retryTickets}>
-                Try again
+                {t("Try again")}
               </Button>
             </div>
           )}
           {model.availabilityError && (
             <div className="space-y-2">
-              <FieldError>Couldn’t check ticket availability.</FieldError>
+              <FieldError>
+                {t("Couldn’t check ticket availability.")}
+              </FieldError>
               <Button variant="outline" onClick={model.retryAvailability}>
-                Try again
+                {t("Try again")}
               </Button>
             </div>
           )}
@@ -80,7 +85,7 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
             !model.loadingTickets &&
             !model.ticketError &&
             model.tickets.length === 0 && (
-              <p>There are no tickets listed for this event.</p>
+              <p>{t("There are no tickets listed for this event.")}</p>
             )}
           {model.tickets.length > 0 && (
             <TicketOrderForm
@@ -97,3 +102,4 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
     </main>
   )
 }
+

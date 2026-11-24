@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useSearch } from "wouter"
@@ -42,7 +43,7 @@ export function useRequestPasswordResetViewModel() {
           message:
             error instanceof Error
               ? error.message
-              : "Could not request a reset link.",
+              : t("Could not request a reset link."),
         })
       }
     }),
@@ -71,7 +72,7 @@ export function useFinishPasswordResetViewModel(key: string) {
           message:
             error instanceof Error
               ? error.message
-              : "Could not reset your password.",
+              : t("Could not reset your password."),
         })
       }
     }),
@@ -81,3 +82,4 @@ export function useFinishPasswordResetViewModel(key: string) {
 export function usePasswordResetKey() {
   return new URLSearchParams(useSearch()).get("key")?.trim() ?? ""
 }
+

@@ -1,3 +1,4 @@
+import { t, numberFormat } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 
@@ -10,7 +11,7 @@ import {
 } from "./useCampaignLinkViewModel"
 
 const codePattern = /^[A-Z0-9]{6,20}$/
-const kzt = new Intl.NumberFormat(undefined, {
+const kzt = numberFormat({
   style: "currency",
   currency: "KZT",
 })
@@ -78,12 +79,12 @@ export function useCheckoutPromoViewModel(
       checkoutRejection ??
       linkError ??
       (code && selections.length > 0 && !canQuote
-        ? "An order can include up to 100 tickets across 30 ticket types."
+        ? t("An order can include up to 100 tickets across 30 ticket types.")
         : undefined) ??
       (request && quote.isError
         ? promoError(
             quote.error,
-            "Couldn’t check the promo code. Try applying it again."
+            t("Couldn’t check the promo code. Try applying it again.")
           )
         : undefined),
     retryLink: usesLink && link.status === "error" ? link.retry : undefined,
@@ -100,7 +101,8 @@ export function useCheckoutPromoViewModel(
     },
     reject: (error: unknown) =>
       setCheckoutRejection(
-        promoError(error, "This promo code could not be applied.")
+        promoError(error, t("This promo code could not be applied."))
       ),
   }
 }
+

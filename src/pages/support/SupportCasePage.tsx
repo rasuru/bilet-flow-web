@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon, SendIcon } from "lucide-react"
 import { Link } from "wouter"
 import type { SupportStatus } from "@/api/support"
@@ -30,27 +31,27 @@ export function SupportCasePage({
   return (
     <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
       <Link href="/support" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> Support inbox
+        <ArrowLeftIcon aria-hidden="true" /> {t("Support inbox")}
       </Link>
       {model.loading && (
         <p role="status" className="flex items-center gap-2">
-          <Spinner /> Loading conversation…
+          <Spinner /> {t("Loading conversation…")}
         </p>
       )}
       {model.error && (
         <div role="alert">
-          {model.error}{" "}
+          {t(model.error)}{" "}
           <Button variant="outline" onClick={model.retry}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       )}
       {model.missing && (
         <Card>
           <CardHeader>
-            <CardTitle>Request not found</CardTitle>
+            <CardTitle>{t("Request not found")}</CardTitle>
             <CardDescription>
-              This request is unavailable to your account.
+              {t("This request is unavailable to your account.")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -60,7 +61,7 @@ export function SupportCasePage({
           <Card>
             <CardHeader>
               <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                {item.staff ? "Staff inbox" : "My request"}
+                {item.staff ? t("Staff inbox") : t("My request")}
               </p>
               <CardTitle>
                 <h1 className="text-2xl break-words">{item.subject}</h1>
@@ -72,7 +73,7 @@ export function SupportCasePage({
             <CardContent className="space-y-4">
               {item.context.length > 0 && (
                 <div className="flex flex-wrap gap-3 text-sm">
-                  Related:{" "}
+                  {t("Related:")}{" "}
                   {item.context.map((link) => (
                     <Link
                       key={link.href}
@@ -86,16 +87,18 @@ export function SupportCasePage({
               )}
               {item.escalated && (
                 <p className="text-sm text-muted-foreground">
-                  Forwarded to platform support.
+                  {t("Forwarded to platform support.")}
                 </p>
               )}
               {item.staff && (
                 <div className="space-y-4 border-t pt-4">
-                  <p className="text-sm">Assigned to: {item.assignedTo}</p>
+                  <p className="text-sm">
+                    {t("Assigned to:")} {item.assignedTo}
+                  </p>
                   {item.canReply && (
                     <div className="flex flex-wrap items-end gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="case-status">Case status</Label>
+                        <Label htmlFor="case-status">{t("Case status")}</Label>
                         <NativeSelect
                           id="case-status"
                           value={item.status}
@@ -111,7 +114,7 @@ export function SupportCasePage({
                               key={status.value}
                               value={status.value}
                             >
-                              {status.label}
+                              {t(status.label)}
                             </NativeSelectOption>
                           ))}
                         </NativeSelect>
@@ -123,7 +126,9 @@ export function SupportCasePage({
                           model.assign()
                         }}
                       >
-                        <Label htmlFor="support-agent">Support agent ID</Label>
+                        <Label htmlFor="support-agent">
+                          {t("Support agent ID")}
+                        </Label>
                         <div className="flex gap-2">
                           <Input
                             id="support-agent"
@@ -140,7 +145,9 @@ export function SupportCasePage({
                             variant="outline"
                             disabled={model.busy}
                           >
-                            {model.assignee.trim() ? "Assign" : "Assign to me"}
+                            {model.assignee.trim()
+                              ? t("Assign")
+                              : t("Assign to me")}
                           </Button>
                         </div>
                       </form>
@@ -150,7 +157,7 @@ export function SupportCasePage({
                           disabled={model.busy}
                           onClick={model.escalate}
                         >
-                          Escalate to platform support
+                          {t("Escalate to platform support")}
                         </Button>
                       )}
                     </div>
@@ -159,7 +166,7 @@ export function SupportCasePage({
               )}
               {model.actionError && (
                 <p role="alert" className="text-sm text-destructive">
-                  {model.actionError}
+                  {t(model.actionError)}
                 </p>
               )}
             </CardContent>
@@ -167,11 +174,11 @@ export function SupportCasePage({
           <Card>
             <CardHeader>
               <CardTitle>
-                <h2>Conversation</h2>
+                <h2>{t("Conversation")}</h2>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <ol className="space-y-4" aria-label="Case messages">
+              <ol className="space-y-4" aria-label={t("Case messages")}>
                 {item.messages.map((message) => (
                   <li
                     key={message.id}
@@ -203,26 +210,26 @@ export function SupportCasePage({
                     model.send()
                   }}
                 >
-                  <Label htmlFor="support-reply">Your reply</Label>
+                  <Label htmlFor="support-reply">{t("Your reply")}</Label>
                   <Textarea
                     disabled={model.busy}
                     id="support-reply"
                     value={model.draft}
                     onChange={(e) => model.setDraft(e.target.value)}
                     maxLength={4000}
-                    placeholder="Write a reply…"
+                    placeholder={t("Write a reply…")}
                     required
                   />
                   <div className="flex justify-end">
                     <Button type="submit" disabled={model.busy}>
                       <SendIcon aria-hidden="true" />{" "}
-                      {model.busy ? "Sending…" : "Send reply"}
+                      {model.busy ? t("Sending…") : t("Send reply")}
                     </Button>
                   </div>
                 </form>
               ) : (
                 <p className="border-t pt-4 text-sm text-muted-foreground">
-                  This request has been resolved. Replies are closed.
+                  {t("This request has been resolved. Replies are closed.")}
                 </p>
               )}
             </CardContent>
@@ -232,3 +239,4 @@ export function SupportCasePage({
     </main>
   )
 }
+

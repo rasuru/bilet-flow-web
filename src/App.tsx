@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/i18n/locale"
 import { lazy, Suspense, type ReactNode } from "react"
 import { Link, Redirect, Route, Switch } from "wouter"
 
@@ -51,7 +52,7 @@ function SignedInRoute({
   if (status === "restoring") {
     return (
       <main className="flex min-h-svh items-center justify-center p-6">
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("Loading…")}</p>
       </main>
     )
   }
@@ -60,13 +61,15 @@ function SignedInRoute({
     return (
       <main className="flex min-h-svh items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <h1 className="text-2xl font-semibold">Could not load account</h1>
+          <h1 className="text-2xl font-semibold">
+            {t("Could not load account")}
+          </h1>
 
           <p className="mt-2 text-sm text-destructive" role="alert">
-            {errorMessage}
+            {t(errorMessage ?? "Could not restore your session.")}
           </p>
           <Button className="mt-4" onClick={() => void retry()}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       </main>
@@ -77,6 +80,7 @@ function SignedInRoute({
 }
 
 export function App() {
+  useLanguage()
   return (
     <Switch>
       <Route path="/" component={HomePage} />
@@ -88,7 +92,7 @@ export function App() {
                 <Suspense
                   fallback={
                     <main className="grid min-h-svh place-items-center">
-                      <Spinner aria-label="Loading administration" />
+                      <Spinner aria-label={t("Loading administration")} />
                     </main>
                   }
                 >
@@ -102,13 +106,13 @@ export function App() {
               ) : (
                 <main className="mx-auto max-w-lg space-y-4 px-4 py-12">
                   <h1 className="text-2xl font-semibold">
-                    Administrator access required
+                    {t("Administrator access required")}
                   </h1>
                   <Link
                     href="/"
                     className={buttonVariants({ variant: "outline" })}
                   >
-                    Back to site
+                    {t("Back to site")}
                   </Link>
                 </main>
               )
@@ -189,13 +193,40 @@ export function App() {
         )}
       </Route>
       <Route path="/support/new">
-        <SignedInRoute>{({ account, sessionId }) => <CreateSupportPage key={sessionId} accountId={account.id} sessionId={sessionId} />}</SignedInRoute>
+        <SignedInRoute>
+          {({ account, sessionId }) => (
+            <CreateSupportPage
+              key={sessionId}
+              accountId={account.id}
+              sessionId={sessionId}
+            />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/support/:caseId">
-        {({ caseId }) => <SignedInRoute>{({ account, sessionId }) => <SupportCasePage key={`${sessionId}:${caseId}`} accountId={account.id} sessionId={sessionId} caseId={caseId} />}</SignedInRoute>}
+        {({ caseId }) => (
+          <SignedInRoute>
+            {({ account, sessionId }) => (
+              <SupportCasePage
+                key={`${sessionId}:${caseId}`}
+                accountId={account.id}
+                sessionId={sessionId}
+                caseId={caseId}
+              />
+            )}
+          </SignedInRoute>
+        )}
       </Route>
       <Route path="/support">
-        <SignedInRoute>{({ account, sessionId }) => <SupportListPage key={sessionId} accountId={account.id} sessionId={sessionId} />}</SignedInRoute>
+        <SignedInRoute>
+          {({ account, sessionId }) => (
+            <SupportListPage
+              key={sessionId}
+              accountId={account.id}
+              sessionId={sessionId}
+            />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/sign-in">
         <SignedInRoute>{() => <Redirect to="/" />}</SignedInRoute>
@@ -222,7 +253,7 @@ export function App() {
 
       <Route>
         <main className="p-6">
-          <p>Page not found</p>
+          <p>{t("Page not found")}</p>
         </main>
       </Route>
     </Switch>
@@ -230,5 +261,4 @@ export function App() {
 }
 
 export default App
-
 

@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 
@@ -112,7 +113,7 @@ export function useSuspendActivationViewModel(
     const reason = String(
       new FormData(event.currentTarget).get("reason") ?? ""
     ).trim()
-    setValidation(reason ? null : "Enter a suspension reason.")
+    setValidation(reason ? null : t("Enter a suspension reason."))
     if (reason) mutation.mutate(reason)
   }
 
@@ -164,7 +165,7 @@ export function useActivationFeeViewModel(sessionId: number) {
       !mutation.isPending,
     pending: mutation.isPending,
     error: validation ?? adminError(mutation.error),
-    success: mutation.isSuccess ? "Activation fee updated." : null,
+    success: mutation.isSuccess ? t("Activation fee updated.") : null,
   }
 }
 
@@ -197,6 +198,7 @@ export function useOperationsExportViewModel(sessionId: number) {
     submit,
     pending: download.isPending,
     error: adminError(download.error),
-    success: download.isSuccess ? "CSV download started." : null,
+    success: download.isSuccess ? t("CSV download started.") : null,
   }
 }
+

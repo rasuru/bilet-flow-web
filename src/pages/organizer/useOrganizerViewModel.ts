@@ -1,3 +1,4 @@
+import { t, dateFormat } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 
 import { ApiError } from "@/api/client"
@@ -12,7 +13,7 @@ const statusLabels: Record<EventStatus, string> = {
   CANCELLED: "Cancelled",
   SUSPENDED: "Suspended",
 }
-const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" })
+const date = dateFormat({ dateStyle: "medium" })
 
 export function useOrganizerViewModel(sessionId: number) {
   const query = useQuery(managedEventRepository.mineQuery(sessionId))
@@ -21,7 +22,7 @@ export function useOrganizerViewModel(sessionId: number) {
     error: query.isError
       ? query.error instanceof ApiError
         ? query.error.message
-        : "Couldn’t load your events."
+        : t("Couldn’t load your events.")
       : null,
     retry: () => void query.refetch(),
     events: (query.data ?? []).map((event) => ({
@@ -29,8 +30,9 @@ export function useOrganizerViewModel(sessionId: number) {
       title: event.title,
       date: date.format(new Date(event.startAt)),
       startAt: event.startAt,
-      status: statusLabels[event.status],
+      status: t(statusLabels[event.status]),
       campaignPath: organizerCampaignsPath(event.id),
     })),
   }
 }
+

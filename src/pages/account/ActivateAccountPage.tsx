@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { buttonVariants } from "@/components/ui/button"
 import { useActivateAccountViewModel } from "./useActivateAccountViewModel"
 
@@ -15,10 +16,12 @@ export function ActivateAccountPage() {
   if (!hasKey) {
     return (
       <PageContainer>
-        <h1 className="text-2xl font-semibold">Invalid activation link</h1>
+        <h1 className="text-2xl font-semibold">
+          {t("Invalid activation link")}
+        </h1>
 
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          This activation link does not contain an activation key.
+          {t("This activation link does not contain an activation key.")}
         </p>
 
         <a
@@ -27,7 +30,7 @@ export function ActivateAccountPage() {
             className: "mt-6",
           })}
         >
-          Go to login
+          {t("Go to login")}
         </a>
       </PageContainer>
     )
@@ -36,7 +39,9 @@ export function ActivateAccountPage() {
   if (isActivating) {
     return (
       <PageContainer>
-        <p className="text-sm text-muted-foreground">Activating account…</p>
+        <p className="text-sm text-muted-foreground">
+          {t("Activating account…")}
+        </p>
       </PageContainer>
     )
   }
@@ -44,13 +49,15 @@ export function ActivateAccountPage() {
   if (errorMessage !== undefined) {
     return (
       <PageContainer>
-        <h1 className="text-2xl font-semibold">Account activation failed</h1>
+        <h1 className="text-2xl font-semibold">
+          {t("Account activation failed")}
+        </h1>
 
         <p
           className="mt-2 text-sm leading-relaxed text-destructive"
           role="alert"
         >
-          {errorMessage}
+          {t(errorMessage)}
         </p>
 
         <a
@@ -60,7 +67,7 @@ export function ActivateAccountPage() {
             className: "mt-6",
           })}
         >
-          Go to login
+          {t("Go to login")}
         </a>
       </PageContainer>
     )
@@ -68,10 +75,10 @@ export function ActivateAccountPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold">Account verified</h1>
+      <h1 className="text-2xl font-semibold">{t("Account verified")}</h1>
 
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Your account has been activated. You can now log in.
+        {t("Your account has been activated. You can now log in.")}
       </p>
 
       <a
@@ -80,8 +87,9 @@ export function ActivateAccountPage() {
           className: "mt-6",
         })}
       >
-        Log in
+        {t("Log in")}
       </a>
     </PageContainer>
   )
 }
+

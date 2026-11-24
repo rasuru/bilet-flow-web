@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowUpRight, ShieldCheck } from "lucide-react"
 import { Link, useSearch } from "wouter"
 
@@ -31,7 +32,7 @@ export function AdminDashboardPage({
 }) {
   const search = useSearch()
   const section = getAdminSection(sectionId)
-  const title = section?.title ?? "Section not found"
+  const title = section?.title ?? t("Section not found")
 
   return (
     <div className="min-h-svh bg-muted/35 lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
@@ -49,7 +50,7 @@ export function AdminDashboardPage({
                 BiletFlow
               </span>
               <span className="block text-xs text-muted-foreground">
-                Administration
+                {t("Administration")}
               </span>
             </span>
           </Link>
@@ -61,11 +62,11 @@ export function AdminDashboardPage({
               className: "lg:hidden",
             })}
           >
-            Back to site <ArrowUpRight aria-hidden="true" />
+            {t("Back to site")} <ArrowUpRight aria-hidden="true" />
           </Link>
         </div>
         <nav
-          aria-label="Admin sections"
+          aria-label={t("Admin sections")}
           className="flex gap-2 overflow-x-auto px-3 pb-3 lg:flex-col lg:gap-4 lg:pb-5"
         >
           {adminNavigation.map((group) => (
@@ -75,7 +76,7 @@ export function AdminDashboardPage({
             >
               {group.title && (
                 <p className="mb-1 hidden px-2.5 text-xs font-medium text-muted-foreground lg:block">
-                  {group.title}
+                  {t(group.title)}
                 </p>
               )}
               {group.items.map((item) => {
@@ -93,7 +94,7 @@ export function AdminDashboardPage({
                     )}
                   >
                     <item.icon aria-hidden="true" className="size-4 shrink-0" />{" "}
-                    {item.title}
+                    {t(item.title)}
                   </Link>
                 )
               })}
@@ -107,7 +108,7 @@ export function AdminDashboardPage({
             href="/"
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            Back to site <ArrowUpRight aria-hidden="true" />
+            {t("Back to site")} <ArrowUpRight aria-hidden="true" />
           </Link>
           <Link
             href="/account/settings"
@@ -118,10 +119,12 @@ export function AdminDashboardPage({
         </header>
         <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:py-8 xl:px-8">
           <div className="space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              {t(title)}
+            </h1>
             {section && (
               <p className="text-sm text-muted-foreground">
-                {section.description}
+                {t(section.description)}
               </p>
             )}
           </div>
@@ -137,7 +140,7 @@ export function AdminDashboardPage({
               href="/admin"
               className={buttonVariants({ variant: "outline" })}
             >
-              Go to overview
+              {t("Go to overview")}
             </Link>
           )}
         </main>
@@ -180,3 +183,4 @@ function AdminSectionContent({
       return <AdminExports sessionId={sessionId} />
   }
 }
+

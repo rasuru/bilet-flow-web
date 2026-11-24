@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useId, useState } from "react"
 import { Controller } from "react-hook-form"
 
@@ -34,12 +35,12 @@ function PayoutAccountForm({
     <form noValidate onSubmit={model.submit}>
       <fieldset disabled={model.isSubmitting} className="flex flex-col gap-4">
         <AccountFormField
-          label="Account holder name"
+          label={t("Account holder name")}
           error={model.errors.holderName?.message}
           {...model.register("holderName")}
         />
         <AccountFormField
-          label="Kazakhstan IBAN"
+          label={t("Kazakhstan IBAN")}
           autoComplete="off"
           spellCheck={false}
           error={model.errors.iban?.message}
@@ -63,7 +64,7 @@ function PayoutAccountForm({
               />
               <FieldContent>
                 <FieldLabel htmlFor={consentId}>
-                  I agree to use this account for simulated payouts.
+                  {t("I agree to use this account for simulated payouts.")}
                 </FieldLabel>
                 <FieldError id={consentErrorId} errors={[fieldState.error]} />
               </FieldContent>
@@ -77,10 +78,10 @@ function PayoutAccountForm({
         )}
         <div className="flex flex-wrap gap-2">
           <Button type="submit">
-            {model.isSubmitting ? "Saving…" : "Save payout account"}
+            {model.isSubmitting ? t("Saving…") : t("Save payout account")}
           </Button>
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t("Cancel")}
           </Button>
         </div>
       </fieldset>
@@ -95,26 +96,27 @@ export function PayoutAccountSection({ sessionId }: { sessionId: number }) {
 
   return (
     <section className="space-y-4 rounded-xl border p-5">
-      <h2 className="text-lg font-semibold">Payout account</h2>
+      <h2 className="text-lg font-semibold">{t("Payout account")}</h2>
       <p className="text-sm text-muted-foreground">
-        BiletFlow simulates payouts. The backend checks the IBAN format and
-        displays a masked account number.
+        {t(
+          "BiletFlow simulates payouts. The backend checks the IBAN format and displays a masked account number."
+        )}
       </p>
       {model.isLoading ? (
         <p role="status" className="text-sm text-muted-foreground">
-          Loading payout account…
+          {t("Loading payout account…")}
         </p>
       ) : model.account === undefined ? (
         <>
           <p role="alert" className="text-sm text-destructive">
-            {model.error || "Could not load the payout account."}
+            {model.error || t("Could not load the payout account.")}
           </p>
           <Button
             type="button"
             variant="outline"
             onClick={() => void model.retry()}
           >
-            Try again
+            {t("Try again")}
           </Button>
         </>
       ) : isEditing ? (
@@ -132,7 +134,7 @@ export function PayoutAccountSection({ sessionId }: { sessionId: number }) {
           {model.account ? (
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-muted-foreground">Account holder</dt>
+                <dt className="text-muted-foreground">{t("Account holder")}</dt>
                 <dd className="wrap-anywhere">{model.account.holderName}</dd>
               </div>
               <div>
@@ -142,12 +144,12 @@ export function PayoutAccountSection({ sessionId }: { sessionId: number }) {
             </dl>
           ) : (
             <p className="text-sm text-muted-foreground">
-              You haven’t set up a payout account yet.
+              {t("You haven’t set up a payout account yet.")}
             </p>
           )}
           {saved && (
             <p role="status" className="text-sm">
-              Payout account saved.
+              {t("Payout account saved.")}
             </p>
           )}
           <Button
@@ -158,10 +160,13 @@ export function PayoutAccountSection({ sessionId }: { sessionId: number }) {
               setIsEditing(true)
             }}
           >
-            {model.account ? "Replace payout account" : "Set up payout account"}
+            {model.account
+              ? t("Replace payout account")
+              : t("Set up payout account")}
           </Button>
         </>
       )}
     </section>
   )
 }
+

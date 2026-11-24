@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
@@ -23,6 +24,7 @@ export function useEventTicketsViewModel(eventId: string) {
     id: ticket.id,
     href: ticketDetailsPath(ticket.id),
     attendee: ticket.attendeeEmail,
-    status: ticketStatusLabels[ticket.status],
+    status: t(ticketStatusLabels[ticket.status]),
   }))
 }
+

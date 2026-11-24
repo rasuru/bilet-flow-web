@@ -1,10 +1,11 @@
+import { t, dateFormat } from "@/i18n/locale"
 import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { ApiError } from "@/api/client"
 import { ticketRepository } from "@/tickets/ticketRepository"
 import { ticketStatusLabels } from "@/tickets/ticketPresentation"
 
-const dateTime = new Intl.DateTimeFormat(undefined, {
+const dateTime = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
@@ -57,15 +58,21 @@ export function useTicketDetailsViewModel(
 
   const seat = record.seat
   const seating = seat
-    ? `${seat.section} · Row ${seat.row} · Seat ${seat.seatNumber}${seat.accessible ? " · Accessible" : ""}`
+    ? t(
+        "{0} · Row {1} · Seat {2}{3}",
+        seat.section,
+        seat.row,
+        seat.seatNumber,
+        seat.accessible ? " · " + t("Accessible") : ""
+      )
     : record.ticket.seatId
-      ? "Assigned seat · details unavailable"
-      : "General admission"
+      ? t("Assigned seat · details unavailable")
+      : t("General admission")
 
   return {
     ...state,
     status: "ready",
-    title: event?.title ?? "Event details unavailable",
+    title: event?.title ?? t("Event details unavailable"),
     eventHref: event ? `/events/${encodeURIComponent(event.id)}` : null,
     date: event
       ? {
@@ -80,7 +87,7 @@ export function useTicketDetailsViewModel(
       "ticketCode" in record.ticket
         ? record.ticket.ticketCode
         : record.ticket.code,
-    statusLabel: ticketStatusLabels[record.ticket.status],
+    statusLabel: t(ticketStatusLabels[record.ticket.status]),
     eventCancelled: event?.status === "CANCELLED",
     mayAccessDocument,
     forAdmission,
@@ -92,8 +99,9 @@ export function useTicketDetailsViewModel(
     downloadError: pdf.isError
       ? pdf.error instanceof ApiError
         ? pdf.error.message
-        : "Couldn’t download the ticket PDF."
+        : t("Couldn’t download the ticket PDF.")
       : null,
     print: () => window.print(),
   } as const
 }
+
