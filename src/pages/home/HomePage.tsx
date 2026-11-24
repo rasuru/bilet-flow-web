@@ -24,7 +24,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { attendanceRepository } from "@/tickets/attendanceRepository"
 
 const discoveryPath = "/events"
-const organizerDashboardPath = "/organizer/dashboard"
+const organizerDashboardPath = "/organizer"
 const previewSize = 4
 const overviewSize = 3
 const attendeePreviewSize = 2
@@ -763,5 +763,6 @@ export function HomePage() {
     </main>
   )
 }
+
 
 

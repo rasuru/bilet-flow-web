@@ -54,4 +54,7 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+export { Button }
+// eslint-disable-next-line react-refresh/only-export-components -- Shared with links styled as buttons.
+export { buttonVariants }
+

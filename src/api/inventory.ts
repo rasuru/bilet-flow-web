@@ -60,8 +60,10 @@ function ticketTypePath(ticketTypeId: string) {
   return `/api/ticket-types/${encodeURIComponent(ticketTypeId)}`
 }
 
-export function getEventInventory(eventId: string) {
-  return requestJson<EventInventory>(`${eventPath(eventId)}/inventory`)
+export function getEventInventory(eventId: string, token?: string) {
+  return requestJson<EventInventory>(`${eventPath(eventId)}/inventory`, {
+    token,
+  })
 }
 
 export function listGeneralAdmissionAvailability(eventId: string) {
@@ -143,3 +145,4 @@ export function unhideTicketType(token: string, ticketTypeId: string) {
     method: "POST",
   })
 }
+

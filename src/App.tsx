@@ -24,9 +24,6 @@ import { OrganizerPage } from "@/pages/organizer/OrganizerPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
 
-import { Dashboard } from "@/pages/organizer/Dashboard"
-import Events from "@/pages/organizer/Events"
-
 const AdminDashboardPage = lazy(() =>
   import("@/pages/admin/AdminDashboardPage").then((module) => ({
     default: module.AdminDashboardPage,
@@ -133,10 +130,18 @@ export function App() {
       </Route>
 
       <Route path="/organizer/dashboard">
-        <SignedInRoute>{() => <Dashboard />}</SignedInRoute>
+        <Redirect to="/organizer" replace />
       </Route>
       <Route path="/organizer/events">
-        <SignedInRoute>{() => <Events />}</SignedInRoute>
+        <SignedInRoute>
+          {({ sessionId }) => (
+            <OrganizerPage
+              key={`${sessionId}:events`}
+              sessionId={sessionId}
+              section="events"
+            />
+          )}
+        </SignedInRoute>
       </Route>
 
       <Route path="/organizer/support">
@@ -268,5 +273,4 @@ export function App() {
 }
 
 export default App
-
 
