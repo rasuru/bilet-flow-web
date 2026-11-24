@@ -1147,6 +1147,40 @@ export const russian: Readonly<Record<string, string>> = {
   "{0} of {1} sold": "Продано {0} из {1}",
   "{0} will lose administrator access to this event.":
     "Пользователь {0} потеряет права администратора этого мероприятия.",
+  "Become an organizer": "Стать организатором",
+  "Browse events": "Смотреть мероприятия",
+  "Choose admission, ticket quantities and prices.":
+    "Выберите тип входа, количество билетов и цены.",
+  "Couldn’t load administrator usernames.":
+    "Не удалось загрузить имена администраторов.",
+  "Create a draft and set up ticket sales when you’re ready.":
+    "Создайте черновик и настройте продажу билетов, когда будете готовы.",
+  "Create a draft with your BiletFlow account. Add a venue and tickets when you’re ready, then publish from your organizer dashboard.":
+    "Создайте черновик в своём аккаунте BiletFlow. Добавьте площадку и билеты, затем опубликуйте мероприятие в кабинете организатора.",
+  "Email verification pending": "Почта ещё не подтверждена",
+  "Find upcoming events, get tickets, or start organizing your own.":
+    "Находите ближайшие мероприятия, покупайте билеты или организуйте своё.",
+  "Find your next event": "Найдите интересное мероприятие",
+  "Helpful links": "Полезные ссылки",
+  "Invite event administrators and track ticket sales.":
+    "Приглашайте администраторов и отслеживайте продажи билетов.",
+  "Loading account…": "Загрузка аккаунта…",
+  "Main navigation": "Основная навигация",
+  Organize: "Организаторам",
+  "Organize an event": "Организовать мероприятие",
+  "Planning an event?": "Планируете мероприятие?",
+  "Run your event": "Управляйте мероприятием",
+  "Save a draft": "Сохранить черновик",
+  "Set up tickets": "Настройте билеты",
+  "Sign in to create an event": "Войдите, чтобы создать мероприятие",
+  "Skip to main content": "Перейти к основному содержанию",
+  "Start a draft whenever you’re ready to plan your first event.":
+    "Создайте черновик, чтобы начать планировать первое мероприятие.",
+  "Start with the event name and schedule.":
+    "Начните с названия и расписания мероприятия.",
+  "Update your password": "Обновить пароль",
+  "View all events": "Все мероприятия",
+  "Welcome back, {0}": "С возвращением, {0}",
 }
 
 export const kazakh: Readonly<Record<string, string>> = {
@@ -2303,4 +2337,38 @@ export const kazakh: Readonly<Record<string, string>> = {
   "{0} of {1} sold": "{1} билеттің {0}-і сатылды",
   "{0} will lose administrator access to this event.":
     "{0} пайдаланушысы осы іс-шараның әкімші рұқсатынан айырылады.",
+  "Become an organizer": "Ұйымдастырушы болу",
+  "Browse events": "Іс-шараларды қарау",
+  "Choose admission, ticket quantities and prices.":
+    "Кіру түрін, билет санын және бағасын таңдаңыз.",
+  "Couldn’t load administrator usernames.":
+    "Әкімшілердің пайдаланушы аттарын жүктеу мүмкін болмады.",
+  "Create a draft and set up ticket sales when you’re ready.":
+    "Нобай жасап, дайын болғанда билет сатылымын баптаңыз.",
+  "Create a draft with your BiletFlow account. Add a venue and tickets when you’re ready, then publish from your organizer dashboard.":
+    "BiletFlow тіркелгіңізде нобай жасаңыз. Өткізу орны мен билеттерді қосып, іс-шараны ұйымдастырушы панелінен жариялаңыз.",
+  "Email verification pending": "Электрондық пошта әлі расталмаған",
+  "Find upcoming events, get tickets, or start organizing your own.":
+    "Алдағы іс-шараларды тауып, билет алыңыз немесе өз іс-шараңызды ұйымдастырыңыз.",
+  "Find your next event": "Келесі іс-шараңызды табыңыз",
+  "Helpful links": "Пайдалы сілтемелер",
+  "Invite event administrators and track ticket sales.":
+    "Іс-шара әкімшілерін шақырып, билет сатылымын бақылаңыз.",
+  "Loading account…": "Тіркелгі жүктелуде…",
+  "Main navigation": "Негізгі навигация",
+  Organize: "Ұйымдастыру",
+  "Organize an event": "Іс-шара ұйымдастыру",
+  "Planning an event?": "Іс-шара жоспарлап жүрсіз бе?",
+  "Run your event": "Іс-шараңызды басқарыңыз",
+  "Save a draft": "Нобайды сақтау",
+  "Set up tickets": "Билеттерді баптаңыз",
+  "Sign in to create an event": "Іс-шара жасау үшін кіріңіз",
+  "Skip to main content": "Негізгі мазмұнға өту",
+  "Start a draft whenever you’re ready to plan your first event.":
+    "Алғашқы іс-шараңызды жоспарлау үшін нобай жасаңыз.",
+  "Start with the event name and schedule.":
+    "Іс-шараның атауы мен кестесінен бастаңыз.",
+  "Update your password": "Құпиясөзді жаңарту",
+  "View all events": "Барлық іс-шаралар",
+  "Welcome back, {0}": "Қайта қош келдіңіз, {0}",
 }

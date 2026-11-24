@@ -1,15 +1,10 @@
+import { useEventReturn } from "@/components/site/useEventReturn"
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon } from "lucide-react"
 import { Link } from "wouter"
 import type { SupportCategory, SupportType } from "@/api/support"
 import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
@@ -24,20 +19,21 @@ export function CreateSupportPage({
   accountId: number
 }) {
   const model = useCreateSupportViewModel(sessionId)
+  const { href: eventReturn } = useEventReturn()
+  const returnState = model.returnTo.href.startsWith("/events/")
+    ? { eventReturn }
+    : undefined
   return (
-    <main className="mx-auto max-w-2xl space-y-5 px-4 py-6 sm:px-6">
-      <Link href="/support" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> {t("All requests")}
-      </Link>
+    <SitePage width="form">
+      <BackLink href={model.returnTo.href} state={returnState}>
+        {model.returnTo.label}
+      </BackLink>
+      <PageHeading
+        description={t("Describe your issue to start a support conversation.")}
+      >
+        {t("Contact support")}
+      </PageHeading>
       <Card>
-        <CardHeader>
-          <CardTitle>
-            <h1 className="text-2xl">{t("Contact support")}</h1>
-          </CardTitle>
-          <CardDescription>
-            {t("Describe your issue to start a support conversation.")}
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           <form
             aria-busy={model.busy}
@@ -137,7 +133,8 @@ export function CreateSupportPage({
             )}
             <div className="flex justify-end gap-2">
               <Link
-                href="/support"
+                href={model.returnTo.href}
+                state={returnState}
                 className={buttonVariants({ variant: "outline" })}
               >
                 {t("Cancel")}
@@ -149,7 +146,6 @@ export function CreateSupportPage({
           </form>
         </CardContent>
       </Card>
-    </main>
+    </SitePage>
   )
 }
-

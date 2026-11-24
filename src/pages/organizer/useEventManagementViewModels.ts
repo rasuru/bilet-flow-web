@@ -365,6 +365,18 @@ export function useEventStaffViewModel(
   const query = useQuery(
     managedEventRepository.userSearchQuery(sessionId, login)
   )
+  const directory = useQuery(
+    managedEventRepository.staffDirectoryQuery(
+      sessionId,
+      event.staff.map(({ userId }) => userId)
+    )
+  )
+  const knownLogins = new Map(
+    [...(directory.data ?? []), ...(query.data ?? [])].map(({ id, login }) => [
+      id,
+      login,
+    ])
+  )
   const save = useSaveManagement(
     ({ userId, action }: { userId: number; action: "assign" | "remove" }) =>
       managedEventRepository.changeStaff(
@@ -414,11 +426,13 @@ export function useEventStaffViewModel(
         ...user,
         assigned: assigned.has(user.id),
       })) ?? [],
+    directoryError: directory.isError,
+    retryDirectory: () => void directory.refetch(),
     staff: event.staff.map(({ userId, assignedAt }) => ({
       userId,
       name:
-        query.data?.find((user) => user.id === userId)?.login ??
-        t("User #{0}", userId),
+        knownLogins.get(userId) ??
+        (directory.isPending ? t("Loading account…") : t("User #{0}", userId)),
       assignedAt: dateTime.format(new Date(assignedAt)),
     })),
     removing,

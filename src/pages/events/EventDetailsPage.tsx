@@ -1,5 +1,7 @@
+import { useEventReturn } from "@/components/site/useEventReturn"
+import { BackLink, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon, CalendarDaysIcon, MapPinIcon } from "lucide-react"
+import { CalendarDaysIcon, MapPinIcon } from "lucide-react"
 import { Link } from "wouter"
 
 import { AspectRatio } from "@/components/ui/aspect-ratio"
@@ -24,20 +26,21 @@ import { useEventDetailsViewModel } from "./useEventDetailsViewModel"
 
 export function EventDetailsPage({ eventId }: { eventId: string }) {
   const model = useEventDetailsViewModel(eventId)
+  const returnTo = useEventReturn()
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-      <Link href="/events" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" />
-        {t("Discover events")}
-      </Link>
+    <SitePage width="wide">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <BackLink href={returnTo.href}>{t(returnTo.label)}</BackLink>
+        <Link
+          href={`/support/new?eventId=${encodeURIComponent(eventId)}`}
+          state={{ eventReturn: returnTo.href }}
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          {t("Get event support")}
+        </Link>
+      </div>
 
-      <Link
-        href={`/support/new?eventId=${encodeURIComponent(eventId)}`}
-        className={buttonVariants({ variant: "outline" })}
-      >
-        {t("Get event support")}
-      </Link>
       {model.status === "loading" && <Loading>{t("Loading event…")}</Loading>}
 
       {model.status === "missing" && (
@@ -71,7 +74,7 @@ export function EventDetailsPage({ eventId }: { eventId: string }) {
       {model.status === "ready" && (
         <EventDetails model={model} eventId={eventId} />
       )}
-    </main>
+    </SitePage>
   )
 }
 
@@ -100,6 +103,7 @@ function EventDetails({
   eventId: string
 }) {
   const { event } = model
+  const { href: eventReturn } = useEventReturn()
   const yourTickets = useEventTicketsViewModel(eventId)
   const campaignToken = useCampaignToken()
   const promo = useCampaignLinkViewModel(eventId, campaignToken)
@@ -111,7 +115,7 @@ function EventDetails({
           <p className="text-sm font-medium text-muted-foreground">
             {event.category}
           </p>
-          <h1 className="text-3xl font-bold tracking-tight break-words sm:text-4xl">
+          <h1 className="text-[clamp(1.75rem,4vw,2.75rem)] leading-tight font-semibold tracking-tight wrap-anywhere">
             {event.title}
           </h1>
         </header>
@@ -339,6 +343,7 @@ function EventDetails({
                         : campaignToken,
                       true
                     )}
+                    state={{ eventReturn }}
                     className={buttonVariants({
                       size: "lg",
                       className: "w-full",
@@ -354,4 +359,3 @@ function EventDetails({
     </div>
   )
 }
-

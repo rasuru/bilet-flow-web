@@ -1,5 +1,6 @@
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon, ArrowUpRightIcon, PlusIcon } from "lucide-react"
+import { ArrowUpRightIcon, PlusIcon } from "lucide-react"
 import { Link } from "wouter"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
@@ -55,21 +56,21 @@ export function SupportListPage({
 }) {
   const model = useSupportListViewModel(sessionId, accountId)
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-      <Link href="/" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> {t("Home")}
-      </Link>
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">{t("Support")}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t("Get help and keep track of conversations.")}
-          </p>
-        </div>
-        <Link href="/support/new" className={buttonVariants()}>
-          <PlusIcon aria-hidden="true" /> {t("New request")}
-        </Link>
-      </header>
+    <SitePage width="content">
+      <BackLink href="/">{t("Home")}</BackLink>
+      <PageHeading
+        description={t("Get help and keep track of conversations.")}
+        action={
+          <Link
+            href="/support/new"
+            className={buttonVariants({ className: "min-h-10" })}
+          >
+            <PlusIcon aria-hidden="true" /> {t("New request")}
+          </Link>
+        }
+      >
+        {t("Support")}
+      </PageHeading>
       {model.loading && (
         <p role="status" className="flex items-center gap-2">
           <Spinner /> {t("Loading requests…")}
@@ -139,7 +140,6 @@ export function SupportListPage({
           )}
         </div>
       )}
-    </main>
+    </SitePage>
   )
 }
-

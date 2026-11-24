@@ -22,7 +22,8 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
     organizerEventFilters?: string
     organizerNotice?: string
   } | null>()
-  const filters = new URLSearchParams(historyState?.organizerEventFilters)
+  const [initialFilters] = useState(historyState?.organizerEventFilters)
+  const filters = new URLSearchParams(initialFilters)
   const returnSearch = new URLSearchParams()
   for (const key of ["q", "status", "pricing", "sort"]) {
     const value = filters.get(key)
@@ -86,6 +87,7 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
     managedEvent: query.data,
     notify: (text: string) => setNotice({ text }),
     dashboardPath,
+    dashboardFilters: returnSearch.toString(),
     loading: query.isPending,
     error: query.isError
       ? query.error instanceof ApiError

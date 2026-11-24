@@ -9,7 +9,10 @@ export function LanguagePicker() {
 
   return (
     <div className="mx-auto flex max-w-7xl items-center justify-end gap-2 px-4 pt-3 sm:px-6 print:hidden">
-      <GlobeIcon aria-hidden="true" className="size-4 text-muted-foreground" />
+      <GlobeIcon
+        aria-hidden="true"
+        className="hidden size-4 text-muted-foreground sm:block"
+      />
       <NativeSelect
         aria-label={t("Language")}
         value={language}
@@ -24,4 +27,3 @@ export function LanguagePicker() {
     </div>
   )
 }
-

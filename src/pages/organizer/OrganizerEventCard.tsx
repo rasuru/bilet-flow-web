@@ -23,11 +23,13 @@ export function OrganizerEventCard({
   onAction,
   onCopy,
   venueAction,
+  dashboardFilters,
 }: {
   event: OrganizerEvent
   onAction: (action: ManagedEventAction) => void
   onCopy: () => void
   venueAction?: ReactNode
+  dashboardFilters: string
 }) {
   const [firstAction] = event.actions
   return (
@@ -62,6 +64,7 @@ export function OrganizerEventCard({
         {venueAction}
         <Link
           href={event.campaignsPath}
+          state={{ organizerEventFilters: dashboardFilters }}
           className={buttonVariants({ variant: "outline", className: "h-10" })}
         >
           {t("Manage campaigns")}

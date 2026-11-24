@@ -1,6 +1,5 @@
-import { ArrowLeft } from "lucide-react"
+import { BackLink } from "@/components/site/SitePage"
 import { useEffect, useRef } from "react"
-import { Link } from "wouter"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -51,15 +50,9 @@ export function ManageEventPage({
   return (
     <OrganizerLayout>
       <div className="mx-auto w-full max-w-7xl min-w-0 space-y-6 px-4 py-5 sm:px-6 sm:py-7 xl:px-10">
-        <Link
-          href={model.dashboardPath}
-          className={buttonVariants({
-            variant: "ghost",
-            className: "-ml-2 h-10",
-          })}
-        >
-          <ArrowLeft aria-hidden="true" /> {t("Organizer dashboard")}
-        </Link>
+        <BackLink href={model.dashboardPath}>
+          {t("Organizer dashboard")}
+        </BackLink>
         <h1
           ref={title}
           tabIndex={-1}
@@ -137,6 +130,7 @@ export function ManageEventPage({
                 <CardContent className="space-y-3">
                   <OrganizerEventCard
                     event={event}
+                    dashboardFilters={model.dashboardFilters}
                     onAction={model.requestAction}
                     onCopy={() => {
                       if (event.copyPath)

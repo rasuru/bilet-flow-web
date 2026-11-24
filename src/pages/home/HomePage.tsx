@@ -1,6 +1,13 @@
 import { t, dateFormat, uiText } from "@/i18n/locale"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { LucideClock, LucideMapPin } from "lucide-react"
+import {
+  ArrowRight,
+  CalendarPlus,
+  LucideClock,
+  LucideMapPin,
+  Search,
+  Ticket,
+} from "lucide-react"
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import { Link, useLocation, useSearch } from "wouter"
 
@@ -12,7 +19,12 @@ import {
 } from "@/api/events"
 import { managedEventRepository } from "@/events/managedEventRepository"
 import { publicEventRepository } from "@/events/publicEventRepository"
-import { organizerCampaignsPath } from "@/promotions/campaignLinks"
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { manageEventPath } from "@/pages/organizer/organizerEventPresentation"
+import { ticketDetailsPath } from "@/tickets/ticketPresentation"
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -249,30 +261,39 @@ function useEventDiscoveryViewModel() {
   }
 }
 
-function EventCard({ card }: { card: ReturnType<typeof toCard> }) {
+function EventCard({
+  card,
+  returnHref,
+}: {
+  card: ReturnType<typeof toCard>
+  returnHref: string
+}) {
   return (
     <Link
       href={card.href}
+      state={{ eventReturn: returnHref }}
       className="group block h-full rounded-xl focus-visible:outline-2 focus-visible:outline-ring"
     >
       <Card className="h-full gap-0 overflow-hidden py-0 transition-colors group-hover:bg-muted/50">
-        <div className="bg-muted">
-          <AspectRatio ratio={16 / 9}>
-            {card.imageUrl && (
+        {card.imageUrl && (
+          <div className="bg-muted">
+            <AspectRatio ratio={16 / 9}>
               <img
                 src={card.imageUrl}
                 alt=""
                 loading="lazy"
-                className="size-full object-cover"
+                className="absolute inset-0 size-full object-cover"
               />
-            )}
-          </AspectRatio>
-        </div>
+            </AspectRatio>
+          </div>
+        )}
 
         <CardHeader className="gap-1 px-4 pt-4 pb-2">
           <p className="text-sm text-muted-foreground">{card.category}</p>
           <CardTitle>
-            <h2>{card.title}</h2>
+            <h3 className="text-lg font-semibold wrap-anywhere group-hover:underline">
+              {card.title}
+            </h3>
           </CardTitle>
         </CardHeader>
 
@@ -296,7 +317,9 @@ function EventCard({ card }: { card: ReturnType<typeof toCard> }) {
           )}
 
           {card.salesLabel && (
-            <p className="pt-1 text-sm font-medium">{card.salesLabel}</p>
+            <Badge variant="secondary" className="mt-2">
+              {card.salesLabel}
+            </Badge>
           )}
         </CardContent>
       </Card>
@@ -307,14 +330,13 @@ function EventCard({ card }: { card: ReturnType<typeof toCard> }) {
 export function EventDiscoveryPage() {
   const viewModel = useEventDiscoveryViewModel()
 
+  const search = useSearch()
+  const returnHref = search ? `/events?${search}` : "/events"
+
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-      <header className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">{t("Discover events")}</h1>
-        <Link href="/" className={buttonVariants({ variant: "outline" })}>
-          {t("Home")}
-        </Link>
-      </header>
+    <SitePage>
+      <BackLink href="/">{t("Home")}</BackLink>
+      <PageHeading>{t("Discover events")}</PageHeading>
 
       <Card>
         <CardContent>
@@ -423,10 +445,13 @@ export function EventDiscoveryPage() {
           </Card>
         )}
 
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul
+          aria-label={t("Public events")}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {viewModel.cards.map((card) => (
             <li key={card.id}>
-              <EventCard card={card} />
+              <EventCard card={card} returnHref={returnHref} />
             </li>
           ))}
         </ul>
@@ -466,7 +491,7 @@ export function EventDiscoveryPage() {
           </nav>
         )}
       </section>
-    </main>
+    </SitePage>
   )
 }
 
@@ -485,7 +510,8 @@ type OverviewEvent = {
   dateLabel: string
   venueName: string | null
   statusLabel?: string
-  href?: string
+  href: string
+  ticketHref?: string
 }
 
 function toOverviewEvent(event: PublicEvent): OverviewEvent {
@@ -495,6 +521,7 @@ function toOverviewEvent(event: PublicEvent): OverviewEvent {
     startAt: event.startAt,
     dateLabel: formatStartAt(event.startAt),
     venueName: event.venue?.name ?? null,
+    href: eventDetailsPath(event.id),
   }
 }
 
@@ -512,115 +539,117 @@ function toOrganizerOverview(events: PublicEvent[]) {
     hasEvents: events.length > 0,
     items: events
       .filter((event) => event.status === "DRAFT" || isCurrentEvent(event, now))
-      .sort(byStartDate)
+      .sort(
+        (first, second) =>
+          Number(first.status === "DRAFT") -
+            Number(second.status === "DRAFT") || byStartDate(first, second)
+      )
       .slice(0, overviewSize)
       .map((event) => ({
         ...toOverviewEvent(event),
         statusLabel: t(organizerStatusLabels[event.status]),
-        href: organizerCampaignsPath(event.id),
+        href: manageEventPath(event.id),
       })),
   }
 }
 
-function toAttendeeOverview(events: PublicEvent[]) {
+function toAttendeeOverview(
+  items: { event: PublicEvent; ticketIds: string[] }[]
+) {
   const now = Date.now()
-  return events
+  return items
     .filter(
-      (event) => event.status === "PUBLISHED" && isCurrentEvent(event, now)
+      ({ event }) => event.status === "PUBLISHED" && isCurrentEvent(event, now)
     )
-    .sort(byStartDate)
+    .sort((first, second) => byStartDate(first.event, second.event))
     .slice(0, attendeePreviewSize)
-    .map((event) => ({
+    .map(({ event, ticketIds }) => ({
       ...toOverviewEvent(event),
-      href: eventDetailsPath(event.id),
+      ticketHref:
+        ticketIds.length === 1 ? ticketDetailsPath(ticketIds[0]) : undefined,
     }))
 }
 
 function useHomeViewModel() {
   const session = useSessionViewModel()
+  const account = session.status === "signedIn" ? session.account : null
   const sessionId = session.status === "signedIn" ? session.sessionId : null
-
   const organized = useQuery({
     ...managedEventRepository.mineQuery(sessionId),
-    select: (result) => toOrganizerOverview(result),
+    select: toOrganizerOverview,
   })
   const attending = useQuery({
-    ...attendanceRepository.eventsQuery(
+    ...attendanceRepository.upcomingEventsQuery(
       sessionId,
-      session.status === "signedIn" && session.account.activated
-        ? session.account.email
-        : null
+      account?.activated ? account.email : null
     ),
-    select: (result) => toAttendeeOverview(result),
+    select: toAttendeeOverview,
   })
   const discovery = useQuery({
     ...publicEventRepository.discoveryQuery({ page: 0, size: previewSize }),
-    select: (result) => toResults(result),
+    select: toResults,
   })
-
-  const isSignedIn = sessionId !== null
-  const organizerItems = organized.data?.items ?? []
-  const attendeeItems = attending.data ?? []
-  const previewCards = discovery.data?.cards ?? []
-
+  const [, navigate] = useLocation()
+  const [search, setSearch] = useState("")
   return {
-    canAccessAdmin: session.canAccessAdmin,
-    accountLink:
-      session.status === "restoring"
-        ? null
-        : isSignedIn
-          ? { href: "/account/settings", label: t("Account") }
-          : { href: "/sign-in", label: t("Sign in") },
-    showOrganizerOverview: isSignedIn && !!organized.data?.hasEvents,
-    organizerItems,
-    showOrganizerEmpty: organizerItems.length === 0,
-    showAttendeeOverview: isSignedIn,
-    showAttendeeEmpty: attending.isSuccess && attendeeItems.length === 0,
-    attendeeItems,
-    showOverviewLoading:
-      isSignedIn && (organized.isPending || attending.isPending),
-    showOverviewError:
-      isSignedIn &&
-      ((organized.isError && !organized.data) ||
-        (attending.isError && !attending.data)),
-    retryOverview: () => {
-      if (organized.isError) void organized.refetch()
-      if (attending.isError) void attending.refetch()
+    account,
+    restoring: session.status === "restoring",
+    organized,
+    attending,
+    discovery,
+    search,
+    setSearch,
+    browse(event: FormEvent<HTMLFormElement>) {
+      event.preventDefault()
+      navigate(
+        discoveryHref("", { ...defaultFilters, query: search.trim() }, 0)
+      )
     },
-    previewCards,
-    showPreviewLoading: discovery.isPending,
-    showPreviewError: discovery.isError && !discovery.data,
-    showPreviewEmpty: !!discovery.data && previewCards.length === 0,
-    retryPreview: () => void discovery.refetch(),
   }
 }
 
-function OverviewList({ items }: { items: OverviewEvent[] }) {
+function OverviewList({
+  items,
+  organizer = false,
+}: {
+  items: OverviewEvent[]
+  organizer?: boolean
+}) {
   return (
-    <ul className="divide-y">
-      {items.map((item) => (
-        <li key={item.id} className="space-y-1 py-3 first:pt-0 last:pb-0">
-          <p className="text-sm font-medium">
-            {item.href ? (
-              <Link href={item.href} className="hover:underline">
-                {item.title}
-              </Link>
-            ) : (
-              item.title
-            )}
-          </p>
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <LucideClock aria-hidden="true" className="size-4 shrink-0" />
-            <time dateTime={item.startAt}>{item.dateLabel}</time>
-          </p>
-          {item.venueName && (
-            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <LucideMapPin aria-hidden="true" className="size-4 shrink-0" />
-              {item.venueName}
+    <ul className="divide-y border-y">
+      {items.map((item, index) => (
+        <li
+          key={item.id}
+          className="flex flex-wrap items-center justify-between gap-3 py-3"
+        >
+          <div className="min-w-0 space-y-1">
+            <Link
+              href={item.href}
+              state={organizer ? undefined : { eventReturn: "/" }}
+              className="rounded-sm font-semibold wrap-anywhere hover:underline"
+            >
+              {item.title}
+            </Link>
+            <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+              <time dateTime={item.startAt}>{item.dateLabel}</time>
+              {item.venueName && (
+                <span className="wrap-anywhere">{item.venueName}</span>
+              )}
             </p>
-          )}
-          {item.statusLabel && (
-            <p className="text-sm text-muted-foreground">{item.statusLabel}</p>
+            {item.statusLabel && (
+              <Badge variant="secondary">{item.statusLabel}</Badge>
+            )}
+          </div>
+          {item.ticketHref && (
+            <Link
+              href={item.ticketHref}
+              className={buttonVariants({
+                variant: index === 0 ? "default" : "outline",
+                className: "min-h-10",
+              })}
+            >
+              <Ticket aria-hidden="true" /> {t("Open ticket")}
+            </Link>
           )}
         </li>
       ))}
@@ -628,154 +657,275 @@ function OverviewList({ items }: { items: OverviewEvent[] }) {
   )
 }
 
+function HomeFailure({
+  children,
+  retry,
+}: {
+  children: string
+  retry: () => void
+}) {
+  return (
+    <Alert role="alert" variant="destructive">
+      <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+        <p>{children}</p>
+        <Button variant="outline" onClick={retry}>
+          {t("Try again")}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  )
+}
+
+function HomeSearch({
+  model,
+}: {
+  model: Pick<
+    ReturnType<typeof useHomeViewModel>,
+    "browse" | "search" | "setSearch"
+  >
+}) {
+  return (
+    <form
+      onSubmit={model.browse}
+      role="search"
+      className="flex min-w-0 flex-wrap items-end gap-2"
+    >
+      <Field className="min-w-0 flex-1 basis-40">
+        <FieldLabel htmlFor="home-search">{t("Search events")}</FieldLabel>
+        <Input
+          id="home-search"
+          className="h-11 bg-background"
+          type="search"
+          value={model.search}
+          onChange={(event) => model.setSearch(event.target.value)}
+          placeholder={t("Search by title or description")}
+        />
+      </Field>
+      <Button type="submit" className="h-11">
+        <Search aria-hidden="true" /> {t("Search")}
+      </Button>
+    </form>
+  )
+}
+
 export function HomePage() {
-  const viewModel = useHomeViewModel()
+  const model = useHomeViewModel()
+  const { account, organized, attending, discovery } = model
+  const nextEvents = attending.data ?? []
+  const cards = discovery.data?.cards ?? []
+  const firstName = account?.firstName?.trim() || account?.login
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="mr-auto text-2xl font-bold">BiletFlow</h1>
-        {viewModel.canAccessAdmin && (
-          <Link
-            href="/admin"
-            className={buttonVariants({ variant: "outline" })}
+    <SitePage className="space-y-8">
+      {firstName ? (
+        <PageHeading>{t("Welcome back, {0}", firstName)}</PageHeading>
+      ) : (
+        <section className="grid items-end gap-6 rounded-2xl border bg-primary/10 p-5 sm:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
+          <PageHeading
+            description={t(
+              "Find upcoming events, get tickets, or start organizing your own."
+            )}
           >
-            {t("Administration")}
-          </Link>
-        )}
-        <Link
-          href="/support"
-          className={buttonVariants({ variant: "outline" })}
-        >
-          {t("Support")}
-        </Link>
-        {viewModel.accountLink && (
-          <Link
-            href={viewModel.accountLink.href}
-            className={buttonVariants({ variant: "outline" })}
-          >
-            {viewModel.accountLink.label}
-          </Link>
-        )}
-      </header>
+            {t("Find your next event")}
+          </PageHeading>
+          <HomeSearch model={model} />
+        </section>
+      )}
 
-      <div className="grid gap-4 empty:hidden lg:grid-cols-2">
-        {viewModel.showOrganizerOverview && (
+      {model.restoring && (
+        <Skeleton
+          className="h-28"
+          role="status"
+          aria-label={t("Loading your events…")}
+        />
+      )}
+      {account && (
+        <div className="grid items-start gap-4 lg:grid-cols-2">
           <Card>
-            <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+            <CardHeader className="flex flex-wrap items-center justify-between gap-3">
               <CardTitle>
-                <h2>{t("Events you organize")}</h2>
-              </CardTitle>
-              <Link
-                href={organizerDashboardPath}
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                {t("Organizer dashboard")}
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {viewModel.showOrganizerEmpty ? (
-                <p className="text-sm text-muted-foreground">
-                  {t("No current or draft events.")}
-                </p>
-              ) : (
-                <OverviewList items={viewModel.organizerItems} />
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {viewModel.showAttendeeOverview && (
-          <Card>
-            <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle>
-                <h2>{t("Events you’re attending")}</h2>
+                <h2 className="text-xl font-semibold tracking-tight">
+                  {t("Upcoming events")}
+                </h2>
               </CardTitle>
               <Link
                 href="/my-tickets"
-                className={buttonVariants({ variant: "outline", size: "sm" })}
+                className={buttonVariants({
+                  className: "min-h-10",
+                  variant: nextEvents.length ? "outline" : "ghost",
+                })}
               >
-                {t("My tickets")}
+                <Ticket aria-hidden="true" /> {t("My tickets")}
               </Link>
             </CardHeader>
             <CardContent>
-              {viewModel.showAttendeeEmpty ? (
-                <p className="text-sm text-muted-foreground">
-                  {t("No upcoming events.")}
-                </p>
+              {attending.isPending ? (
+                <Skeleton
+                  className="h-16"
+                  role="status"
+                  aria-label={t("Loading your events…")}
+                />
+              ) : attending.isError ? (
+                <HomeFailure retry={() => void attending.refetch()}>
+                  {t("Couldn’t load your tickets and events.")}
+                </HomeFailure>
+              ) : nextEvents.length ? (
+                <OverviewList items={nextEvents} />
               ) : (
-                <OverviewList items={viewModel.attendeeItems} />
+                <div className="space-y-2">
+                  <p className="text-muted-foreground">
+                    {t("You don’t have any upcoming events.")}
+                  </p>
+                  <Link
+                    href="/events"
+                    className={buttonVariants({
+                      variant: "link",
+                      className: "px-0",
+                    })}
+                  >
+                    {t("Browse events")} <ArrowRight aria-hidden="true" />
+                  </Link>
+                </div>
               )}
             </CardContent>
           </Card>
-        )}
-      </div>
-
-      {viewModel.showOverviewLoading && (
-        <p role="status" className="flex items-center gap-2 text-sm">
-          <Spinner />
-          {t("Loading your events…")}
-        </p>
-      )}
-
-      {viewModel.showOverviewError && (
-        <div role="alert" className="flex flex-wrap items-center gap-2 text-sm">
-          {t("Some of your events couldn’t be loaded.")}
-          <Button variant="outline" size="sm" onClick={viewModel.retryOverview}>
-            {t("Try again")}
-          </Button>
+          <Card>
+            <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+              <CardTitle>
+                <h2 className="text-xl font-semibold tracking-tight">
+                  {t("Events you organize")}
+                </h2>
+              </CardTitle>
+              {organized.data?.hasEvents && (
+                <Link
+                  href={organizerDashboardPath}
+                  className={buttonVariants({
+                    variant: "outline",
+                    className: "min-h-10",
+                  })}
+                >
+                  {t("Organizer dashboard")}
+                </Link>
+              )}
+            </CardHeader>
+            <CardContent>
+              {organized.isPending ? (
+                <Skeleton
+                  className="h-16"
+                  role="status"
+                  aria-label={t("Loading your events…")}
+                />
+              ) : organized.isError ? (
+                <HomeFailure retry={() => void organized.refetch()}>
+                  {t("Couldn’t load your events.")}
+                </HomeFailure>
+              ) : organized.data?.hasEvents ? (
+                organized.data.items.length ? (
+                  <OverviewList items={organized.data.items} organizer />
+                ) : (
+                  <p className="text-muted-foreground">
+                    {t("No current or draft events.")}
+                  </p>
+                )
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-muted-foreground">
+                    {t(
+                      "Start a draft whenever you’re ready to plan your first event."
+                    )}
+                  </p>
+                  <Link
+                    href="/organizer/start"
+                    className={buttonVariants({
+                      variant: "link",
+                      className: "px-0",
+                    })}
+                  >
+                    <CalendarPlus aria-hidden="true" />{" "}
+                    {t("Become an organizer")}
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
-      <section aria-labelledby="home-public-events">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 id="home-public-events" className="text-lg font-semibold">
+      <section aria-labelledby="home-public-events" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2
+            id="home-public-events"
+            className="text-xl font-semibold tracking-tight"
+          >
             {t("Public events")}
           </h2>
           <Link
             href={discoveryPath}
-            className={buttonVariants({ variant: "secondary", size: "sm" })}
+            className={buttonVariants({
+              variant: "outline",
+              className: "min-h-10",
+            })}
           >
-            {t("View all")}
+            {t("View all events")} <ArrowRight aria-hidden="true" />
           </Link>
         </div>
 
-        {viewModel.showPreviewLoading && (
-          <p role="status" className="flex items-center gap-2 text-sm">
-            <Spinner />
-            {t("Loading public events…")}
-          </p>
-        )}
-        {viewModel.showPreviewError && (
-          <div
-            role="alert"
-            className="flex flex-wrap items-center gap-2 text-sm"
-          >
-            {t("Couldn’t load public events.")}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={viewModel.retryPreview}
-            >
-              {t("Try again")}
-            </Button>
+        {account && (
+          <div className="max-w-lg">
+            <HomeSearch model={model} />
           </div>
         )}
-        {viewModel.showPreviewEmpty && (
-          <p className="text-sm text-muted-foreground">
-            {t("No public events to show right now.")}
-          </p>
-        )}
 
-        <ul className="flex snap-x gap-4 overflow-x-auto p-1">
-          {viewModel.previewCards.map((card) => (
-            <li key={card.id} className="w-60 shrink-0 snap-start sm:w-72">
-              <EventCard card={card} />
-            </li>
-          ))}
-        </ul>
+        {discovery.isPending ? (
+          <Skeleton
+            className="h-36"
+            role="status"
+            aria-label={t("Loading public events…")}
+          />
+        ) : discovery.isError ? (
+          <HomeFailure retry={() => void discovery.refetch()}>
+            {t("Couldn’t load public events.")}
+          </HomeFailure>
+        ) : !cards.length ? (
+          <Card>
+            <CardContent>
+              <p className="text-muted-foreground">
+                {t("No public events to show right now.")}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {cards.map((card) => (
+              <li key={card.id}>
+                <EventCard card={card} returnHref="/" />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
-    </main>
+
+      {!account && !model.restoring && (
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border bg-card p-5">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold tracking-tight">
+              {t("Planning an event?")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t("Create a draft and set up ticket sales when you’re ready.")}
+            </p>
+          </div>
+          <Link
+            href="/organizer/start"
+            className={buttonVariants({
+              variant: "outline",
+              className: "min-h-10",
+            })}
+          >
+            <CalendarPlus aria-hidden="true" /> {t("Become an organizer")}
+          </Link>
+        </section>
+      )}
+    </SitePage>
   )
 }
-

@@ -1,8 +1,9 @@
+import { BackLink, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon, SendIcon } from "lucide-react"
+import { SendIcon } from "lucide-react"
 import { Link } from "wouter"
 import type { SupportStatus } from "@/api/support"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -29,10 +30,8 @@ export function SupportCasePage({
   const model = useSupportCaseViewModel(sessionId, accountId, caseId)
   const item = model.case
   return (
-    <main className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
-      <Link href="/support" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> {t("Support inbox")}
-      </Link>
+    <SitePage width="content">
+      <BackLink href="/support">{t("Support inbox")}</BackLink>
       {model.loading && (
         <p role="status" className="flex items-center gap-2">
           <Spinner /> {t("Loading conversation…")}
@@ -64,7 +63,9 @@ export function SupportCasePage({
                 {item.staff ? t("Staff inbox") : t("My request")}
               </p>
               <CardTitle>
-                <h1 className="text-2xl break-words">{item.subject}</h1>
+                <h1 className="text-[clamp(1.5rem,4vw,2.25rem)] leading-tight font-semibold wrap-anywhere">
+                  {item.subject}
+                </h1>
               </CardTitle>
               <CardDescription>
                 {item.category} · {item.recipient} · {item.statusLabel}
@@ -78,7 +79,7 @@ export function SupportCasePage({
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="text-primary underline underline-offset-4"
+                      className="text-foreground underline underline-offset-4"
                     >
                       {link.label}
                     </Link>
@@ -236,7 +237,6 @@ export function SupportCasePage({
           </Card>
         </>
       )}
-    </main>
+    </SitePage>
   )
 }
-

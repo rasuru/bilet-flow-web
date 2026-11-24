@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react"
+import { BackLink } from "@/components/site/SitePage"
 import { useEffect, useRef } from "react"
 import { t } from "@/i18n/locale"
 import { Link, Redirect } from "wouter"
@@ -71,15 +71,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
   return (
     <OrganizerLayout>
       <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-5 sm:px-6 sm:py-7">
-        <Link
-          href="/organizer"
-          className={buttonVariants({
-            variant: "ghost",
-            className: "-ml-2 h-10",
-          })}
-        >
-          <ArrowLeft aria-hidden="true" /> {t("Organizer dashboard")}
-        </Link>
+        <BackLink href="/organizer">{t("Organizer dashboard")}</BackLink>
         <h1 className="text-[clamp(1.75rem,4vw,2.5rem)] leading-tight font-semibold tracking-tight">
           {result ? t("Event saved locally") : t("Create new event")}
         </h1>

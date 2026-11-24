@@ -1,5 +1,7 @@
+import { BackLink, PageHeading } from "@/components/site/SitePage"
+import { LanguagePicker } from "@/i18n/LanguagePicker"
 import { t } from "@/i18n/locale"
-import { ArrowUpRight, ShieldCheck } from "lucide-react"
+import { ShieldCheck } from "lucide-react"
 import { Link, useSearch } from "wouter"
 
 import { buttonVariants } from "@/components/ui/button"
@@ -54,16 +56,10 @@ export function AdminDashboardPage({
               </span>
             </span>
           </Link>
-          <Link
-            href="/"
-            className={buttonVariants({
-              variant: "outline",
-              size: "sm",
-              className: "lg:hidden",
-            })}
-          >
-            {t("Back to site")} <ArrowUpRight aria-hidden="true" />
-          </Link>
+          <div className="flex flex-wrap justify-end gap-1 lg:hidden">
+            <BackLink href="/">{t("Home")}</BackLink>
+            <LanguagePicker />
+          </div>
         </div>
         <nav
           aria-label={t("Admin sections")}
@@ -104,12 +100,10 @@ export function AdminDashboardPage({
       </aside>
       <div className="min-w-0">
         <header className="hidden items-center justify-between gap-4 border-b bg-background px-6 py-3 lg:flex xl:px-8">
-          <Link
-            href="/"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-          >
-            {t("Back to site")} <ArrowUpRight aria-hidden="true" />
-          </Link>
+          <BackLink href="/">{t("Home")}</BackLink>
+          <div className="ml-auto">
+            <LanguagePicker />
+          </div>
           <Link
             href="/account/settings"
             className="max-w-56 truncate rounded-md text-sm font-medium text-muted-foreground hover:underline focus-visible:outline"
@@ -118,16 +112,14 @@ export function AdminDashboardPage({
           </Link>
         </header>
         <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:py-8 xl:px-8">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {t(title)}
-            </h1>
-            {section && (
-              <p className="text-sm text-muted-foreground">
-                {t(section.description)}
-              </p>
-            )}
-          </div>
+          {section?.id !== "overview" && (
+            <BackLink href="/admin">{t("Go to overview")}</BackLink>
+          )}
+          <PageHeading
+            description={section ? t(section.description) : undefined}
+          >
+            {t(title)}
+          </PageHeading>
           {section ? (
             <AdminSectionContent
               key={`${section.id}:${search}`}
@@ -183,4 +175,3 @@ function AdminSectionContent({
       return <AdminExports sessionId={sessionId} />
   }
 }
-

@@ -76,6 +76,16 @@ export function OrganizerEventStaff({
               {t("No event administrators assigned.")}
             </p>
           )}
+          {model.directoryError && (
+            <Alert role="alert" variant="destructive">
+              <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+                {t("Couldn’t load administrator usernames.")}
+                <Button variant="outline" onClick={model.retryDirectory}>
+                  {t("Try again")}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           {editable && (
             <>
               <p className="text-sm text-muted-foreground">

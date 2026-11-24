@@ -28,7 +28,7 @@ import {
   updateAssignedSeatingTicketType,
   updateGeneralAdmissionTicketType,
 } from "@/api/inventory"
-import { searchUsers } from "@/api/users"
+import { findDirectoryUsers } from "@/api/users"
 import { sessionRepository } from "@/auth/sessionRepository"
 import type { TicketRequest } from "./organizerEventRepository"
 
@@ -183,13 +183,36 @@ export const managedEventRepository = {
       queryKey: ["organizer", sessionId, "staff-search", login],
       queryFn: login
         ? () =>
-            sessionRepository.authenticatedRequest(sessionId, async (token) =>
-              (await searchUsers(token, `login:"${login}"`)).filter(
-                (user) => user.login.toLowerCase() === login
-              )
+            sessionRepository.authenticatedRequest(sessionId, (token) =>
+              findDirectoryUsers(token, { login })
             )
         : skipToken,
       retry: false,
+    })
+  },
+
+  staffDirectoryQuery(sessionId: number, userIds: number[]) {
+    const ids = [...new Set(userIds)]
+      .sort((first, second) => first - second)
+      .map(String)
+    return queryOptions({
+      queryKey: ["organizer", sessionId, "staff-directory", ids],
+      queryFn: ids.length
+        ? () =>
+            sessionRepository.authenticatedRequest(sessionId, async (token) => {
+              const batches = []
+              for (let index = 0; index < ids.length; index += 100) {
+                batches.push(
+                  findDirectoryUsers(token, {
+                    ids: ids.slice(index, index + 100),
+                  })
+                )
+              }
+              return (await Promise.all(batches)).flat()
+            })
+        : skipToken,
+      retry: false,
+      staleTime: 60_000,
     })
   },
 

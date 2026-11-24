@@ -1,3 +1,5 @@
+import { BackLink } from "@/components/site/SitePage"
+import { LanguagePicker } from "@/i18n/LanguagePicker"
 import { t } from "@/i18n/locale"
 import type { CSSProperties, ReactNode } from "react"
 import { CircleHelp, LayoutDashboard, Settings, Ticket } from "lucide-react"
@@ -26,7 +28,7 @@ const navigation = [
   { section: "support", href: "/support", label: "Support", Icon: CircleHelp },
   {
     section: "settings",
-    href: "/account/settings",
+    href: "/account/settings?from=organizer",
     label: "Account settings",
     Icon: Settings,
   },
@@ -81,12 +83,13 @@ export function OrganizerLayout({
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset className="min-w-0 bg-muted/35">
+      <SidebarInset id="main-content" className="min-w-0 bg-muted/35">
         <header className="flex min-h-14 items-center gap-2 border-b bg-background px-4 sm:px-6">
           <SidebarTrigger className="size-10" />
-          <Link href="/" className="text-sm font-semibold md:hidden">
-            BiletFlow
-          </Link>
+          <BackLink href="/">{t("Home")}</BackLink>
+          <div className="ml-auto">
+            <LanguagePicker />
+          </div>
         </header>
         {children}
       </SidebarInset>

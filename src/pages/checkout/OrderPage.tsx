@@ -1,8 +1,11 @@
+import { useEventReturn } from "@/components/site/useEventReturn"
+import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
 import { Link } from "wouter"
+import { useHistoryState } from "wouter/use-browser-location"
 
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { ticketDetailsPath } from "@/tickets/ticketPresentation"
@@ -17,32 +20,40 @@ export function OrderPage({
   orderId: string
 }) {
   const model = useOrderViewModel(sessionId, orderId)
+  const { href: eventReturn } = useEventReturn()
+  const state = useHistoryState<{ orderFrom?: string } | null>()
+  const eventParent =
+    model.status === "ready" && state?.orderFrom !== "/my-tickets"
 
   return (
-    <main className="mx-auto max-w-xl space-y-4 px-4 py-6 sm:px-6">
-      <Link
+    <SitePage width="form">
+      <BackLink
+        state={eventParent ? { eventReturn } : undefined}
         href={
-          model.status === "ready"
+          eventParent
             ? `/events/${encodeURIComponent(model.order.eventId)}`
-            : "/events"
+            : "/my-tickets"
         }
-        className={buttonVariants({ variant: "ghost" })}
       >
-        {model.status === "ready" ? t("Back to event") : t("Discover events")}
-      </Link>
+        {t(eventParent ? "Back to event" : "My tickets")}
+      </BackLink>
 
-      <Link
-        href={`/support/new?orderId=${encodeURIComponent(orderId)}`}
-        className={buttonVariants({ variant: "outline" })}
+      <PageHeading
+        action={
+          <Link
+            href={`/support/new?orderId=${encodeURIComponent(orderId)}`}
+            className={buttonVariants({
+              variant: "outline",
+              className: "min-h-10",
+            })}
+          >
+            {t("Get order support")}
+          </Link>
+        }
       >
-        {t("Get order support")}
-      </Link>
+        {t("Your order")}
+      </PageHeading>
       <Card>
-        <CardHeader>
-          <CardTitle>
-            <h1>{t("Your order")}</h1>
-          </CardTitle>
-        </CardHeader>
         <CardContent className="space-y-4">
           {model.status === "loading" && (
             <p role="status" className="flex items-center gap-2">
@@ -59,7 +70,7 @@ export function OrderPage({
           )}
           {model.status === "ready" && (
             <>
-              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+              <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
                 <dt className="text-muted-foreground">{t("Status")}</dt>
                 <dd className="font-medium capitalize" role="status">
                   {model.statusLabel}
@@ -168,7 +179,6 @@ export function OrderPage({
           )}
         </CardContent>
       </Card>
-    </main>
+    </SitePage>
   )
 }
-

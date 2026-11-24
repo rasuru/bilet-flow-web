@@ -1,9 +1,11 @@
+import { BackLink, PageHeading } from "@/components/site/SitePage"
+import { OrganizerLayout } from "./OrganizerLayout"
 import { t } from "@/i18n/locale"
-import { ArrowLeftIcon, DownloadIcon, LinkIcon } from "lucide-react"
+import { DownloadIcon, LinkIcon } from "lucide-react"
 import { useState } from "react"
-import { Link } from "wouter"
+import { useHistoryState } from "wouter/use-browser-location"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -31,6 +33,7 @@ export function EventCampaignsPage({
   eventId: string
 }) {
   const model = useCampaignsViewModel(sessionId, eventId)
+  const state = useHistoryState<{ organizerEventFilters?: string } | null>()
   const [showForm, setShowForm] = useState(false)
   const canCreate =
     model.event &&
@@ -39,76 +42,72 @@ export function EventCampaignsPage({
     !model.error
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-      <Link
-        href={manageEventPath(eventId)}
-        className={buttonVariants({ variant: "ghost" })}
-      >
-        <ArrowLeftIcon aria-hidden="true" /> {t("Manage event")}
-      </Link>
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t("Campaigns")}
-          </h1>
-          {model.event && (
-            <p className="text-muted-foreground">{model.event.title}</p>
-          )}
-        </div>
-        {canCreate && (
-          <Button
-            variant={showForm ? "outline" : "default"}
-            aria-expanded={showForm}
-            onClick={() => setShowForm(!showForm)}
-          >
-            {showForm ? t("Close form") : t("New campaign")}
-          </Button>
+    <OrganizerLayout>
+      <div className="mx-auto w-full max-w-5xl min-w-0 space-y-6 px-4 py-5 sm:px-6 sm:py-8">
+        <BackLink href={manageEventPath(eventId)} state={state ?? undefined}>
+          {t("Manage event")}
+        </BackLink>
+        <PageHeading
+          description={model.event?.title}
+          action={
+            canCreate && (
+              <Button
+                variant={showForm ? "outline" : "default"}
+                aria-expanded={showForm}
+                onClick={() => setShowForm(!showForm)}
+              >
+                {showForm ? t("Close form") : t("New campaign")}
+              </Button>
+            )
+          }
+        >
+          {t("Campaigns")}
+        </PageHeading>
+        {model.loading && (
+          <p role="status" className="flex items-center gap-2">
+            <Spinner aria-hidden="true" /> {t("Loading campaigns…")}
+          </p>
         )}
-      </header>
-      {model.loading && (
-        <p role="status" className="flex items-center gap-2">
-          <Spinner aria-hidden="true" /> {t("Loading campaigns…")}
-        </p>
-      )}
-      {model.error && (
-        <div className="space-y-2">
-          <FieldError>{model.error}</FieldError>
-          <Button variant="outline" onClick={model.retry}>
-            {t("Try again")}
-          </Button>
-        </div>
-      )}
-      {showForm && canCreate && (
-        <CampaignForm
-          sessionId={sessionId}
-          eventId={eventId}
-          ticketTypes={model.ticketTypes}
-          ticketTypesLoading={model.ticketTypesLoading}
-          ticketTypesError={model.ticketTypesError}
-          retryTicketTypes={model.retryTicketTypes}
-          onCreated={() => setShowForm(false)}
-        />
-      )}
-      {!model.loading && !model.error && model.campaigns.length === 0 && (
-        <Card>
-          <CardContent>
-            <p className="text-muted-foreground">
-              {t("This event has no campaigns yet.")}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      <div className="space-y-4 empty:hidden">
-        {model.campaigns.map((campaign) => (
-          <CampaignCard
-            key={campaign.id}
+        {model.error && (
+          <div className="space-y-2">
+            <FieldError>{model.error}</FieldError>
+            <Button variant="outline" onClick={model.retry}>
+              {t("Try again")}
+            </Button>
+          </div>
+        )}
+        {showForm && canCreate && (
+          <CampaignForm
             sessionId={sessionId}
             eventId={eventId}
-            campaign={campaign}
+            ticketTypes={model.ticketTypes}
+            ticketTypesLoading={model.ticketTypesLoading}
+            ticketTypesError={model.ticketTypesError}
+            retryTicketTypes={model.retryTicketTypes}
+            onCreated={() => setShowForm(false)}
           />
-        ))}
+        )}
+        {!model.loading && !model.error && model.campaigns.length === 0 && (
+          <Card>
+            <CardContent>
+              <p className="text-muted-foreground">
+                {t("This event has no campaigns yet.")}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+        <div className="space-y-4 empty:hidden">
+          {model.campaigns.map((campaign) => (
+            <CampaignCard
+              key={campaign.id}
+              sessionId={sessionId}
+              eventId={eventId}
+              campaign={campaign}
+            />
+          ))}
+        </div>
       </div>
-    </main>
+    </OrganizerLayout>
   )
 }
 
