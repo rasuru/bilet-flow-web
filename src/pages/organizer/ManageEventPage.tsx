@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import type { ManagedEventAction } from "@/events/managedEventRepository"
 import { t } from "@/i18n/locale"
+import { OrganizerEventHistory } from "./OrganizerEventHistory"
 import { OrganizerAnalyticsPanel } from "./OrganizerAnalyticsPanel"
 import { AttachEventVenue, EditEventDetails } from "./OrganizerEventSettings"
 import { usePaidSalesViewModel } from "./usePaidSalesViewModel"
@@ -169,6 +170,7 @@ export function ManageEventPage({
                 eventId={event.id}
               />
             </div>
+            <OrganizerEventHistory key={event.id} sessionId={sessionId} eventId={event.id} />
           </>
         )}
 

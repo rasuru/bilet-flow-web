@@ -90,6 +90,7 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
       { id: "organizer-staff", label: t("Event administrators") },
       { id: "organizer-campaigns", label: t("Campaigns") },
       { id: "organizer-analytics", label: t("Analytics") },
+      { id: "organizer-history", label: t("Activity history") },
     ] : [],
     managedEvent: query.data,
     notify: (text: string) => setNotice({ text }),
