@@ -1,8 +1,9 @@
+import { BrandLogo } from "@/components/site/BrandLogo"
 import { BackLink } from "@/components/site/SitePage"
 import { LanguagePicker } from "@/i18n/LanguagePicker"
 import { t } from "@/i18n/locale"
 import type { CSSProperties, ReactNode } from "react"
-import { CircleHelp, LayoutDashboard, Settings, Ticket } from "lucide-react"
+import { CircleHelp, LayoutDashboard, Settings } from "lucide-react"
 import { Link } from "wouter"
 
 import {
@@ -49,8 +50,7 @@ export function OrganizerLayout({
             href="/"
             className="flex min-h-10 items-center gap-2 rounded-md px-3 font-semibold focus-visible:outline-2 focus-visible:outline-ring"
           >
-            <Ticket className="size-5" aria-hidden="true" />
-            BiletFlow
+            <BrandLogo />
           </Link>
         </SidebarHeader>
         <SidebarContent>

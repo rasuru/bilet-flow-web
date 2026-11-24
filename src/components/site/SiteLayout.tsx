@@ -3,6 +3,7 @@ import { ArrowUpRight, Compass, Ticket, UserRound } from "lucide-react"
 import { Link, useLocation } from "wouter"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
+import { BrandLogo } from "@/components/site/BrandLogo"
 import { buttonVariants } from "@/components/ui/button"
 import { LanguagePicker } from "@/i18n/LanguagePicker"
 import { t } from "@/i18n/locale"
@@ -33,10 +34,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             aria-current={path === "/" ? "page" : undefined}
             className="flex min-h-11 items-center gap-2 rounded-md font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Ticket aria-hidden="true" className="size-4" />
-            </span>
-            BiletFlow
+            <BrandLogo />
           </Link>
           <nav
             aria-label={t("Main navigation")}
@@ -94,8 +92,11 @@ export function SiteLayout({ children }: { children: ReactNode }) {
       <div className="flex-1">{children}</div>
       <footer className="border-t bg-background print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4 text-sm sm:px-6">
-          <Link href="/" className="rounded-sm font-semibold hover:underline">
-            BiletFlow
+          <Link
+            href="/"
+            className="inline-flex min-h-10 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            <BrandLogo />
           </Link>
           <nav
             aria-label={t("Helpful links")}
