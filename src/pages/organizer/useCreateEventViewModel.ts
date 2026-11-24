@@ -416,6 +416,7 @@ export function useCreateEventViewModel(sessionId: number) {
     refreshLayouts,
     selectedLayout,
     step,
+    errorOccurrence: error,
     error: Array.isArray(error) ? t(...error) : error ? failureText(error) : "",
     busy,
     publishStep: publishStep ? progressText(publishStep) : "",
@@ -436,4 +437,3 @@ export function useCreateEventViewModel(sessionId: number) {
       setGaTickets((previous) => previous.filter((ticket) => ticket.id !== id)),
   }
 }
-
