@@ -487,8 +487,7 @@ function ActivationFeeCard({ sessionId }: { sessionId: number }) {
               <div className="flex flex-wrap items-end gap-3">
                 <Field className="w-full sm:max-w-56">
                   <FieldLabel htmlFor="fee-amount">
-                    {t("Amount (")}
-                    {fee.currency})
+                    {model.amountLabel}
                   </FieldLabel>
                   <Input
                     id="fee-amount"

@@ -154,7 +154,7 @@ function EditPrice({
       model={model}
     >
       <Field>
-        <FieldLabel htmlFor="ticket-price">{t("Price (KZT)")}</FieldLabel>
+        <FieldLabel htmlFor="ticket-price">{t("Price (₸)")}</FieldLabel>
         <Input
           id="ticket-price"
           type="number"
@@ -196,7 +196,7 @@ function AddTicket({
       }}
       trigger={t("Add ticket tier")}
       title={t("Add ticket tier")}
-      description={t("Prices are in KZT. Enter 0 for a free ticket.")}
+      description={t("Prices are in tenge. Enter 0 for a free ticket.")}
       action={t("Save ticket tier")}
       model={model}
     >

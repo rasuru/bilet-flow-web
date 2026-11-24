@@ -206,7 +206,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                   {step === 3 && (
                     <>
                       <FieldDescription>
-                        {t("Prices are in KZT. Enter 0 for a free ticket.")}
+                        {t("Prices are in tenge. Enter 0 for a free ticket.")}
                       </FieldDescription>
                       {tickets.map((ticket, index) => (
                         <TicketTierFields

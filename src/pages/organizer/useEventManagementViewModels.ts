@@ -26,7 +26,6 @@ const dateTime = dateFormat({ dateStyle: "medium", timeStyle: "short" })
 const priceFormat = numberFormat({
   style: "currency",
   currency: "KZT",
-  currencyDisplay: "code",
   minimumFractionDigits: 0,
 })
 

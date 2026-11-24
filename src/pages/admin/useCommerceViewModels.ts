@@ -143,7 +143,7 @@ export function useActivationFeeViewModel(sessionId: number) {
     if (mutation.isPending || draft === null) return
     if (!/^\d{1,17}(?:\.\d{1,2})?$/.test(draft) || !/[1-9]/.test(draft)) {
       setValidation(
-        "Enter a positive fee in KZT with up to two decimal places."
+        "Enter a positive fee in tenge with up to two decimal places."
       )
       return
     }
@@ -153,6 +153,7 @@ export function useActivationFeeViewModel(sessionId: number) {
   return {
     query: adminQueryView(query),
     submit,
+    amountLabel: t("Amount ({0})", query.data?.currency === "KZT" ? "₸" : (query.data?.currency ?? "₸")),
     value: draft ?? (query.data ? String(query.data.amountKzt) : ""),
     change: (value: string) => {
       setDraft(value)

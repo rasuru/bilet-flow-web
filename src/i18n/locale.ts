@@ -113,6 +113,15 @@ export function numberFormat(options: Intl.NumberFormatOptions) {
         formatter = new Intl.NumberFormat(locales[language], options)
         formatters.set(language, formatter)
       }
+      if (options.style === "currency" && options.currency?.toUpperCase() === "KZT") {
+        const amount = formatter
+          .formatToParts(value)
+          .filter((part) => part.type !== "currency")
+          .map((part) => part.value)
+          .join("")
+          .trim()
+        return `${amount}\u00a0₸`
+      }
       return formatter.format(value)
     },
   }
