@@ -11,6 +11,8 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
+  SidebarGroupLabel,
+  useSidebar,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -39,9 +41,11 @@ const navigation = [
 export function OrganizerLayout({
   isDashboard = false,
   children,
+  eventSections = [],
 }: {
   isDashboard?: boolean
   children: ReactNode
+  eventSections?: { id: string; label: string }[]
 }) {
   return (
     <SidebarProvider style={{ "--sidebar-width": "13rem" } as CSSProperties}>
@@ -62,7 +66,7 @@ export function OrganizerLayout({
                   <SidebarMenuItem key={key}>
                     <SidebarMenuButton
                       className="min-h-10 rounded-lg px-3"
-                      isActive={key === "dashboard"}
+                      isActive={key === "dashboard" && isDashboard}
                       render={
                         <Link
                           href={href}
@@ -82,6 +86,7 @@ export function OrganizerLayout({
               </SidebarMenu>
             </nav>
           </SidebarGroup>
+          {eventSections.length > 0 && <EventSectionNavigation sections={eventSections} />}
         </SidebarContent>
       </Sidebar>
       <SidebarInset id="main-content" className="min-w-0 bg-muted/35">
@@ -100,3 +105,28 @@ export function OrganizerLayout({
     </SidebarProvider>
   )
 }
+
+function EventSectionNavigation({ sections }: { sections: { id: string; label: string }[] }) {
+  const { setOpenMobile } = useSidebar()
+  return (
+    <SidebarGroup className="px-3 pt-2">
+      <SidebarGroupLabel>{t("Event sections")}</SidebarGroupLabel>
+      <nav aria-label={t("Event sections")}>
+        <SidebarMenu className="gap-1">
+          {sections.map(({ id, label }) => (
+            <SidebarMenuItem key={id}>
+              <SidebarMenuButton
+                className="min-h-10 h-auto whitespace-normal rounded-lg px-3 py-2 [&>span]:whitespace-normal [&>span]:overflow-visible"
+                render={<a href={`#${id}`} />}
+                onClick={() => setOpenMobile(false)}
+              >
+                <span>{label}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </nav>
+    </SidebarGroup>
+  )
+}
+

@@ -41,6 +41,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
     refreshLayouts,
     step,
     error,
+    errorOccurrence,
     busy,
     publishStep,
     result,
@@ -49,10 +50,17 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
   } = vm
 
   const stepTitle = useRef<HTMLHeadingElement>(null)
+  const errorAlert = useRef<HTMLDivElement>(null)
   useEffect(() => {
     window.scrollTo(0, 0)
     stepTitle.current?.focus({ preventScroll: true })
   }, [step])
+
+  useEffect(() => {
+    if (!errorOccurrence || !errorAlert.current) return
+    errorAlert.current.focus({ preventScroll: true })
+    errorAlert.current.scrollIntoView({ block: "center", behavior: "instant" })
+  }, [errorOccurrence])
 
   if (result && !result.local) {
     return (
@@ -76,22 +84,28 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
           {result ? t("Event saved locally") : t("Create new event")}
         </h1>
         {!result && (
-          <nav aria-label={t("Event form progress")} className="mb-6">
-            <ol className="flex flex-wrap gap-2">
+          <nav aria-label={t("Event form progress")} className="mb-6 overflow-x-auto p-1">
+            <ol className="grid grid-cols-[repeat(5,minmax(max-content,1fr))] items-start gap-1 sm:gap-2">
               {steps.map((label, index) => (
-                <li key={label}>
-                  <button
+                <li key={label} className="min-w-max">
+                  <Button
                     type="button"
+                    variant="ghost"
                     aria-current={index === step ? "step" : undefined}
                     disabled={busy}
-                    className={buttonVariants({
-                      variant: index === step ? "secondary" : "ghost",
-                      size: "sm",
-                    })}
+                    className="group/step h-auto min-h-16 w-full flex-col gap-2 whitespace-nowrap px-2 py-2 text-center text-xs leading-tight sm:text-sm"
                     onClick={() => navigate(index)}
                   >
-                    <span>{t(label)}</span>
-                  </button>
+                    <span
+                      aria-hidden="true"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground tabular-nums group-aria-[current=step]/step:bg-primary group-aria-[current=step]/step:text-primary-foreground"
+                    >
+                      {index + 1}
+                    </span>
+                    <span className="whitespace-nowrap text-muted-foreground group-aria-[current=step]/step:font-semibold group-aria-[current=step]/step:text-foreground">
+                      {t(label)}
+                    </span>
+                  </Button>
                 </li>
               ))}
             </ol>
@@ -181,6 +195,14 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         refreshLayouts={() => void refreshLayouts()}
                       />
                     ))}
+                  {(step === 3 || step === 4) && vm.hasPaidTickets && (
+                    <Alert className="border-amber-500/40 bg-amber-50 text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
+                      <AlertDescription>
+                        <strong className="mb-1 block">{t("Paid sales require activation")}</strong>
+                        <span>{t("A one-time activation fee applies to events with paid tickets. You can save or publish now and activate paid sales from event management. Paid tickets cannot be purchased until activation is complete.")}</span>
+                      </AlertDescription>
+                    </Alert>
+                  )}
                   {step === 3 && (
                     <>
                       <FieldDescription>
@@ -264,7 +286,13 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                   </Link>
                 )}
                 {error && (
-                  <Alert role="alert" variant="destructive">
+                  <Alert
+                    ref={errorAlert}
+                    role="alert"
+                    tabIndex={-1}
+                    variant="destructive"
+                    className="mt-4 scroll-m-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-destructive"
+                  >
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 )}
@@ -306,3 +334,4 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
     </OrganizerLayout>
   )
 }
+

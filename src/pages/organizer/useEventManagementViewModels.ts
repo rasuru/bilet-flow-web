@@ -113,6 +113,7 @@ export function useEditEventViewModel(
   )
   return {
     ...save,
+    hasUnsavedChanges: JSON.stringify(event) !== JSON.stringify(initial),
     event,
     setField,
     reset() {
@@ -447,3 +448,4 @@ export function useEventStaffViewModel(
         : save.submit({ userId: removing, action: "remove" }),
   }
 }
+

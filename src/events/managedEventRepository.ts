@@ -53,6 +53,7 @@ export async function refreshManagedEvent(
     { queryKey: ["managed-events", sessionId, eventId] },
     { queryKey: ["managed-events", sessionId], exact: true },
     { queryKey: ["managed-events", sessionId, "analytics-overview"] },
+    { queryKey: ["paid-sales", sessionId, eventId] },
     { queryKey: ["public-events"] },
     { queryKey: ["public-event", eventId] },
   ]
@@ -278,3 +279,4 @@ async function updateManagedEvent<T>(
   await sessionRepository.authenticatedRequest(sessionId, request)
   await refreshManagedEvent(client, sessionId, eventId)
 }
+

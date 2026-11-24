@@ -45,7 +45,7 @@ export function OrganizerEventStaff({
         </CardHeader>
         <CardContent className="space-y-4">
           {model.staff.length ? (
-            <ul className="divide-y border-y">
+            <ul className="space-y-2">
               {model.staff.map(({ userId, name, assignedAt }) => (
                 <li
                   key={userId}
@@ -135,7 +135,7 @@ export function OrganizerEventStaff({
               )}
               {model.searched &&
                 (model.results.length ? (
-                  <ul className="max-w-lg divide-y rounded-lg border">
+                  <ul className="max-w-lg space-y-2 rounded-lg border">
                     {model.results.map(({ id, login, assigned }) => (
                       <li
                         key={id}
@@ -217,3 +217,4 @@ export function OrganizerEventStaff({
     </section>
   )
 }
+

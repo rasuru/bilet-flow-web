@@ -79,7 +79,7 @@ export function OrganizerTicketTypes({
             </p>
           )}
           {model.tickets.length > 0 && (
-            <ul className="divide-y border-y">
+            <ul className="space-y-2">
               {model.tickets.map(({ ticket, price, status, salesWindow }) => (
                 <li
                   key={ticket.id}
@@ -256,3 +256,4 @@ function AddTicket({
     </EventManagementDialog>
   )
 }
+

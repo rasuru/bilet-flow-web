@@ -24,6 +24,7 @@ export function EventManagementDialog({
   action,
   model,
   children,
+  additionalActions,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -33,6 +34,7 @@ export function EventManagementDialog({
   action: string
   model: { busy: boolean; error: string | null; submit: () => void }
   children: ReactNode
+  additionalActions?: ReactNode
 }) {
   return (
     <Dialog
@@ -52,7 +54,7 @@ export function EventManagementDialog({
         {trigger}
       </DialogTrigger>
       <DialogContent
-        className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg"
+        className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:max-w-lg"
         showCloseButton={false}
       >
         <DialogHeader>
@@ -62,21 +64,24 @@ export function EventManagementDialog({
         <form
           noValidate
           aria-busy={model.busy}
-          className="space-y-4"
+          className="flex min-h-0 flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault()
             model.submit()
           }}
         >
-          <fieldset disabled={model.busy} className="min-w-0 space-y-4">
-            {children}
-          </fieldset>
-          {model.error && (
-            <Alert variant="destructive" role="alert">
-              <AlertDescription>{model.error}</AlertDescription>
-            </Alert>
-          )}
-          <DialogFooter>
+          <div className="-mx-1 min-h-0 flex-1 space-y-4 overflow-y-auto px-1 pb-1">
+            <fieldset disabled={model.busy} className="min-w-0 space-y-4">
+              {children}
+            </fieldset>
+            {model.error && (
+              <Alert variant="destructive" role="alert">
+                <AlertDescription>{model.error}</AlertDescription>
+              </Alert>
+            )}
+            {additionalActions}
+          </div>
+          <DialogFooter className="shrink-0">
             <DialogClose
               render={
                 <Button variant="outline" type="button" disabled={model.busy} />
@@ -94,3 +99,4 @@ export function EventManagementDialog({
     </Dialog>
   )
 }
+

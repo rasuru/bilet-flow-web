@@ -79,7 +79,7 @@ export function OrganizerAnalyticsPanel({
 function AnalyticsFilters({ model }: { model: OrganizerAnalyticsModel }) {
   return (
     <Card>
-      <CardHeader className="border-b">
+      <CardHeader>
         <CardTitle>
           <h3 className="flex items-center gap-2">
             <CalendarRange
@@ -195,7 +195,7 @@ function SalesChart({
 }) {
   return (
     <Card>
-      <CardHeader className="border-b">
+      <CardHeader>
         <CardTitle>
           <h3 className="flex items-center gap-2">
             <ChartNoAxesColumn
@@ -474,3 +474,4 @@ function CampaignSalesCard({
     </Card>
   )
 }
+
