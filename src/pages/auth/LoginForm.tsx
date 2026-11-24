@@ -1,86 +1,86 @@
-import { useState, type FormEvent } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { t } from "@/i18n/locale"
+import { Controller } from "react-hook-form"
+import { Link } from "wouter"
 
-export interface LoginFormProps {
-  onAuthenticated: () => void
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Field, FieldLabel } from "@/components/ui/field"
+import { AccountFormField } from "@/pages/account/AccountFormField"
+import { useSignInViewModel } from "./useSignInViewModel"
+
+type LoginFormProps = {
   onRegister: () => void
 }
 
-export function LoginForm({ onAuthenticated, onRegister }: LoginFormProps) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate auth action
-    setTimeout(() => {
-      setIsSubmitting(false)
-      onAuthenticated()
-    }, 400)
-  }
+export function LoginForm({ onRegister }: LoginFormProps) {
+  const { register, control, fieldErrors, submit, isSubmitting, formError } =
+    useSignInViewModel()
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4 bg-muted/30">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Enter your credentials to manage your events</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                placeholder="organizer@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+    <form className="flex flex-col gap-4" noValidate onSubmit={submit}>
+      <AccountFormField
+        label={t("Username or email")}
+        autoComplete="username"
+        error={fieldErrors.username?.message}
+        {...register("username")}
+      />
+      <AccountFormField
+        label={t("Password")}
+        type="password"
+        autoComplete="current-password"
+        error={fieldErrors.password?.message}
+        {...register("password")}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <Field orientation="horizontal" className="w-auto">
+          <Controller
+            name="rememberMe"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                id="remember-me"
+                name={field.name}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Signing in…" : "Sign in"}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full text-xs text-muted-foreground"
-              onClick={onRegister}
-            >
-              Don&apos;t have an account? Sign up
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+            )}
+          />
+          <FieldLabel htmlFor="remember-me">{t("Remember me")}</FieldLabel>
+        </Field>
+
+        <Link
+          to="/account/reset/request"
+          className="underline underline-offset-4"
+        >
+          {t("Forgot password?")}
+        </Link>
+      </div>
+
+      {formError && (
+        <p className="text-sm text-destructive" role="alert">
+          {formError}
+        </p>
+      )}
+
+      <Button type="submit" size="lg" disabled={isSubmitting}>
+        {isSubmitting ? t("Logging in…") : t("Log in")}
+      </Button>
+
+      <p className="text-center text-sm text-muted-foreground">
+        {t("Don't have an account?")}{" "}
+        <Button
+          type="button"
+          variant="link"
+          className="h-auto px-0 text-foreground"
+          onClick={onRegister}
+        >
+          {t("Sign up")}
+        </Button>
+      </p>
+    </form>
   )
 }
 
-export default LoginForm
