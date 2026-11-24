@@ -15,6 +15,7 @@ import { FieldError } from "@/components/ui/field"
 import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 
+import { manageEventPath } from "./organizerEventPresentation"
 import { CampaignForm } from "./CampaignForm"
 import {
   useCampaignActions,
@@ -39,8 +40,11 @@ export function EventCampaignsPage({
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-      <Link href="/organizer" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> {t("Organizer dashboard")}
+      <Link
+        href={manageEventPath(eventId)}
+        className={buttonVariants({ variant: "ghost" })}
+      >
+        <ArrowLeftIcon aria-hidden="true" /> {t("Manage event")}
       </Link>
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
@@ -266,4 +270,3 @@ function CampaignCard({
     </Card>
   )
 }
-

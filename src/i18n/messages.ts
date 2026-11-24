@@ -980,6 +980,82 @@ export const russian: Readonly<Record<string, string>> = {
   "{0} of {1} events": "Мероприятий: {0} из {1}",
   "{0} sold": "Продано: {0}",
   "{0}?": "{0}?",
+  "All time": "За всё время",
+  "Analytics are unavailable for this event.":
+    "Аналитика по этому мероприятию недоступна.",
+  Attendance: "Посещаемость",
+  "Attendance is available once the event starts.":
+    "Данные о посещаемости появятся с началом мероприятия.",
+  "Attributed tickets": "Билеты по акции",
+  "Attribution for the selected orders and ticket types":
+    "Результаты по выбранным заказам и типам билетов",
+  "By order date": "По дате заказа",
+  "Campaign or code": "Кампания или код",
+  "Campaigns and promo codes": "Кампании и промокоды",
+  "Capacity sold": "Процент проданных мест",
+  "Check-in rate": "Доля отметившихся на входе",
+  "Check-in status for tickets in the report":
+    "Отметки о входе по билетам в отчёте",
+  "Confirmed refunds": "Подтверждённые возвраты",
+  "Could not load analytics.": "Не удалось загрузить аналитику.",
+  "Could not load this event.": "Не удалось загрузить мероприятие.",
+  "Current inventory for the shared seat category":
+    "Текущая доступность мест в общей категории",
+  "Current inventory · all dates": "Текущая доступность · за всё время",
+  "End date": "Дата окончания",
+  "Event analytics": "Аналитика мероприятия",
+  "From {0}": "С {0}",
+  "Gross sales": "Продажи до вычетов",
+  "Gross sales less discounts and confirmed refunds":
+    "Продажи за вычетом скидок и подтверждённых возвратов",
+  "Loading analytics…": "Загружаем аналитику…",
+  "Manage event": "Управление мероприятием",
+  "Net demonstration revenue": "Демонстрационная чистая выручка",
+  "Net revenue": "Чистая выручка",
+  "No confirmed redemptions for these filters.":
+    "По выбранным фильтрам нет подтверждённых применений.",
+  "No dated sales for these filters.":
+    "По выбранным фильтрам нет продаж с указанной датой.",
+  "Not checked in": "Не отметились на входе",
+  "Order dates use Kazakhstan time (Asia/Almaty).":
+    "Даты заказов указаны по времени Казахстана (Asia/Almaty).",
+  Registered: "Зарегистрированы",
+  "Report filters": "Фильтры отчёта",
+  "Sales by ticket type": "Продажи по типам билетов",
+  "Sales chart metric": "Показатель на графике продаж",
+  "Sales over time": "Динамика продаж",
+  "Start date": "Дата начала",
+  "The end date must be on or after the start date.":
+    "Дата окончания не может быть раньше даты начала.",
+  "This event has no ticket types yet.":
+    "У этого мероприятия пока нет типов билетов.",
+  "Through {0}": "По {0} включительно",
+  "Ticket type": "Тип билета",
+  "Ticket type {0}": "Тип билета {0}",
+  "Track ticket sales, revenue, and attendance across your events.":
+    "Отслеживайте продажи билетов, выручку и посещаемость ваших мероприятий.",
+  "View analytics": "Открыть аналитику",
+  "View chart values": "Показать значения на графике",
+  "{0} tickets have no recorded order date and are omitted from the chart.":
+    "На графике отсутствуют билеты без даты заказа ({0}).",
+  "{0} tickets temporarily held": "Временно зарезервировано билетов: {0}",
+  "{0} · {1}": "{0} · {1}",
+  "All events overview": "Сводка по всем мероприятиям",
+  "Events that have started": "Мероприятия, которые уже начались",
+  "Attendance is available once an event starts.":
+    "Данные о посещаемости появятся с началом первого мероприятия.",
+  "All statuses": "Все статусы",
+  Manage: "Управлять",
+  "Event or venue": "Событие или площадка",
+  "No events match your search and filters.":
+    "По вашему запросу и фильтрам ничего не найдено.",
+  "{0} sold of {1} capacity \u00b7 {2} available \u00b7 {3} held":
+    "Продано {0} из {1} · доступно {2} · в резерве {3}",
+  "{0} check-in rate": "{0} отметились на входе",
+  "{0} of {1} checked in \u00b7 {2} not checked in":
+    "Отметились {0} из {1} · не отметились {2}",
+  "{0} confirmed redemptions \u00b7 {1} attributed tickets":
+    "Подтверждённых применений: {0} · билетов по акции: {1}",
 }
 
 export const kazakh: Readonly<Record<string, string>> = {
@@ -1968,4 +2044,80 @@ export const kazakh: Readonly<Record<string, string>> = {
   "{0} of {1} events": "{1} іс-шараның {0}-і",
   "{0} sold": "{0} сатылды",
   "{0}?": "{0}?",
+  "All time": "Барлық уақыт",
+  "Analytics are unavailable for this event.":
+    "Бұл іс-шараның аналитикасы қолжетімсіз.",
+  Attendance: "Қатысу",
+  "Attendance is available once the event starts.":
+    "Қатысу деректері іс-шара басталғанда қолжетімді болады.",
+  "Attributed tickets": "Науқан бойынша билеттер",
+  "Attribution for the selected orders and ticket types":
+    "Таңдалған тапсырыстар мен билет түрлері бойынша нәтижелер",
+  "By order date": "Тапсырыс күні бойынша",
+  "Campaign or code": "Науқан немесе код",
+  "Campaigns and promo codes": "Науқандар мен промокодтар",
+  "Capacity sold": "Сатылған орындар үлесі",
+  "Check-in rate": "Кіруде тіркелгендер үлесі",
+  "Check-in status for tickets in the report":
+    "Есептегі билеттер бойынша кіру мәртебесі",
+  "Confirmed refunds": "Расталған қайтарымдар",
+  "Could not load analytics.": "Аналитиканы жүктеу мүмкін болмады.",
+  "Could not load this event.": "Іс-шараны жүктеу мүмкін болмады.",
+  "Current inventory for the shared seat category":
+    "Ортақ санаттағы орындардың ағымдағы қолжетімділігі",
+  "Current inventory · all dates": "Ағымдағы қолжетімділік · барлық уақыт",
+  "End date": "Аяқталу күні",
+  "Event analytics": "Іс-шара аналитикасы",
+  "From {0}": "{0} бастап",
+  "Gross sales": "Жалпы сатылым",
+  "Gross sales less discounts and confirmed refunds":
+    "Сатылымнан жеңілдіктер мен расталған қайтарымдар шегеріледі",
+  "Loading analytics…": "Аналитика жүктелуде…",
+  "Manage event": "Іс-шараны басқару",
+  "Net demonstration revenue": "Демонстрациялық таза түсім",
+  "Net revenue": "Таза түсім",
+  "No confirmed redemptions for these filters.":
+    "Таңдалған сүзгілер бойынша расталған қолданыс жоқ.",
+  "No dated sales for these filters.":
+    "Таңдалған сүзгілер бойынша күні көрсетілген сатылым жоқ.",
+  "Not checked in": "Кіруде тіркелмеген",
+  "Order dates use Kazakhstan time (Asia/Almaty).":
+    "Тапсырыс күндері Қазақстан уақытымен көрсетіледі (Asia/Almaty).",
+  Registered: "Тіркелген",
+  "Report filters": "Есеп сүзгілері",
+  "Sales by ticket type": "Билет түрлері бойынша сатылым",
+  "Sales chart metric": "Сатылым диаграммасының көрсеткіші",
+  "Sales over time": "Сатылым динамикасы",
+  "Start date": "Басталу күні",
+  "The end date must be on or after the start date.":
+    "Аяқталу күні басталу күнінен ерте болмауы керек.",
+  "This event has no ticket types yet.":
+    "Бұл іс-шарада әзірге билет түрлері жоқ.",
+  "Through {0}": "{0} қоса алғанда",
+  "Ticket type": "Билет түрі",
+  "Ticket type {0}": "Билет түрі {0}",
+  "Track ticket sales, revenue, and attendance across your events.":
+    "Іс-шараларыңыздың билет сатылымын, түсімін және қатысуын бақылаңыз.",
+  "View analytics": "Аналитиканы ашу",
+  "View chart values": "Диаграмма мәндерін көру",
+  "{0} tickets have no recorded order date and are omitted from the chart.":
+    "Тапсырыс күні жазылмаған {0} билет диаграммаға қосылмады.",
+  "{0} tickets temporarily held": "Уақытша броньдалған билеттер саны: {0}",
+  "{0} · {1}": "{0} · {1}",
+  "All events overview": "Барлық іс-шаралардың шолуы",
+  "Events that have started": "Басталған іс-шаралар",
+  "Attendance is available once an event starts.":
+    "Қатысу деректері алғашқы іс-шара басталғанда қолжетімді болады.",
+  "All statuses": "Барлық мәртебе",
+  Manage: "Басқару",
+  "Event or venue": "Атауы немесе орны",
+  "No events match your search and filters.":
+    "Сұрау мен сүзгілерге сай іс-шара табылмады.",
+  "{0} sold of {1} capacity \u00b7 {2} available \u00b7 {3} held":
+    "{1} орынның {0}-і сатылды · {2} бос · {3} броньда",
+  "{0} check-in rate": "{0} кіргенде тіркелді",
+  "{0} of {1} checked in \u00b7 {2} not checked in":
+    "{1} адамның {0}-і тіркелді · {2}-і тіркелмеді",
+  "{0} confirmed redemptions \u00b7 {1} attributed tickets":
+    "Расталған қолданыс: {0} · науқан бойынша билет: {1}",
 }

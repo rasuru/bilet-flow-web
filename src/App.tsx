@@ -22,7 +22,8 @@ import { SupportCasePage } from "@/pages/support/SupportCasePage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 import { EventCampaignsPage } from "@/pages/organizer/EventCampaignsPage"
 import { CreateEventPage } from "@/pages/organizer/CreateEventPage"
-import { OrganizerPage } from "@/pages/organizer/OrganizerPage"
+import { ManageEventPage } from "@/pages/organizer/ManageEventPage"
+import { OrganizerDashboardPage } from "@/pages/organizer/OrganizerDashboardPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
 
@@ -140,19 +141,24 @@ export function App() {
           </SignedInRoute>
         )}
       </Route>
+      <Route path="/organizer/events/:eventId">
+        {({ eventId }) => (
+          <SignedInRoute>
+            {({ sessionId }) => (
+              <ManageEventPage
+                key={`${sessionId}:${eventId}`}
+                sessionId={sessionId}
+                eventId={eventId}
+              />
+            )}
+          </SignedInRoute>
+        )}
+      </Route>
       <Route path="/organizer/dashboard">
         <Redirect to="/organizer" replace />
       </Route>
       <Route path="/organizer/events">
-        <SignedInRoute>
-          {({ sessionId }) => (
-            <OrganizerPage
-              key={`${sessionId}:events`}
-              sessionId={sessionId}
-              section="events"
-            />
-          )}
-        </SignedInRoute>
+        <Redirect to="/organizer" replace />
       </Route>
 
       <Route path="/organizer/support">
@@ -166,7 +172,7 @@ export function App() {
       <Route path="/organizer">
         <SignedInRoute>
           {({ sessionId }) => (
-            <OrganizerPage key={sessionId} sessionId={sessionId} />
+            <OrganizerDashboardPage key={sessionId} sessionId={sessionId} />
           )}
         </SignedInRoute>
       </Route>

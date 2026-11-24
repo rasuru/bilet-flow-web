@@ -1,162 +1,136 @@
-import { numberFormat, t } from "@/i18n/locale"
-import { CalendarDays, MapPin, Users } from "lucide-react"
+import { CalendarDays, ChevronDown, MapPin, Users } from "lucide-react"
 import { Link } from "wouter"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Spinner } from "@/components/ui/spinner"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { t } from "@/i18n/locale"
 import type { ManagedEventAction } from "@/events/managedEventRepository"
-import { eventActionLabels } from "./organizerEventPresentation"
-import type { OrganizerEventCardModel } from "./useOrganizerViewModel"
-
-const integer = numberFormat({ maximumFractionDigits: 0 })
-
-export function OrganizerInventory({
-  inventory,
-}: {
-  inventory: OrganizerEventCardModel["inventory"]
-}) {
-  if (inventory.loading) {
-    return (
-      <p
-        role="status"
-        className="flex items-center gap-2 text-sm text-muted-foreground"
-      >
-        <Spinner aria-hidden="true" /> {t("Loading ticket inventory…")}
-      </p>
-    )
-  }
-  if (inventory.error) {
-    return (
-      <div className="flex flex-wrap items-center gap-2">
-        <p role="alert" className="text-sm text-destructive">
-          {t("Could not load ticket inventory.")}
-        </p>
-        <Button variant="ghost" size="sm" onClick={inventory.retry}>
-          {t("Try again")}
-        </Button>
-      </div>
-    )
-  }
-  const totals = inventory.totals
-  if (!totals)
-    return (
-      <p className="text-sm text-muted-foreground">
-        {t("Ticket inventory is not configured.")}
-      </p>
-    )
-
-  return (
-    <section className="space-y-2">
-      <h4 className="text-sm font-medium">{t("Ticket inventory")}</h4>
-      <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-        {(
-          [
-            [t("Capacity"), totals.capacity],
-            [t("Sold"), totals.sold],
-            [t("Remaining"), totals.available],
-            [t("Reserved"), totals.reserved],
-          ] as const
-        ).map(([label, value]) => (
-          <div key={label}>
-            <dt className="text-muted-foreground">{label}</dt>
-            <dd className="font-medium tabular-nums">
-              {integer.format(value)}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      {totals.progress && (
-        <Progress value={totals.progress.value} aria-label={t("Tickets sold")}>
-          <span className="text-sm text-muted-foreground">
-            {totals.progress.label}
-          </span>
-        </Progress>
-      )}
-    </section>
-  )
-}
+import {
+  eventActionLabels,
+  type OrganizerEvent,
+} from "./organizerEventPresentation"
 
 export function OrganizerEventCard({
   event,
-  onPreview,
   onAction,
   onCopy,
 }: {
-  event: OrganizerEventCardModel
-  onPreview: () => void
+  event: OrganizerEvent
   onAction: (action: ManagedEventAction) => void
   onCopy: () => void
 }) {
+  const [firstAction] = event.actions
   return (
-    <Card className="shadow-none">
-      <CardHeader>
-        <CardTitle className="flex flex-wrap items-center gap-2">
-          <h3 className="wrap-anywhere">{event.title}</h3>
-          <Badge variant="secondary">{event.statusLabel}</Badge>
-          <Badge variant="outline">{event.visibility}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
-          <span className="flex items-center gap-2">
-            <CalendarDays className="size-4 shrink-0" aria-hidden="true" />{" "}
-            {event.starts}
-          </span>
-          <span className="flex items-center gap-2">
-            <MapPin className="size-4 shrink-0" aria-hidden="true" />{" "}
-            {event.venue}
-          </span>
-          <span className="flex items-center gap-2">
-            <Users className="size-4 shrink-0" aria-hidden="true" />{" "}
-            {event.admission}
-          </span>
-        </div>
-        {event.draftMessage && (
-          <Alert>
-            <AlertDescription>{event.draftMessage}</AlertDescription>
-          </Alert>
-        )}
-        <OrganizerInventory inventory={event.inventory} />
-        <div className="flex flex-wrap gap-2 border-t pt-4">
-          <Button size="sm" variant="outline" onClick={onPreview}>
-            {t("View details")}
-          </Button>
-          <Link
-            href={event.campaignsPath}
-            aria-label={t("Manage campaigns for {0}", event.title)}
-            className={buttonVariants({ size: "sm", variant: "outline" })}
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="secondary">{event.statusLabel}</Badge>
+        <Badge variant="outline">{event.visibility}</Badge>
+      </div>
+
+      <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+        {[
+          { Icon: CalendarDays, value: event.starts },
+          { Icon: MapPin, value: event.venue },
+          { Icon: Users, value: event.admission },
+        ].map(({ Icon, value }) => (
+          <span
+            key={value}
+            className="flex min-w-0 items-start gap-2 wrap-anywhere"
           >
-            {t("Manage campaigns")}
+            <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{" "}
+            {value}
+          </span>
+        ))}
+      </div>
+
+      {event.draftMessage && (
+        <Alert>
+          <AlertDescription>{event.draftMessage}</AlertDescription>
+        </Alert>
+      )}
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href={event.campaignsPath}
+          className={buttonVariants({ variant: "outline", className: "h-10" })}
+        >
+          {t("Manage campaigns")}
+        </Link>
+        {event.publicPath && (
+          <Link
+            href={event.publicPath}
+            className={buttonVariants({
+              variant: "outline",
+              className: "h-10",
+            })}
+          >
+            {t("View event")}
           </Link>
-          {event.publicPath && (
-            <Link
-              href={event.publicPath}
-              className={buttonVariants({ size: "sm", variant: "outline" })}
+        )}
+        {event.copyPath && (
+          <Button variant="outline" className="h-10" onClick={onCopy}>
+            {t("Copy link")}
+          </Button>
+        )}
+        {event.actions.length > 1 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button variant="outline" className="h-10" />}
             >
-              {t("View event")}
-            </Link>
-          )}
-          {event.copyPath && (
-            <Button size="sm" variant="outline" onClick={onCopy}>
-              {t("Copy link")}
+              {t("Event status")} <ChevronDown aria-hidden="true" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-44">
+              {event.actions.map((action) => (
+                <DropdownMenuItem
+                  key={action}
+                  className="min-h-9"
+                  variant={action === "cancel" ? "destructive" : "default"}
+                  onClick={() => onAction(action)}
+                >
+                  {t(eventActionLabels[action])}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          firstAction && (
+            <Button className="h-10" onClick={() => onAction(firstAction)}>
+              {t(eventActionLabels[firstAction])}
             </Button>
-          )}
-          {event.actions.map((action) => (
-            <Button
-              key={action}
-              size="sm"
-              variant={action === "cancel" ? "destructive" : "outline"}
-              onClick={() => onAction(action)}
-            >
-              {t(eventActionLabels[action])}
-            </Button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+          )
+        )}
+      </div>
+
+      <details className="border-t pt-2">
+        <summary className="w-fit cursor-pointer rounded-md py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-ring">
+          {t("Event details")}
+        </summary>
+        <dl className="mt-2 grid gap-3 text-sm sm:grid-cols-3">
+          {[
+            [t("Category"), event.category],
+            [t("Ends"), event.ends],
+            [t("Address"), event.address],
+          ]
+            .filter(([, value]) => value)
+            .map(([label, value]) => (
+              <div key={label} className="min-w-0">
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd className="wrap-anywhere">{value}</dd>
+              </div>
+            ))}
+        </dl>
+        {event.description && (
+          <p className="mt-3 text-sm wrap-anywhere whitespace-pre-wrap">
+            {event.description}
+          </p>
+        )}
+      </details>
+    </div>
   )
 }

@@ -1,19 +1,12 @@
 import { t } from "@/i18n/locale"
-import type { ReactNode } from "react"
-import {
-  CalendarDays,
-  CircleHelp,
-  LayoutDashboard,
-  Settings,
-  Ticket,
-} from "lucide-react"
+import type { CSSProperties, ReactNode } from "react"
+import { CircleHelp, LayoutDashboard, Settings, Ticket } from "lucide-react"
 import { Link } from "wouter"
 
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -30,12 +23,6 @@ const navigation = [
     label: "Dashboard",
     Icon: LayoutDashboard,
   },
-  {
-    section: "events",
-    href: "/organizer/events",
-    label: "Events",
-    Icon: CalendarDays,
-  },
   { section: "support", href: "/support", label: "Support", Icon: CircleHelp },
   {
     section: "settings",
@@ -46,37 +33,41 @@ const navigation = [
 ]
 
 export function OrganizerLayout({
-  section,
+  isDashboard = false,
   children,
 }: {
-  section: "dashboard" | "events"
+  isDashboard?: boolean
   children: ReactNode
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider style={{ "--sidebar-width": "13rem" } as CSSProperties}>
       <Sidebar collapsible="offcanvas">
-        <SidebarHeader>
+        <SidebarHeader className="px-3 pt-5">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-md p-2 font-semibold"
+            className="flex min-h-10 items-center gap-2 rounded-md px-3 font-semibold focus-visible:outline-2 focus-visible:outline-ring"
           >
             <Ticket className="size-5" aria-hidden="true" />
             BiletFlow
           </Link>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>{t("Organizer")}</SidebarGroupLabel>
+          <SidebarGroup className="px-3">
             <nav aria-label={t("Organizer")}>
-              <SidebarMenu>
+              <SidebarMenu className="gap-1">
                 {navigation.map(({ section: key, href, label, Icon }) => (
                   <SidebarMenuItem key={key}>
                     <SidebarMenuButton
-                      isActive={section === key}
+                      className="min-h-10 rounded-lg px-3"
+                      isActive={key === "dashboard"}
                       render={
                         <Link
                           href={href}
-                          aria-current={section === key ? "page" : undefined}
+                          aria-current={
+                            key === "dashboard" && isDashboard
+                              ? "page"
+                              : undefined
+                          }
                         />
                       }
                     >
@@ -90,9 +81,9 @@ export function OrganizerLayout({
           </SidebarGroup>
         </SidebarContent>
       </Sidebar>
-      <SidebarInset>
-        <header className="flex items-center gap-2 border-b px-4 py-2">
-          <SidebarTrigger />
+      <SidebarInset className="min-w-0 bg-muted/35">
+        <header className="flex min-h-14 items-center gap-2 border-b bg-background px-4 sm:px-6">
+          <SidebarTrigger className="size-10" />
           <Link href="/" className="text-sm font-semibold md:hidden">
             BiletFlow
           </Link>

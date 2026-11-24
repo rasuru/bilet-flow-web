@@ -13,7 +13,7 @@ import {
   publishEvent,
   unpublishEvent,
 } from "@/api/events"
-import { getEventInventory, listManagedTicketTypes } from "@/api/inventory"
+import { listManagedTicketTypes } from "@/api/inventory"
 import { sessionRepository } from "@/auth/sessionRepository"
 
 function retryRead(count: number, error: Error) {
@@ -29,23 +29,6 @@ const eventActions = {
 export type ManagedEventAction = keyof typeof eventActions
 
 export const managedEventRepository = {
-  inventoryQuery(sessionId: number, eventId: string) {
-    return queryOptions({
-      queryKey: ["managed-events", sessionId, eventId, "inventory"],
-      queryFn: () =>
-        sessionRepository.authenticatedRequest(sessionId, async (token) => {
-          try {
-            return await getEventInventory(eventId, token)
-          } catch (error) {
-            if (error instanceof ApiError && error.status === 404) return null
-            throw error
-          }
-        }),
-      retry: retryRead,
-      staleTime: 30_000,
-    })
-  },
-
   changeStatusMutation(client: QueryClient, sessionId: number) {
     return mutationOptions({
       mutationKey: ["managed-events", sessionId, "change-status"],
