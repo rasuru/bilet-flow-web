@@ -3,9 +3,10 @@ import { ArrowUpRight, Compass, Ticket, UserRound } from "lucide-react"
 import { Link, useLocation } from "wouter"
 
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
+import { TransactionNotice } from "@/components/site/TransactionNotice"
 import { BrandLogo } from "@/components/site/BrandLogo"
 import { buttonVariants } from "@/components/ui/button"
-import { LanguagePicker } from "@/i18n/LanguagePicker"
+import { AppearanceControls } from "@/components/site/AppearanceControls"
 import { t } from "@/i18n/locale"
 
 export function SiteLayout({ children }: { children: ReactNode }) {
@@ -72,7 +73,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             </Link>
           </nav>
           <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-1 sm:gap-2">
-            <LanguagePicker />
+            <AppearanceControls />
             {session.status !== "restoring" && (
               <Link
                 href={signedIn ? "/account/settings" : "/sign-in"}
@@ -98,6 +99,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           >
             <BrandLogo />
           </Link>
+          <TransactionNotice />
           <nav
             aria-label={t("Helpful links")}
             className="flex flex-wrap items-center gap-x-5 gap-y-1"

@@ -73,8 +73,8 @@ export const russian: Readonly<Record<string, string>> = {
   "BiletFlow platform support": "Поддержка BiletFlow",
   "BiletFlow sends the user an email to set their password.":
     "BiletFlow отправит пользователю письмо для установки пароля.",
-  "BiletFlow simulates payouts. The backend checks the IBAN format and displays a masked account number.":
-    "BiletFlow имитирует выплаты. Сервер проверяет формат IBAN и скрывает часть номера счёта.",
+  "Your IBAN is checked for validity. Only a masked account number is displayed.":
+    "Проверяется корректность IBAN. Отображается только маскированный номер счёта.",
   "BiletFlow ticket": "Билет BiletFlow",
   "BiletFlow uses your account email for sign-in and password reset.":
     "BiletFlow использует вашу почту для входа и сброса пароля.",
@@ -127,8 +127,6 @@ export const russian: Readonly<Record<string, string>> = {
   Commerce: "Продажи",
   "Complete payment on Halyk ePay to receive your tickets.":
     "Оплатите заказ через Halyk ePay, чтобы получить билеты.",
-  "Complete the test payment on Halyk ePay to receive your tickets.":
-    "Завершите тестовую оплату в Halyk ePay, чтобы получить билеты.",
   Completed: "Завершено",
   "Confirm new password": "Подтвердите новый пароль",
   "Confirm password": "Подтвердите пароль",
@@ -478,7 +476,6 @@ export const russian: Readonly<Record<string, string>> = {
   "Password must be at most 100 characters":
     "Пароль не должен превышать 100 символов",
   "Passwords do not match": "Пароли не совпадают",
-  "Pay in Halyk sandbox": "Оплатить в тестовой среде Halyk",
   "Pay with Halyk ePay": "Оплатить через Halyk ePay",
   Payer: "Плательщик",
   "Payer ID": "ID плательщика",
@@ -1010,7 +1007,6 @@ export const russian: Readonly<Record<string, string>> = {
     "Продажи за вычетом скидок и подтверждённых возвратов",
   "Loading analytics…": "Загружаем аналитику…",
   "Manage event": "Управление мероприятием",
-  "Net demonstration revenue": "Демонстрационная чистая выручка",
   "Net revenue": "Чистая выручка",
   "No confirmed redemptions for these filters.":
     "По выбранным фильтрам нет подтверждённых применений.",
@@ -1151,6 +1147,12 @@ export const russian: Readonly<Record<string, string>> = {
   "Browse events": "Смотреть мероприятия",
   "Browse public events": "Смотреть публичные мероприятия",
   "No image available": "Нет изображения",
+  "This is a demo. All transactions are simulated.":
+    "Это демонстрационная версия. Все транзакции имитируются.",
+  "Theme ({0})": "Тема ({0})",
+  System: "Системная",
+  Light: "Светлая",
+  Dark: "Тёмная",
   "Choose admission, ticket quantities and prices.":
     "Выберите тип входа, количество билетов и цены.",
   "Couldn’t load administrator usernames.":
@@ -1260,8 +1262,8 @@ export const kazakh: Readonly<Record<string, string>> = {
   "BiletFlow platform support": "BiletFlow қолдауы",
   "BiletFlow sends the user an email to set their password.":
     "BiletFlow пайдаланушыға құпиясөз орнату үшін хат жібереді.",
-  "BiletFlow simulates payouts. The backend checks the IBAN format and displays a masked account number.":
-    "BiletFlow төлемдерді модельдейді. Сервер IBAN пішімін тексеріп, шот нөмірінің бір бөлігін жасырады.",
+  "Your IBAN is checked for validity. Only a masked account number is displayed.":
+    "IBAN жарамдылығы тексеріледі. Шот нөмірі ішінара жасырылып көрсетіледі.",
   "BiletFlow ticket": "BiletFlow билеті",
   "BiletFlow uses your account email for sign-in and password reset.":
     "BiletFlow электрондық поштаңызды кіру және құпиясөзді қалпына келтіру үшін қолданады.",
@@ -1314,8 +1316,6 @@ export const kazakh: Readonly<Record<string, string>> = {
   Commerce: "Сауда",
   "Complete payment on Halyk ePay to receive your tickets.":
     "Билеттерді алу үшін Halyk ePay арқылы төлеңіз.",
-  "Complete the test payment on Halyk ePay to receive your tickets.":
-    "Билеттерді алу үшін Halyk ePay жүйесінде сынақ төлемін аяқтаңыз.",
   Completed: "Аяқталды",
   "Confirm new password": "Жаңа құпиясөзді растаңыз",
   "Confirm password": "Құпиясөзді растаңыз",
@@ -1670,7 +1670,6 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Password must be at most 100 characters":
     "Құпиясөз 100 таңбадан аспауы керек",
   "Passwords do not match": "Құпиясөздер сәйкес келмейді",
-  "Pay in Halyk sandbox": "Halyk сынақ ортасында төлеу",
   "Pay with Halyk ePay": "Halyk ePay арқылы төлеу",
   Payer: "Төлеуші",
   "Payer ID": "Төлеушінің ID",
@@ -2201,7 +2200,6 @@ export const kazakh: Readonly<Record<string, string>> = {
     "Сатылымнан жеңілдіктер мен расталған қайтарымдар шегеріледі",
   "Loading analytics…": "Аналитика жүктелуде…",
   "Manage event": "Іс-шараны басқару",
-  "Net demonstration revenue": "Демонстрациялық таза түсім",
   "Net revenue": "Таза түсім",
   "No confirmed redemptions for these filters.":
     "Таңдалған сүзгілер бойынша расталған қолданыс жоқ.",
@@ -2343,6 +2341,12 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Browse events": "Іс-шараларды қарау",
   "Browse public events": "Жария іс-шараларды қарау",
   "No image available": "Сурет жоқ",
+  "This is a demo. All transactions are simulated.":
+    "Бұл демо нұсқа. Барлық транзакциялар имитацияланады.",
+  "Theme ({0})": "Тақырып ({0})",
+  System: "Жүйелік",
+  Light: "Ашық",
+  Dark: "Қараңғы",
   "Choose admission, ticket quantities and prices.":
     "Кіру түрін, билет санын және бағасын таңдаңыз.",
   "Couldn’t load administrator usernames.":

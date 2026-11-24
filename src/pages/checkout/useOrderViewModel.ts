@@ -68,11 +68,7 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
     completed && free
       ? t("Your total was zero. Your tickets were issued immediately.")
       : awaitingPayment && paymentId
-        ? order.sandbox
-          ? t(
-              "Complete the test payment on Halyk ePay to receive your tickets."
-            )
-          : t("Complete payment on Halyk ePay to receive your tickets.")
+        ? t("Complete payment on Halyk ePay to receive your tickets.")
         : null
 
   return {
@@ -123,4 +119,3 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
           : null,
   } as const
 }
-

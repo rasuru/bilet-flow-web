@@ -13,14 +13,14 @@ export function OrganizerAnalyticsSummary({ summary }: { summary: Summary }) {
   const { inventory, sales, attendance, campaignTotals } = summary
   return (
     <div className="grid overflow-hidden rounded-xl border bg-card lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)]">
-      <section className="min-w-0 bg-[#16362e] p-5 text-[#f1faee] sm:p-6">
-        <h3 className="text-sm font-medium text-[#c4ddd1]">
-          {t("Net demonstration revenue")}
+      <section className="min-w-0 bg-green-100 p-5 text-green-950 sm:p-6 dark:bg-[#16362e] dark:text-[#f1faee]">
+        <h3 className="text-sm font-medium text-green-800 dark:text-[#c4ddd1]">
+          {t("Net revenue")}
         </h3>
         <p className="mt-2 text-3xl leading-tight font-semibold tracking-tight wrap-anywhere tabular-nums sm:text-4xl">
           {sales.net}
         </p>
-        <dl className="mt-5 space-y-2 border-t border-white/25 pt-4 text-sm">
+        <dl className="mt-5 space-y-2 border-t border-green-300/70 pt-4 text-sm dark:border-white/25">
           {[
             [t("Gross sales"), sales.gross],
             [t("Discounts"), sales.discounts],
@@ -30,7 +30,7 @@ export function OrganizerAnalyticsSummary({ summary }: { summary: Summary }) {
               key={label}
               className="flex flex-wrap justify-between gap-x-3 gap-y-1"
             >
-              <dt className="text-[#c4ddd1]">{label}</dt>
+              <dt className="text-green-800 dark:text-[#c4ddd1]">{label}</dt>
               <dd className="font-medium tabular-nums">{value}</dd>
             </div>
           ))}

@@ -1,6 +1,7 @@
+import { TransactionNotice } from "@/components/site/TransactionNotice"
 import { BrandLogo } from "@/components/site/BrandLogo"
 import { BackLink, PageHeading } from "@/components/site/SitePage"
-import { LanguagePicker } from "@/i18n/LanguagePicker"
+import { AppearanceControls } from "@/components/site/AppearanceControls"
 import { t } from "@/i18n/locale"
 import { Link, useSearch } from "wouter"
 
@@ -51,7 +52,7 @@ export function AdminDashboardPage({
           </Link>
           <div className="flex flex-wrap items-center justify-end gap-1 lg:hidden">
             <BackLink href="/">{t("Home")}</BackLink>
-            <LanguagePicker />
+            <AppearanceControls />
           </div>
         </div>
         <nav
@@ -91,11 +92,11 @@ export function AdminDashboardPage({
           ))}
         </nav>
       </aside>
-      <div className="min-w-0">
+      <div className="flex min-w-0 flex-col">
         <header className="hidden items-center justify-between gap-4 border-b bg-background px-6 py-3 lg:flex xl:px-8">
           <BackLink href="/">{t("Home")}</BackLink>
           <div className="ml-auto">
-            <LanguagePicker />
+            <AppearanceControls />
           </div>
           <Link
             href="/account/settings"
@@ -104,7 +105,7 @@ export function AdminDashboardPage({
             {login}
           </Link>
         </header>
-        <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:py-8 xl:px-8">
+        <main className="mx-auto w-full max-w-7xl flex-1 space-y-5 px-4 py-6 sm:px-6 lg:py-8 xl:px-8">
           {section?.id !== "overview" && (
             <BackLink href="/admin">{t("Go to overview")}</BackLink>
           )}
@@ -129,6 +130,9 @@ export function AdminDashboardPage({
             </Link>
           )}
         </main>
+        <footer className="border-t bg-background px-4 py-4 sm:px-6 xl:px-8 print:hidden">
+          <TransactionNotice />
+        </footer>
       </div>
     </div>
   )

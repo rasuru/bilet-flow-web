@@ -95,7 +95,7 @@ export function CreateSupportPage({
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="text-primary underline underline-offset-4"
+                      className="text-link underline underline-offset-4"
                     >
                       {link.label}
                     </Link>

@@ -110,7 +110,7 @@ export function PayoutAccountSection({ sessionId }: { sessionId: number }) {
         </h2>
         <p className="text-sm text-muted-foreground">
           {t(
-            "BiletFlow simulates payouts. The backend checks the IBAN format and displays a masked account number."
+            "Your IBAN is checked for validity. Only a masked account number is displayed."
           )}
         </p>
         {model.isLoading ? (

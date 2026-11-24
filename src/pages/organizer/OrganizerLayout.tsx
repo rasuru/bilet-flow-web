@@ -1,6 +1,7 @@
+import { TransactionNotice } from "@/components/site/TransactionNotice"
 import { BrandLogo } from "@/components/site/BrandLogo"
 import { BackLink } from "@/components/site/SitePage"
-import { LanguagePicker } from "@/i18n/LanguagePicker"
+import { AppearanceControls } from "@/components/site/AppearanceControls"
 import { t } from "@/i18n/locale"
 import type { CSSProperties, ReactNode } from "react"
 import { CircleHelp, LayoutDashboard, Settings } from "lucide-react"
@@ -88,10 +89,13 @@ export function OrganizerLayout({
           <SidebarTrigger className="size-10" />
           <BackLink href="/">{t("Home")}</BackLink>
           <div className="ml-auto">
-            <LanguagePicker />
+            <AppearanceControls />
           </div>
         </header>
-        {children}
+        <div className="flex-1">{children}</div>
+        <footer className="border-t bg-background px-4 py-4 sm:px-6 print:hidden">
+          <TransactionNotice />
+        </footer>
       </SidebarInset>
     </SidebarProvider>
   )

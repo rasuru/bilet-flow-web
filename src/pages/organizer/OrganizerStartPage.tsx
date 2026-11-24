@@ -6,6 +6,7 @@ import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { t } from "@/i18n/locale"
+import { cn } from "@/lib/utils"
 
 const steps = [
   {
@@ -32,7 +33,7 @@ export function OrganizerStartPage() {
   return (
     <SitePage width="content">
       <BackLink href="/">{t("Home")}</BackLink>
-      <Card className="gap-6 bg-primary/10 p-5 sm:p-8">
+      <Card className="gap-6 bg-green-100 p-5 ring-green-200 sm:p-8 dark:bg-primary/10 dark:ring-foreground/10">
         <PageHeading
           description={t(
             "Create a draft with your BiletFlow account. Add a venue and tickets when you’re ready, then publish from your organizer dashboard."
@@ -51,10 +52,10 @@ export function OrganizerStartPage() {
           {signedIn && (
             <Link
               href="/organizer"
-              className={buttonVariants({
-                variant: "outline",
-                className: "min-h-11",
-              })}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "min-h-11 border-green-300 bg-green-200 hover:bg-green-300"
+              )}
             >
               {t("Organizer dashboard")}
             </Link>

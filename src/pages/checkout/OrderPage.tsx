@@ -111,9 +111,7 @@ export function OrderPage({
                   <Button onClick={model.pay} disabled={model.busy}>
                     {model.paying
                       ? t("Opening Halyk ePay…")
-                      : model.order.sandbox
-                        ? t("Pay in Halyk sandbox")
-                        : t("Pay with Halyk ePay")}
+                      : t("Pay with Halyk ePay")}
                   </Button>
                 )}
                 {model.canCancel && (

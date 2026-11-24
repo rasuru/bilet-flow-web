@@ -1,5 +1,5 @@
-import type { ReactNode } from "react"
 import { ArrowLeft } from "lucide-react"
+import type { ReactNode } from "react"
 import { Link } from "wouter"
 
 import { buttonVariants } from "@/components/ui/button"
