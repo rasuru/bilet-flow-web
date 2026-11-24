@@ -1,3 +1,4 @@
+import { numberFormat, t } from "@/i18n/locale"
 import type { ComponentProps, ReactNode } from "react"
 import { Link, Redirect } from "wouter"
 
@@ -29,6 +30,8 @@ import {
 import { EventPreview } from "./EventPreview"
 import { TicketTierFields } from "./TicketTierFields"
 import { useCreateEventViewModel } from "./useCreateEventViewModel"
+
+const seatCount = numberFormat({ maximumFractionDigits: 0 })
 
 const steps = ["Basics", "Schedule", "Venue & Admission", "Tickets", "Review"]
 function Field({
@@ -100,10 +103,10 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
           href="/"
           className={buttonVariants({ variant: "ghost", className: "mb-6" })}
         >
-          Back to home
+          {t("Back to home")}
         </Link>
         {!result && (
-          <nav aria-label="Event form progress" className="mb-6">
+          <nav aria-label={t("Event form progress")} className="mb-6">
             <ol className="grid grid-cols-5 gap-2 text-center">
               {steps.map((label, index) => (
                 <li key={label}>
@@ -119,7 +122,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                     >
                       {index + 1}
                     </span>
-                    <span>{label}</span>
+                    <span>{t(label)}</span>
                   </button>
                 </li>
               ))}
@@ -129,10 +132,12 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
         <Card>
           <CardHeader>
             <CardTitle>
-              <h1>{result ? "Event saved locally" : "Create new event"}</h1>
+              <h1>
+                {result ? t("Event saved locally") : t("Create new event")}
+              </h1>
             </CardTitle>
             <CardDescription>
-              {result ? event.title : steps[step]}
+              {result ? event.title : t(steps[step])}
             </CardDescription>
             {import.meta.env.DEV && !result && (
               <CardAction>
@@ -143,7 +148,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                   disabled={busy || Boolean(savedDraft) || loadingLayouts}
                   onClick={vm.fillSample}
                 >
-                  Fill sample event
+                  {t("Fill sample event")}
                 </Button>
               </CardAction>
             )}
@@ -152,8 +157,9 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
           {result ? (
             <CardContent>
               <p role="status" className="text-sm">
-                The development API is unavailable. This event was saved in this
-                browser only.
+                {t(
+                  "The development API is unavailable. This event was saved in this browser only."
+                )}
               </p>
             </CardContent>
           ) : (
@@ -168,9 +174,9 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
               <CardContent className="space-y-4">
                 {step === 0 && (
                   <>
-                    {eventInput("title", "Event title", { required: true })}
-                    {eventInput("category", "Category", { required: true })}
-                    <Field id="description" label="Description (optional)">
+                    {eventInput("title", t("Event title"), { required: true })}
+                    {eventInput("category", t("Category"), { required: true })}
+                    <Field id="description" label={t("Description (optional)")}>
                       <Textarea
                         id="description"
                         value={event.description}
@@ -179,10 +185,10 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         }
                       />
                     </Field>
-                    {eventInput("imageUrl", "Image URL (optional)", {
+                    {eventInput("imageUrl", t("Image URL (optional)"), {
                       type: "url",
                     })}
-                    <Field id="visibility" label="Visibility">
+                    <Field id="visibility" label={t("Visibility")}>
                       <NativeSelect
                         id="visibility"
                         aria-describedby="visibility-description"
@@ -198,13 +204,13 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         {Object.entries(visibilityDetails).map(
                           ([value, { label }]) => (
                             <NativeSelectOption key={value} value={value}>
-                              {label}
+                              {t(label)}
                             </NativeSelectOption>
                           )
                         )}
                       </NativeSelect>
                       <FieldDescription id="visibility-description">
-                        {visibilityDetails[event.visibility].description}
+                        {t(visibilityDetails[event.visibility].description)}
                       </FieldDescription>
                     </Field>
                   </>
@@ -212,16 +218,16 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                 {step === 1 && (
                   <>
                     <div className="grid gap-4 sm:grid-cols-2">
-                      {eventInput("startAt", "Starts", {
+                      {eventInput("startAt", t("Starts"), {
                         type: "datetime-local",
                         required: true,
                       })}
-                      {eventInput("endAt", "Ends", {
+                      {eventInput("endAt", t("Ends"), {
                         type: "datetime-local",
                         required: true,
                       })}
                     </div>
-                    <Field id="timeZone" label="Time zone">
+                    <Field id="timeZone" label={t("Time zone")}>
                       <NativeSelect
                         id="timeZone"
                         className="w-full"
@@ -238,7 +244,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                     <div className="grid gap-4 sm:grid-cols-2">
                       {eventInput(
                         "registrationOpensAt",
-                        "Registration opens (optional)",
+                        t("Registration opens (optional)"),
                         {
                           type: "datetime-local",
                           "aria-describedby": "registration-description",
@@ -246,7 +252,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                       )}
                       {eventInput(
                         "registrationClosesAt",
-                        "Registration closes (optional)",
+                        t("Registration closes (optional)"),
                         {
                           type: "datetime-local",
                           "aria-describedby": "registration-description",
@@ -254,15 +260,15 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                       )}
                     </div>
                     <FieldDescription id="registration-description">
-                      Registration limits when buyers can order tickets across
-                      all tiers. Leave both dates blank to open registration
-                      when the event is published.
+                      {t(
+                        "Registration limits when buyers can order tickets across all tiers. Leave both dates blank to open registration when the event is published."
+                      )}
                     </FieldDescription>
                   </>
                 )}
                 {step === 2 && (
                   <>
-                    <Field id="admission" label="Admission mode">
+                    <Field id="admission" label={t("Admission mode")}>
                       <NativeSelect
                         id="admission"
                         className="w-full"
@@ -273,17 +279,21 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         }
                       >
                         <NativeSelectOption value="GENERAL_ADMISSION">
-                          General admission
+                          {t("General admission")}
                         </NativeSelectOption>
                         <NativeSelectOption value="ASSIGNED_SEATING">
-                          Assigned seating
+                          {t("Assigned seating")}
                         </NativeSelectOption>
                       </NativeSelect>
                     </Field>
-                    {eventInput("venueName", "Venue name", { required: true })}
-                    {eventInput("venueAddress", "Address", { required: true })}
+                    {eventInput("venueName", t("Venue name"), {
+                      required: true,
+                    })}
+                    {eventInput("venueAddress", t("Address"), {
+                      required: true,
+                    })}
                     {assigned ? (
-                      <Field id="layoutId" label="Venue layout">
+                      <Field id="layoutId" label={t("Venue layout")}>
                         <NativeSelect
                           id="layoutId"
                           className="w-full"
@@ -296,21 +306,25 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         >
                           <NativeSelectOption value="">
                             {loadingLayouts
-                              ? "Loading layouts…"
-                              : "Select a layout"}
+                              ? t("Loading layouts…")
+                              : t("Select a layout")}
                           </NativeSelectOption>
                           {layouts.map((layout) => (
                             <NativeSelectOption
                               key={layout.layoutId}
                               value={layout.layoutId}
                             >
-                              {layout.name} ({layout.seats.length} seats)
+                              {t(
+                                "{0} ({1} seats)",
+                                layout.name,
+                                seatCount.format(layout.seats.length)
+                              )}
                             </NativeSelectOption>
                           ))}
                         </NativeSelect>
                         {layoutsOffline && layouts.length > 0 && (
                           <p className="text-sm text-muted-foreground">
-                            Sample layouts are available for local saves.
+                            {t("Sample layouts are available for local saves.")}
                           </p>
                         )}
                         {!loadingLayouts &&
@@ -318,7 +332,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                             <>
                               <p className="text-sm" role="status">
                                 {layoutError ||
-                                  "No venue layouts are available."}
+                                  t("No venue layouts are available.")}
                               </p>
                               <Button
                                 type="button"
@@ -326,13 +340,13 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                                 disabled={hasSavedTickets}
                                 onClick={() => void refreshLayouts()}
                               >
-                                Reload layouts
+                                {t("Reload layouts")}
                               </Button>
                             </>
                           )}
                       </Field>
                     ) : (
-                      eventInput("venueCapacity", "Total event capacity", {
+                      eventInput("venueCapacity", t("Total event capacity"), {
                         type: "number",
                         min: 1,
                         required: true,
@@ -340,8 +354,9 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                     )}
                     {hasSavedTickets && (
                       <FieldDescription>
-                        Admission mode and layout are fixed once a ticket tier
-                        is saved.
+                        {t(
+                          "Admission mode and layout are fixed once a ticket tier is saved."
+                        )}
                       </FieldDescription>
                     )}
                   </>
@@ -349,14 +364,14 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                 {step === 3 && (
                   <>
                     <FieldDescription>
-                      Prices are in KZT. Enter 0 for a free ticket.
+                      {t("Prices are in KZT. Enter 0 for a free ticket.")}
                     </FieldDescription>
                     {tickets.map((ticket, index) => (
                       <TicketTierFields
                         key={ticket.id}
                         ticket={ticket}
                         title={
-                          assigned ? ticket.id : `Ticket tier ${index + 1}`
+                          assigned ? ticket.id : t("Ticket tier {0}", index + 1)
                         }
                         readOnlyQuantity={assigned}
                         timeZone={event.timeZone}
@@ -382,7 +397,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                         variant="outline"
                         onClick={vm.addTicket}
                       >
-                        Add ticket tier
+                        {t("Add ticket tier")}
                       </Button>
                     )}
                   </>
@@ -398,7 +413,9 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                     {savedDraft && (
                       <Alert>
                         <AlertDescription>
-                          Publishing will continue using your saved draft.
+                          {t(
+                            "Publishing will continue using your saved draft."
+                          )}
                         </AlertDescription>
                       </Alert>
                     )}
@@ -421,7 +438,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                     disabled={busy}
                     onClick={() => navigate(step - 1)}
                   >
-                    Back
+                    {t("Back")}
                   </Button>
                 )}
                 <Button
@@ -430,11 +447,11 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                 >
                   {step === 4
                     ? busy
-                      ? "Publishing…"
-                      : "Publish event"
+                      ? t("Publishing…")
+                      : t("Publish event")
                     : step === 3
-                      ? "Continue to review"
-                      : "Continue"}
+                      ? t("Continue to review")
+                      : t("Continue")}
                 </Button>
               </CardFooter>
             </form>
@@ -444,3 +461,4 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
     </main>
   )
 }
+

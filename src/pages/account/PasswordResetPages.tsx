@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import type { ReactNode } from "react"
 import { Link } from "wouter"
 
@@ -23,7 +24,7 @@ function ResetPage({
         <h1 className="text-2xl font-semibold">{title}</h1>
         {children}
         <Link to="/" replace className="text-sm underline underline-offset-4">
-          Back to login
+          {t("Back to login")}
         </Link>
       </section>
     </main>
@@ -34,11 +35,12 @@ export function RequestPasswordResetPage() {
   const model = useRequestPasswordResetViewModel()
 
   return (
-    <ResetPage title="Reset your password">
+    <ResetPage title={t("Reset your password")}>
       {model.isComplete ? (
         <p role="status" className="text-sm text-muted-foreground">
-          If an eligible account uses this email address, you’ll receive a
-          password reset link.
+          {t(
+            "If an eligible account uses this email address, you’ll receive a password reset link."
+          )}
         </p>
       ) : (
         <form noValidate onSubmit={model.submit}>
@@ -47,10 +49,10 @@ export function RequestPasswordResetPage() {
             className="flex flex-col gap-4"
           >
             <p className="text-sm text-muted-foreground">
-              Enter your account email address to request a reset link.
+              {t("Enter your account email address to request a reset link.")}
             </p>
             <AccountFormField
-              label="Email address"
+              label={t("Email address")}
               type="email"
               autoComplete="email"
               error={model.errors.email?.message}
@@ -62,7 +64,7 @@ export function RequestPasswordResetPage() {
               </p>
             )}
             <Button type="submit" size="lg">
-              {model.isSubmitting ? "Sending…" : "Send reset link"}
+              {model.isSubmitting ? t("Sending…") : t("Send reset link")}
             </Button>
           </fieldset>
         </form>
@@ -77,7 +79,9 @@ function FinishPasswordResetForm({ resetKey }: { resetKey: string }) {
   if (model.isComplete) {
     return (
       <p role="status" className="text-sm text-muted-foreground">
-        Your password has been reset. You can now log in with your new password.
+        {t(
+          "Your password has been reset. You can now log in with your new password."
+        )}
       </p>
     )
   }
@@ -101,7 +105,7 @@ function FinishPasswordResetForm({ resetKey }: { resetKey: string }) {
           </p>
         )}
         <Button type="submit" size="lg">
-          {model.isSubmitting ? "Saving…" : "Set new password"}
+          {model.isSubmitting ? t("Saving…") : t("Set new password")}
         </Button>
       </fieldset>
     </form>
@@ -112,12 +116,12 @@ export function FinishPasswordResetPage() {
   const key = usePasswordResetKey()
 
   return (
-    <ResetPage title="Choose a new password">
+    <ResetPage title={t("Choose a new password")}>
       {key ? (
         <FinishPasswordResetForm key={key} resetKey={key} />
       ) : (
         <p role="alert" className="text-sm text-destructive">
-          This link is missing its password reset key.
+          {t("This link is missing its password reset key.")}
         </p>
       )}
       <p className="text-sm">
@@ -126,9 +130,10 @@ export function FinishPasswordResetPage() {
           replace
           className="underline underline-offset-4"
         >
-          Request a new reset link
+          {t("Request a new reset link")}
         </Link>
       </p>
     </ResetPage>
   )
 }
+

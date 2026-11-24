@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import type { ComponentProps } from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -75,7 +76,9 @@ export function TicketTierFields({
         <CardTitle className="flex flex-wrap items-center gap-2">
           <h2>{title}</h2>
           {validPrice && (
-            <Badge>{Number(ticket.price) === 0 ? "Free" : "Paid"}</Badge>
+            <Badge>
+              {Number(ticket.price) === 0 ? t("Free") : t("Paid ticket")}
+            </Badge>
           )}
         </CardTitle>
         {onRemove && (
@@ -85,19 +88,19 @@ export function TicketTierFields({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              aria-label={`Remove ${title.toLowerCase()}`}
+              aria-label={t("Remove {0}", title)}
             >
-              Remove
+              {t("Remove")}
             </Button>
           </CardAction>
         )}
       </CardHeader>
       <CardContent>
         <FieldGroup>
-          {input("name", "Tier name", { required: true })}
-          {input("description", "Ticket description (optional)")}
+          {input("name", t("Tier name"), { required: true })}
+          {input("description", t("Ticket description (optional)"))}
           <div className="grid gap-4 sm:grid-cols-3">
-            {input("price", "Price (KZT)", {
+            {input("price", t("Price (KZT)"), {
               type: "number",
               min: 0,
               step: "0.01",
@@ -105,20 +108,20 @@ export function TicketTierFields({
             })}
             {input(
               "capacity",
-              "Quantity",
+              t("Quantity"),
               {
                 type: "number",
                 min: 1,
                 readOnly: readOnlyQuantity,
                 required: true,
               },
-              readOnlyQuantity ? "Set by the venue layout." : undefined
+              readOnlyQuantity ? t("Set by the venue layout.") : undefined
             )}
             {input(
               "maxPerOrder",
-              "Max per order",
+              t("Max per order"),
               { type: "number", min: 1, required: true },
-              "Maximum tickets from this tier in one order."
+              t("Maximum tickets from this tier in one order.")
             )}
           </div>
           <div className="space-y-3 rounded-lg border p-3">
@@ -129,20 +132,22 @@ export function TicketTierFields({
                 onCheckedChange={onCustomSales}
                 aria-describedby={`${salesId}-description`}
               />
-              <FieldLabel htmlFor={salesId}>Custom sales window</FieldLabel>
+              <FieldLabel htmlFor={salesId}>
+                {t("Custom sales window")}
+              </FieldLabel>
             </Field>
             <FieldDescription id={`${salesId}-description`}>
               {ticket.customSales
-                ? `Sales times use ${timeZone}.`
+                ? t("Sales times use {0}.", timeZone)
                 : salesSummary}
             </FieldDescription>
             {ticket.customSales && (
               <div className="grid gap-3 sm:grid-cols-2">
-                {input("salesStartAt", "Sales start", {
+                {input("salesStartAt", t("Sales start"), {
                   type: "datetime-local",
                   required: true,
                 })}
-                {input("salesEndAt", "Sales end", {
+                {input("salesEndAt", t("Sales end"), {
                   type: "datetime-local",
                   required: true,
                 })}
@@ -154,3 +159,4 @@ export function TicketTierFields({
     </Card>
   )
 }
+

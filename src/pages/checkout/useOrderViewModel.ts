@@ -1,3 +1,4 @@
+import { t, dateFormat, numberFormat, statusText } from "@/i18n/locale"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { ApiError } from "@/api/client"
@@ -7,11 +8,11 @@ import {
 } from "@/checkout/checkoutRepository"
 import { openHalykPayment } from "@/checkout/halykPayment"
 
-const kzt = new Intl.NumberFormat(undefined, {
+const kzt = numberFormat({
   style: "currency",
   currency: "KZT",
 })
-const dateTime = new Intl.DateTimeFormat(undefined, {
+const dateTime = dateFormat({
   dateStyle: "medium",
   timeStyle: "short",
 })
@@ -45,7 +46,7 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
   if (!order) {
     return {
       status: query.isPending ? "loading" : "error",
-      error: errorMessage(query.error, "Couldn’t load your order."),
+      error: errorMessage(query.error, t("Couldn’t load your order.")),
       refresh: () => void query.refetch(),
     } as const
   }
@@ -58,18 +59,20 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
   const completed = order.status === "COMPLETED"
   const statusLabel = completed
     ? free
-      ? "Free order confirmed"
-      : "Payment confirmed"
+      ? t("Free order confirmed")
+      : t("Payment confirmed")
     : awaitingPayment
-      ? "Awaiting payment"
-      : order.status.toLowerCase().replaceAll("_", " ")
+      ? t("Awaiting payment")
+      : statusText(order.status)
   const paymentMessage =
     completed && free
-      ? "Your total was zero. Your tickets were issued immediately."
+      ? t("Your total was zero. Your tickets were issued immediately.")
       : awaitingPayment && paymentId
         ? order.sandbox
-          ? "Complete the test payment on Halyk ePay to receive your tickets."
-          : "Complete payment on Halyk ePay to receive your tickets."
+          ? t(
+              "Complete the test payment on Halyk ePay to receive your tickets."
+            )
+          : t("Complete payment on Halyk ePay to receive your tickets.")
         : null
 
   return {
@@ -112,11 +115,12 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
     refresh: () => void query.refetch(),
     refreshing: query.isFetching,
     error: cancel.isError
-      ? errorMessage(cancel.error, "Couldn’t cancel your order.")
+      ? errorMessage(cancel.error, t("Couldn’t cancel your order."))
       : pay.isError
-        ? errorMessage(pay.error, "Couldn’t open Halyk ePay. Try again.")
+        ? errorMessage(pay.error, t("Couldn’t open Halyk ePay. Try again."))
         : query.isError
-          ? "Couldn’t refresh your order status."
+          ? t("Couldn’t refresh your order status.")
           : null,
   } as const
 }
+

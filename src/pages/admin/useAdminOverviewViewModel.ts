@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 import { CreditCard, Flag, MessagesSquare } from "lucide-react"
 
@@ -20,10 +21,10 @@ export function useAdminOverviewViewModel(sessionId: number) {
   return [
     {
       id: "reports",
-      title: "Open event reports",
+      title: t("Open event reports"),
       icon: Flag,
       href: "/admin/event-reports?status=OPEN",
-      empty: "No open reports.",
+      empty: t("No open reports."),
       query: adminQueryView(reports),
       items: reports.data?.items.map((item) => ({
         id: item.id,
@@ -34,10 +35,10 @@ export function useAdminOverviewViewModel(sessionId: number) {
     },
     {
       id: "payments",
-      title: "Failed payments",
+      title: t("Failed payments"),
       icon: CreditCard,
       href: "/admin/payments?status=FAILED",
-      empty: "No failed payments.",
+      empty: t("No failed payments."),
       query: adminQueryView(payments),
       items: payments.data?.items.map((item) => ({
         id: item.id,
@@ -48,10 +49,10 @@ export function useAdminOverviewViewModel(sessionId: number) {
     },
     {
       id: "support",
-      title: "Escalated support",
+      title: t("Escalated support"),
       icon: MessagesSquare,
       href: "/admin/support?escalatedOnly=true",
-      empty: "No escalated cases.",
+      empty: t("No escalated cases."),
       query: adminQueryView(support),
       items: support.data?.items.map((item) => ({
         id: item.id,
@@ -62,3 +63,4 @@ export function useAdminOverviewViewModel(sessionId: number) {
     },
   ]
 }
+

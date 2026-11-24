@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { Link } from "wouter"
 
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -18,37 +19,39 @@ export function OrganizerPage({ sessionId }: { sessionId: number }) {
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <Link href="/" className={buttonVariants({ variant: "ghost" })}>
-        Back to home
+        {t("Back to home")}
       </Link>
-      <h1 className="text-3xl font-bold tracking-tight">Organizer dashboard</h1>
+      <h1 className="text-3xl font-bold tracking-tight">
+        {t("Organizer dashboard")}
+      </h1>
       <Card>
         <CardHeader>
           <CardTitle>
-            <h2>Your events</h2>
+            <h2>{t("Your events")}</h2>
           </CardTitle>
           <CardAction>
             <Link href="/organizer/events/new" className={buttonVariants()}>
-              Create event
+              {t("Create event")}
             </Link>
           </CardAction>
         </CardHeader>
         <CardContent>
           {model.loading && (
             <p role="status" className="flex items-center gap-2">
-              <Spinner aria-hidden="true" /> Loading events…
+              <Spinner aria-hidden="true" /> {t("Loading events…")}
             </p>
           )}
           {model.error && (
             <div className="space-y-2">
               <FieldError>{model.error}</FieldError>
               <Button variant="outline" onClick={model.retry}>
-                Try again
+                {t("Try again")}
               </Button>
             </div>
           )}
           {!model.loading && !model.error && model.events.length === 0 && (
             <p className="text-muted-foreground">
-              You haven’t organized any events yet.
+              {t("You haven’t organized any events yet.")}
             </p>
           )}
           {model.events.length > 0 && (
@@ -67,10 +70,10 @@ export function OrganizerPage({ sessionId }: { sessionId: number }) {
                   </div>
                   <Link
                     href={event.campaignPath}
-                    aria-label={`Manage campaigns for ${event.title}`}
+                    aria-label={t("Manage campaigns for {0}", event.title)}
                     className={buttonVariants({ variant: "outline" })}
                   >
-                    Manage campaigns
+                    {t("Manage campaigns")}
                   </Link>
                 </li>
               ))}
@@ -81,3 +84,4 @@ export function OrganizerPage({ sessionId }: { sessionId: number }) {
     </main>
   )
 }
+

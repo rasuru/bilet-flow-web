@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import type { ComponentProps } from "react"
 
 import { AccountFormField } from "./AccountFormField"
@@ -15,16 +16,17 @@ export function NewPasswordFields({
     <>
       <AccountFormField
         {...password}
-        label="New password"
+        label={t("New password")}
         type="password"
         autoComplete="new-password"
       />
       <AccountFormField
         {...confirmation}
-        label="Confirm new password"
+        label={t("Confirm new password")}
         type="password"
         autoComplete="new-password"
       />
     </>
   )
 }
+

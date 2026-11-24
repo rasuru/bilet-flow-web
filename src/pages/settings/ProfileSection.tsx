@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -24,26 +25,26 @@ function ProfileForm({
     <form noValidate onSubmit={model.submit}>
       <fieldset disabled={model.isSubmitting} className="flex flex-col gap-4">
         <AccountFormField
-          label="First name"
+          label={t("First name")}
           autoComplete="given-name"
           error={model.errors.firstName?.message}
           {...model.register("firstName")}
         />
         <AccountFormField
-          label="Last name"
+          label={t("Last name")}
           autoComplete="family-name"
           error={model.errors.lastName?.message}
           {...model.register("lastName")}
         />
         <AccountFormField
-          label="Account email"
+          label={t("Account email")}
           type="email"
           autoComplete="email"
           error={model.errors.email?.message}
           {...model.register("email")}
         />
         <AccountFormField
-          label="Profile image URL"
+          label={t("Profile image URL")}
           type="url"
           error={model.errors.imageUrl?.message}
           {...model.register("imageUrl")}
@@ -55,10 +56,10 @@ function ProfileForm({
         )}
         <div className="flex flex-wrap gap-2">
           <Button type="submit">
-            {model.isSubmitting ? "Saving…" : "Save profile"}
+            {model.isSubmitting ? t("Saving…") : t("Save profile")}
           </Button>
           <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+            {t("Cancel")}
           </Button>
         </div>
       </fieldset>
@@ -72,9 +73,11 @@ export function ProfileSection({ account, sessionId }: Props) {
 
   return (
     <section className="space-y-4 rounded-xl border p-5">
-      <h2 className="text-lg font-semibold">Profile and contact email</h2>
+      <h2 className="text-lg font-semibold">
+        {t("Profile and contact email")}
+      </h2>
       <p className="text-sm text-muted-foreground">
-        BiletFlow uses your account email for sign-in and password reset.
+        {t("BiletFlow uses your account email for sign-in and password reset.")}
       </p>
       {isEditing ? (
         <ProfileForm
@@ -90,29 +93,33 @@ export function ProfileSection({ account, sessionId }: Props) {
         <>
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-muted-foreground">Username</dt>
+              <dt className="text-muted-foreground">{t("Username")}</dt>
               <dd className="break-all">{account.login}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Name</dt>
+              <dt className="text-muted-foreground">{t("Name")}</dt>
               <dd className="wrap-anywhere">
                 {[account.firstName, account.lastName]
                   .filter(Boolean)
-                  .join(" ") || "Not set"}
+                  .join(" ") || t("Not set")}
               </dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Account email</dt>
-              <dd className="wrap-anywhere">{account.email || "Not set"}</dd>
+              <dt className="text-muted-foreground">{t("Account email")}</dt>
+              <dd className="wrap-anywhere">{account.email || t("Not set")}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Profile image URL</dt>
-              <dd className="wrap-anywhere">{account.imageUrl || "Not set"}</dd>
+              <dt className="text-muted-foreground">
+                {t("Profile image URL")}
+              </dt>
+              <dd className="wrap-anywhere">
+                {account.imageUrl || t("Not set")}
+              </dd>
             </div>
           </dl>
           {saved && (
             <p role="status" className="text-sm">
-              Profile saved.
+              {t("Profile saved.")}
             </p>
           )}
           <Button
@@ -123,10 +130,11 @@ export function ProfileSection({ account, sessionId }: Props) {
               setIsEditing(true)
             }}
           >
-            Edit profile
+            {t("Edit profile")}
           </Button>
         </>
       )}
     </section>
   )
 }
+

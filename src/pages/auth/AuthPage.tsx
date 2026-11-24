@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useState } from "react"
 
 import { LoginForm } from "@/pages/auth/LoginForm"
@@ -13,7 +14,7 @@ export function AuthPage() {
       <section className="w-full max-w-sm">
         <header className="mb-6">
           <h1 className="text-2xl font-semibold">
-            {mode === "login" ? "Log in" : "Create an account"}
+            {mode === "login" ? t("Log in") : t("Create an account")}
           </h1>
         </header>
 
@@ -26,3 +27,4 @@ export function AuthPage() {
     </main>
   )
 }
+

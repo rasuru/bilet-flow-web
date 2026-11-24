@@ -1,3 +1,4 @@
+import { dateFormat, numberFormat, t } from "@/i18n/locale"
 import type { VenueLayout } from "@/api/events"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -13,8 +14,18 @@ import {
   type TicketDraft,
 } from "./createEventDraft"
 
+// The inputs hold wall-clock times in the event’s selected time zone.
+const dateTime = dateFormat({
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "UTC",
+})
+const count = numberFormat({ maximumFractionDigits: 0 })
+const price = numberFormat({ style: "currency", currency: "KZT" })
+
 function dateLabel(value: string) {
-  return value.replace("T", " at ")
+  const wallTime = Date.parse(`${value}Z`)
+  return Number.isFinite(wallTime) ? dateTime.format(wallTime) : value
 }
 
 export function EventPreview({
@@ -38,7 +49,7 @@ export function EventPreview({
           <CardDescription className="flex flex-wrap items-center gap-2">
             {event.category}{" "}
             <Badge variant="outline">
-              {visibilityDetails[event.visibility].label}
+              {t(visibilityDetails[event.visibility].label)}
             </Badge>
           </CardDescription>
         </CardHeader>
@@ -53,38 +64,51 @@ export function EventPreview({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Open event image
+              {t("Open event image")}
             </a>
           )}
           <dl className="grid gap-3 sm:grid-cols-2">
             <div>
-              <dt className="font-medium">Event schedule ({event.timeZone})</dt>
+              <dt className="font-medium">
+                {t("Event schedule ({0})", event.timeZone)}
+              </dt>
               <dd className="text-muted-foreground">
-                {dateLabel(event.startAt)} to {dateLabel(event.endAt)}
+                {t(
+                  "{0} to {1}",
+                  dateLabel(event.startAt),
+                  dateLabel(event.endAt)
+                )}
               </dd>
             </div>
             <div>
-              <dt className="font-medium">Registration</dt>
+              <dt className="font-medium">{t("Registration")}</dt>
               <dd className="text-muted-foreground">
                 {event.registrationOpensAt
-                  ? `Opens ${dateLabel(event.registrationOpensAt)}`
-                  : "Open when published"}
+                  ? t("Opens {0}", dateLabel(event.registrationOpensAt))
+                  : t("Open when published")}
                 {event.registrationClosesAt &&
-                  ` · Closes ${dateLabel(event.registrationClosesAt)}`}
+                  ` · ${t("Closes {0}", dateLabel(event.registrationClosesAt))}`}
               </dd>
             </div>
             <div>
-              <dt className="font-medium">Venue</dt>
+              <dt className="font-medium">{t("Venue")}</dt>
               <dd className="text-muted-foreground">
                 {event.venueName}, {event.venueAddress}
               </dd>
             </div>
             <div>
-              <dt className="font-medium">Admission</dt>
+              <dt className="font-medium">{t("Admission")}</dt>
               <dd className="text-muted-foreground">
                 {layout
-                  ? `Assigned seating · ${layout.name} · ${layout.seats.length} seats`
-                  : `General admission · Capacity ${event.venueCapacity}`}
+                  ? t(
+                      "Assigned seating · {0} · {1} seats",
+                      layout.name,
+                      count.format(layout.seats.length)
+                    )
+                  : t(
+                      "General admission · Capacity {0}",
+                      count.format(Number(event.venueCapacity))
+                    )}
               </dd>
             </div>
           </dl>
@@ -94,7 +118,7 @@ export function EventPreview({
       <Card size="sm">
         <CardHeader>
           <CardTitle>
-            <h2>Ticket tiers</h2>
+            <h2>{t("Ticket tiers")}</h2>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -108,18 +132,27 @@ export function EventPreview({
                   <h3 className="font-medium">{ticket.name}</h3>
                   <Badge>
                     {Number(ticket.price) === 0
-                      ? "Free"
-                      : `${ticket.price} KZT`}
+                      ? t("Free")
+                      : price.format(Number(ticket.price))}
                   </Badge>
                 </div>
                 {ticket.description && <p>{ticket.description}</p>}
                 <p className="text-muted-foreground">
-                  {ticket.capacity} tickets · Max {ticket.maxPerOrder} per order
+                  {t(
+                    "{0} tickets · Max {1} per order",
+                    count.format(Number(ticket.capacity)),
+                    count.format(Number(ticket.maxPerOrder))
+                  )}
                   {layout && ` · ${ticket.id}`}
                 </p>
                 <p className="text-muted-foreground">
                   {ticket.customSales
-                    ? `On sale ${dateLabel(ticket.salesStartAt)} to ${dateLabel(ticket.salesEndAt)} (${event.timeZone})`
+                    ? t(
+                        "On sale {0} to {1} ({2})",
+                        dateLabel(ticket.salesStartAt),
+                        dateLabel(ticket.salesEndAt),
+                        event.timeZone
+                      )
                     : salesSummary}
                 </p>
               </li>
@@ -130,3 +163,4 @@ export function EventPreview({
     </div>
   )
 }
+

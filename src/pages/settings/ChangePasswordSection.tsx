@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { Button } from "@/components/ui/button"
 import { AccountFormField } from "@/pages/account/AccountFormField"
 import { NewPasswordFields } from "@/pages/account/NewPasswordFields"
@@ -8,14 +9,14 @@ export function ChangePasswordSection({ sessionId }: { sessionId: number }) {
 
   return (
     <section className="space-y-4 rounded-xl border p-5">
-      <h2 className="text-lg font-semibold">Change password</h2>
+      <h2 className="text-lg font-semibold">{t("Change password")}</h2>
       <form noValidate onSubmit={model.submit}>
         <fieldset
           disabled={model.isSubmitting}
           className="flex flex-col items-start gap-4 [&>div]:w-full"
         >
           <AccountFormField
-            label="Current password"
+            label={t("Current password")}
             type="password"
             autoComplete="current-password"
             error={model.errors.currentPassword?.message}
@@ -38,14 +39,15 @@ export function ChangePasswordSection({ sessionId }: { sessionId: number }) {
           )}
           {model.isComplete && (
             <p role="status" className="text-sm">
-              Password changed.
+              {t("Password changed.")}
             </p>
           )}
           <Button type="submit">
-            {model.isSubmitting ? "Saving…" : "Change password"}
+            {model.isSubmitting ? t("Saving…") : t("Change password")}
           </Button>
         </fieldset>
       </form>
     </section>
   )
 }
+

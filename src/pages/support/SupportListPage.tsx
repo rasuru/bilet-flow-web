@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { ArrowLeftIcon, ArrowUpRightIcon, PlusIcon } from "lucide-react"
 import { Link } from "wouter"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -34,10 +35,10 @@ function CaseList({ cases, empty }: { cases: Model["cases"]; empty: string }) {
             </div>
             <Link
               href={item.href}
-              aria-label={`Open ${item.subject}`}
+              aria-label={t("Open {0}", item.subject)}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              View <ArrowUpRightIcon aria-hidden="true" />
+              {t("View")} <ArrowUpRightIcon aria-hidden="true" />
             </Link>
           </div>
         </li>
@@ -56,29 +57,29 @@ export function SupportListPage({
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <Link href="/" className={buttonVariants({ variant: "ghost" })}>
-        <ArrowLeftIcon aria-hidden="true" /> Home
+        <ArrowLeftIcon aria-hidden="true" /> {t("Home")}
       </Link>
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Support</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("Support")}</h1>
           <p className="text-sm text-muted-foreground">
-            Get help and keep track of conversations.
+            {t("Get help and keep track of conversations.")}
           </p>
         </div>
         <Link href="/support/new" className={buttonVariants()}>
-          <PlusIcon aria-hidden="true" /> New request
+          <PlusIcon aria-hidden="true" /> {t("New request")}
         </Link>
       </header>
       {model.loading && (
         <p role="status" className="flex items-center gap-2">
-          <Spinner /> Loading requests…
+          <Spinner /> {t("Loading requests…")}
         </p>
       )}
       {model.error && (
         <div role="alert" className="flex items-center gap-3">
-          {model.error}{" "}
+          {t(model.error)}{" "}
           <Button variant="outline" onClick={model.retry}>
-            Try again
+            {t("Try again")}
           </Button>
         </div>
       )}
@@ -87,30 +88,32 @@ export function SupportListPage({
           <Card>
             <CardHeader>
               <CardTitle>
-                <h2>My requests</h2>
+                <h2>{t("My requests")}</h2>
               </CardTitle>
-              <CardDescription>Conversations you've started</CardDescription>
+              <CardDescription>
+                {t("Conversations you've started")}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <CaseList
                 cases={model.cases.filter((c) => c.scope === "MY_REQUESTS")}
-                empty="You haven’t contacted support yet."
+                empty={t("You haven’t contacted support yet.")}
               />
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle>
-                <h2>Event support inbox</h2>
+                <h2>{t("Event support inbox")}</h2>
               </CardTitle>
               <CardDescription>
-                Requests from attendees for events you support
+                {t("Requests from attendees for events you support")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <CaseList
                 cases={model.cases.filter((c) => c.scope === "EVENT_INBOX")}
-                empty="No attendee requests."
+                empty={t("No attendee requests.")}
               />
             </CardContent>
           </Card>
@@ -118,10 +121,10 @@ export function SupportListPage({
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2>Platform support inbox</h2>
+                  <h2>{t("Platform support inbox")}</h2>
                 </CardTitle>
                 <CardDescription>
-                  Platform requests and escalated attendee cases
+                  {t("Platform requests and escalated attendee cases")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -129,7 +132,7 @@ export function SupportListPage({
                   cases={model.cases.filter(
                     (c) => c.scope === "PLATFORM_INBOX"
                   )}
-                  empty="No platform cases."
+                  empty={t("No platform cases.")}
                 />
               </CardContent>
             </Card>
@@ -139,3 +142,4 @@ export function SupportListPage({
     </main>
   )
 }
+

@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useLocation, useSearch } from "wouter"
@@ -80,7 +81,7 @@ export function useCreateSupportViewModel(sessionId: number) {
     error:
       validation ??
       (mutation.isError
-        ? supportError(mutation.error, "Couldn’t create the request.")
+        ? supportError(mutation.error, t("Couldn’t create the request."))
         : null),
     submit: () => {
       if (
@@ -97,3 +98,4 @@ export function useCreateSupportViewModel(sessionId: number) {
     },
   }
 }
+

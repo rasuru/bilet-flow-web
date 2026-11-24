@@ -1,3 +1,4 @@
+import { t } from "@/i18n/locale"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -76,9 +77,10 @@ export function useSavePayoutAccountViewModel(
           message:
             error instanceof Error
               ? error.message
-              : "Could not save the payout account.",
+              : t("Could not save the payout account."),
         })
       }
     }),
   }
 }
+
