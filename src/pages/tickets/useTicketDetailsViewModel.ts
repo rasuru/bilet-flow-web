@@ -58,11 +58,10 @@ export function useTicketDetailsViewModel(
   const seat = record.seat
   const seating = seat
     ? t(
-        "{0} · Row {1} · Seat {2}{3}",
+        "{0} · Row {1} · Seat {2}",
         seat.section,
         seat.row,
-        seat.seatNumber,
-        seat.accessible ? " · " + t("Accessible") : ""
+        seat.seatNumber
       )
     : record.ticket.seatId
       ? t("Assigned seat · details unavailable")
@@ -117,3 +116,4 @@ export function useTicketDetailsViewModel(
     print: () => window.print(),
   } as const
 }
+

@@ -59,7 +59,6 @@ function mockLayout(
       section: "A",
       row: "1",
       seatNumber: String(index + 1),
-      accessible: index === 0,
       priceCategory,
     })),
   }
@@ -204,3 +203,4 @@ export function submissionError(error: unknown) {
     return "Could not reach the event service. Check your connection and try again."
   return "Could not save the event. Please try again."
 }
+

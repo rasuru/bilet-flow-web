@@ -36,6 +36,7 @@ export const publicEventRepository = {
       queryFn:
         eventId === null ? skipToken : () => listPublicTicketTypes(eventId),
       retry: retryPublicRead,
+      refetchInterval: 10_000,
     })
   },
 
@@ -47,13 +48,17 @@ export const publicEventRepository = {
           ? skipToken
           : async () => {
               const [inventory, layout] = await Promise.all([
-                getEventInventory(eventId),
+                getEventInventory(eventId).catch((error: unknown) => {
+                  if (layoutId && error instanceof ApiError && error.status === 404) return null
+                  throw error
+                }),
                 layoutId === null ? null : getVenueLayout(layoutId),
               ])
               return { inventory, layout }
             },
       retry: retryPublicRead,
-      refetchInterval: 30_000,
+      refetchInterval: layoutId ? 5_000 : 30_000,
     })
   },
 }
+

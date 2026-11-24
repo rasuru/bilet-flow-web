@@ -5,6 +5,9 @@ import { useRef, useState, type FormEvent } from "react"
 import { useLocation } from "wouter"
 import { z } from "zod"
 
+import { buildSeatMap, type MapSeat } from "@/events/seatMapPresentation"
+import type { VenueLayout } from "@/api/events"
+import type { SeatAvailability } from "@/api/inventory"
 import type { CheckoutRequest } from "@/api/checkouts"
 import { ApiError, problemTypes } from "@/api/client"
 import { useSessionViewModel } from "@/auth/useSessionViewModel"
@@ -31,7 +34,9 @@ export function useTicketOrderViewModel(
   eventId: string,
   tickets: OrderTicket[],
   refreshAvailability: () => void,
-  campaignToken: string | null
+  campaignToken: string | null,
+  layout: VenueLayout | null,
+  availability: SeatAvailability[]
 ) {
   const [draft, setDraft] = useState<Record<string, Attendee[]>>({})
   const [authMode, setAuthMode] = useState<"login" | "register" | null>(null)
@@ -63,6 +68,25 @@ export function useTicketOrderViewModel(
       attendees.map((attendee) => attendee.seatId).filter(Boolean)
     )
   )
+  const map = layout ? buildSeatMap(layout, availability, tickets, draft) : null
+  function toggleSeat(seat: MapSeat) {
+    if (order.isPending || retryRequest || seat.disabled) return
+    setDraft((current) => {
+      const owner = Object.entries(current).find(([, entries]) =>
+        entries.some((entry) => entry.seatId === seat.id))
+      if (owner) return { ...current, [owner[0]]: owner[1].filter((entry) => entry.seatId !== seat.id) }
+      const ticket = tickets.find((item) => item.id === seat.ticketTypeId)
+      if (!ticket || !ticket.seats?.some((item) => item.id === seat.id)) return current
+      const entries = current[ticket.id] ?? []
+      if (entries.length >= ticket.orderLimit || Object.values(current).flat().length >= 100) return current
+      return { ...current, [ticket.id]: [...entries, { seatId: seat.id }] }
+    })
+    setFormError(undefined)
+  }
+  function removeSeat(ticketId: string, seatId: string) {
+    setDraft((current) => ({ ...current, [ticketId]: (current[ticketId] ?? []).filter((entry) => entry.seatId !== seatId) }))
+    setFormError(undefined)
+  }
   const promoSelections = Object.entries(draft)
     .filter(([, attendees]) => attendees.length > 0)
     .map(([ticketTypeId, attendees]) => ({
@@ -225,6 +249,9 @@ export function useTicketOrderViewModel(
 
   return {
     promo,
+    map,
+    toggleSeat,
+    removeSeat,
     draft,
     selectedSeatIds,
     isFree: total === 0,
@@ -249,3 +276,4 @@ export function useTicketOrderViewModel(
     },
   }
 }
+

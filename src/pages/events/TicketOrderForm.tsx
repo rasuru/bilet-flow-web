@@ -1,5 +1,8 @@
 import { t } from "@/i18n/locale"
 import { useId } from "react"
+import type { VenueLayout } from "@/api/events"
+import type { SeatAvailability } from "@/api/inventory"
+import { SeatMap } from "@/components/seating/SeatMap"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -28,18 +31,24 @@ export function TicketOrderForm({
   refreshAvailability,
   seatingLabel,
   campaignToken,
+  layout,
+  seatAvailability,
 }: {
   eventId: string
   tickets: OrderTicket[]
   refreshAvailability: () => void
   seatingLabel: string
   campaignToken: string | null
+  layout: VenueLayout | null
+  seatAvailability: SeatAvailability[]
 }) {
   const model = useTicketOrderViewModel(
     eventId,
     tickets,
     refreshAvailability,
-    campaignToken
+    campaignToken,
+    layout,
+    seatAvailability
   )
   const formId = useId()
   const promoInputId = useId()
@@ -63,6 +72,13 @@ export function TicketOrderForm({
               disabled={model.isSubmitting || model.retryingOrder}
               className="divide-y"
             >
+              {model.map && (
+                <div className="space-y-3 pb-5">
+                  <p className="text-sm text-muted-foreground">{t("Choose seats on the map. Select again to remove a seat.")}</p>
+                  <SeatMap model={model.map} onSelect={model.toggleSeat} disabled={model.isSubmitting || model.retryingOrder} />
+                  <p className="text-xs text-muted-foreground">{t("Seats are reserved only when you place your order.")}</p>
+                </div>
+              )}
               {tickets.map((ticket) => {
                 const attendees = model.draft[ticket.id] ?? []
                 const quantityId = `quantity-${ticket.id}`
@@ -85,7 +101,7 @@ export function TicketOrderForm({
                       </p>
                       {ticket.availability && <p>{ticket.availability}</p>}
                     </div>
-                    {(ticket.orderLimit > 0 || attendees.length > 0) && (
+                    {!model.map && (ticket.orderLimit > 0 || attendees.length > 0) && (
                       <Field>
                         <FieldLabel htmlFor={quantityId}>
                           {t("Quantity")}{" "}
@@ -137,7 +153,14 @@ export function TicketOrderForm({
                           <p className="font-medium">
                             {t("Ticket {0}", index + 1)}
                           </p>
-                          {seats && (
+                          {model.map && (
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-sm">{model.map.seats.find((seat) => seat.id === attendee.seatId)?.location ?? attendee.seatId}</span>
+                              <Button type="button" size="sm" variant="outline" onClick={() => model.removeSeat(ticket.id, attendee.seatId)}>{t("Remove")}</Button>
+                              {!ticket.seats?.some((seat) => seat.id === attendee.seatId) && <FieldError>{t("Seat no longer available")}</FieldError>}
+                            </div>
+                          )}
+                          {seats && !model.map && (
                             <Field>
                               <FieldLabel htmlFor={`seat-${id}`}>
                                 {t("Seat")}
@@ -378,7 +401,7 @@ export function TicketOrderForm({
             </div>
           ) : (
             <p className="text-muted-foreground">
-              {t("Choose a quantity to see your order total.")}
+              {t(model.map ? "Choose a seat to see your order total." : "Choose a quantity to see your order total.")}
             </p>
           )}
           {showAuth && model.hasSelection && (

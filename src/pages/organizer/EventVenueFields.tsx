@@ -1,12 +1,13 @@
+import { SeatMap } from "@/components/seating/SeatMap"
+import type { LayoutPreview } from "@/events/seatMapPresentation"
 import type { SeatingMode, VenueLayout } from "@/api/events"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
-import { numberFormat, t } from "@/i18n/locale"
+import { t } from "@/i18n/locale"
 import type { EventDraft } from "./createEventDraft"
 import { EventTextField } from "./EventDetailsFields"
 
-const seatCount = numberFormat({ maximumFractionDigits: 0 })
 
 export function EventVenueFields({
   event,
@@ -14,6 +15,7 @@ export function EventVenueFields({
   seatingMode,
   changeSeatingMode,
   layouts,
+  layoutPreviews,
   layoutsOffline = false,
   loadingLayouts,
   layoutError,
@@ -28,6 +30,7 @@ export function EventVenueFields({
   seatingMode: SeatingMode
   changeSeatingMode: (mode: SeatingMode) => void
   layouts: VenueLayout[]
+  layoutPreviews: LayoutPreview[]
   layoutsOffline?: boolean
   loadingLayouts: boolean
   layoutError: string
@@ -70,28 +73,22 @@ export function EventVenueFields({
       />
       {assigned ? (
         <Field>
-          <FieldLabel htmlFor="layoutId">{t("Venue layout")}</FieldLabel>
-          <NativeSelect
-            id="layoutId"
-            className="w-full"
-            required
-            value={event.layoutId}
-            disabled={loadingLayouts || !layouts.length}
-            onChange={(e) => selectLayout(e.target.value)}
-          >
-            <NativeSelectOption value="">
-              {loadingLayouts ? t("Loading layouts…") : t("Select a layout")}
-            </NativeSelectOption>
-            {layouts.map((layout) => (
-              <NativeSelectOption key={layout.layoutId} value={layout.layoutId}>
-                {t(
-                  "{0} ({1} seats)",
-                  layout.name,
-                  seatCount.format(layout.seats.length)
-                )}
-              </NativeSelectOption>
+          <FieldLabel>{t("Venue layout")}</FieldLabel>
+          <div role="group" aria-label={t("Venue layout")} className="grid gap-3 sm:grid-cols-2">
+            {layoutPreviews.map((preview) => (
+              <button key={preview.id} type="button" disabled={loadingLayouts} aria-pressed={event.layoutId === preview.id}
+                onClick={() => selectLayout(preview.id)}
+                className="min-w-0 space-y-2 rounded-xl border bg-card p-3 text-left transition-colors hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-ring aria-pressed:border-primary aria-pressed:ring-2 aria-pressed:ring-primary/30">
+                <div className="flex items-start justify-between gap-2">
+                  <div><p className="font-semibold">{preview.name}</p><p className="text-xs text-muted-foreground">{preview.capacityLabel}</p></div>
+                  {event.layoutId === preview.id && <span className="text-xs font-medium text-primary">{t("Selected")}</span>}
+                </div>
+                <SeatMap model={preview.map} compact />
+                <p className="text-xs text-muted-foreground">{preview.categoryLabel}</p>
+              </button>
             ))}
-          </NativeSelect>
+          </div>
+          {loadingLayouts && <p role="status" className="text-sm">{t("Loading layouts…")}</p>}
           {layoutsOffline && layouts.length > 0 && (
             <p className="text-sm text-muted-foreground">
               {t("Sample layouts are available for local saves.")}
@@ -129,3 +126,4 @@ export function EventVenueFields({
     </>
   )
 }
+
