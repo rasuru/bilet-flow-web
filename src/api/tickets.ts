@@ -48,6 +48,13 @@ export function getTicketQr(token: string, ticketId: string) {
   return requestFile(`${ticketPath(ticketId)}/qr`, token)
 }
 
+export function getTicketAdmissionCode(token: string, ticketId: string) {
+  return requestJson<{ manualCode: string }>(
+    `${ticketPath(ticketId)}/admission-code`,
+    { token }
+  )
+}
+
 export function searchAttendees(token: string, eventId: string, email: string) {
   return requestJson<Ticket[]>(
     withQuery(`${checkInPath(eventId)}/attendees`, { email }),
