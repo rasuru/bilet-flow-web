@@ -26,6 +26,7 @@ import { EventCampaignsPage } from "@/pages/organizer/EventCampaignsPage"
 import { CreateEventPage } from "@/pages/organizer/CreateEventPage"
 import { ManageEventPage } from "@/pages/organizer/ManageEventPage"
 import { OrganizerStartPage } from "@/pages/organizer/OrganizerStartPage"
+import { OrganizerPayoutsPage } from "@/pages/organizer/OrganizerPayoutsPage"
 import { OrganizerDashboardPage } from "@/pages/organizer/OrganizerDashboardPage"
 import { MyTicketsPage } from "@/pages/tickets/MyTicketsPage"
 import { TicketDetailsPage } from "@/pages/tickets/TicketDetailsPage"
@@ -102,8 +103,7 @@ export function App() {
     if (!window.location.hash) window.scrollTo(0, 0)
   }, [path])
   const organizerWorkspace =
-    /^\/organizer(?:\/events\/[^/]+(?:\/campaigns)?)?\/?$/.test(path) &&
-    path !== "/organizer/start"
+    /^\/organizer(?:\/finances|\/events\/[^/]+(?:\/campaigns)?)?\/?$/.test(path)
   const adminWorkspace = /^\/admin(?:\/[^/]+)?\/?$/.test(path)
   const ownLayout =
     (session.status === "signedIn" && organizerWorkspace) ||
@@ -141,6 +141,13 @@ export function App() {
             }
           </SignedInRoute>
         )}
+      </Route>
+      <Route path="/organizer/finances">
+        <SignedInRoute>
+          {({ sessionId, account }) => (
+            <OrganizerPayoutsPage key={sessionId} sessionId={sessionId} accountId={account.id} />
+          )}
+        </SignedInRoute>
       </Route>
       <Route path="/organizer/start" component={OrganizerStartPage} />
       <Route path="/organizer/events/new">

@@ -4,7 +4,7 @@ import { BackLink } from "@/components/site/SitePage"
 import { AppearanceControls } from "@/components/site/AppearanceControls"
 import { t } from "@/i18n/locale"
 import type { CSSProperties, ReactNode } from "react"
-import { CircleHelp, LayoutDashboard, Settings } from "lucide-react"
+import { CircleHelp, LayoutDashboard, Settings, Wallet } from "lucide-react"
 import { Link } from "wouter"
 
 import {
@@ -29,6 +29,7 @@ const navigation = [
     label: "Dashboard",
     Icon: LayoutDashboard,
   },
+  { section: "finances", href: "/organizer/finances", label: "Finances", Icon: Wallet },
   { section: "support", href: "/support", label: "Support", Icon: CircleHelp },
   {
     section: "settings",
@@ -40,10 +41,12 @@ const navigation = [
 
 export function OrganizerLayout({
   isDashboard = false,
+  isFinances = false,
   children,
   eventSections = [],
 }: {
   isDashboard?: boolean
+  isFinances?: boolean
   children: ReactNode
   eventSections?: { id: string; label: string }[]
 }) {
@@ -66,12 +69,12 @@ export function OrganizerLayout({
                   <SidebarMenuItem key={key}>
                     <SidebarMenuButton
                       className="min-h-10 rounded-lg px-3"
-                      isActive={key === "dashboard" && isDashboard}
+                      isActive={(key === "dashboard" && isDashboard) || (key === "finances" && isFinances)}
                       render={
                         <Link
                           href={href}
                           aria-current={
-                            key === "dashboard" && isDashboard
+                            (key === "dashboard" && isDashboard) || (key === "finances" && isFinances)
                               ? "page"
                               : undefined
                           }
