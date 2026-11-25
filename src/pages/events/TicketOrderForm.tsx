@@ -59,22 +59,22 @@ export function TicketOrderForm({
   const showSummary = model.canSelectTickets || model.hasSelection || model.retryingOrder
 
   return (
-    <div className={showSummary ? "grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_19rem]" : "space-y-6"}>
-      <Card>
+    <div className={showSummary ? "grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]" : "min-w-0 space-y-6"}>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <h2>{t("Choose tickets")}</h2>
           </CardTitle>
           <CardDescription>{seatingLabel}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form id={formId} onSubmit={model.submit} noValidate>
+        <CardContent className="min-w-0">
+          <form id={formId} onSubmit={model.submit} noValidate className="min-w-0">
             <fieldset
               disabled={model.isSubmitting || model.retryingOrder}
-              className="divide-y"
+              className="min-w-0 divide-y"
             >
               {model.map && (
-                <div className="space-y-3 pb-5">
+                <div className="min-w-0 space-y-3 pb-5">
                   <p className="text-sm text-muted-foreground">{t("Choose seats on the map. Select again to remove a seat.")}</p>
                   <SeatMap model={model.map} onSelect={model.toggleSeat} disabled={model.isSubmitting || model.retryingOrder} />
                   <p className="text-xs text-muted-foreground">{t("Seats are reserved only when you place your order.")}</p>
@@ -229,7 +229,7 @@ export function TicketOrderForm({
           </form>
         </CardContent>
       </Card>
-      {showSummary && <Card>
+      {showSummary && <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <h2>{t("Order summary")}</h2>

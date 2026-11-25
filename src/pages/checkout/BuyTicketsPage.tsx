@@ -16,7 +16,7 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
   const { href: eventReturn } = useEventReturn()
 
   return (
-    <SitePage width="content">
+    <SitePage width={model.status === "ready" && model.layout ? "wide" : "content"}>
       <BackLink
         href={campaignEventPath(eventId, token)}
         state={{ eventReturn }}
