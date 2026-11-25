@@ -6,7 +6,8 @@ import {
 
 import type { Checkout } from "@/api/checkouts"
 import { ApiError } from "@/api/client"
-import { getPublicEvent, type PublicEvent } from "@/api/events"
+import type { PublicEvent } from "@/api/events"
+import { publicEventRepository } from "@/events/publicEventRepository"
 import type { Ticket, TicketStatus } from "@/api/tickets"
 import { loadTicketRecords } from "./ticketRepository"
 
@@ -61,11 +62,11 @@ function attendingEventIds(
   )
 }
 
-async function loadEvents(eventIds: Iterable<string>) {
+async function loadEvents(client: QueryClient, sessionId: number, eventIds: Iterable<string>) {
   const events = await Promise.all(
     [...eventIds].map(async (id) => {
       try {
-        return await getPublicEvent(id)
+        return await client.fetchQuery(publicEventRepository.eventQuery(id, sessionId))
       } catch (error) {
         if (error instanceof ApiError && [403, 404].includes(error.status))
           return null
@@ -84,13 +85,15 @@ export const attendanceRepository = {
       queryFn:
         sessionId === null
           ? skipToken
-          : async () => {
+          : async ({ client }) => {
               const [tickets, orders] = await loadTicketRecords(
                 sessionId,
                 !!email
               )
               const attending = attendingTickets(tickets, orders, email)
               const events = await loadEvents(
+                client,
+                sessionId,
                 new Set(attending.map(({ eventId }) => eventId))
               )
               const byEvent = new Map<string, string[]>()
@@ -134,7 +137,7 @@ export const attendanceRepository = {
     const email = verifiedEmail?.trim().toLowerCase() || null
     return queryOptions({
       queryKey: [...attendanceKey(sessionId), "activity", email],
-      queryFn: async (): Promise<AttendanceActivity> => {
+      queryFn: async ({ client }): Promise<AttendanceActivity> => {
         const [tickets, orders] = await loadTicketRecords(sessionId, true)
         const attending = attendingEventIds(tickets, orders, email)
         const eventIds = new Set([
@@ -142,7 +145,7 @@ export const attendanceRepository = {
           ...tickets.map(({ eventId }) => eventId),
           ...orders.map(({ eventId }) => eventId),
         ])
-        const events = await loadEvents(eventIds)
+        const events = await loadEvents(client, sessionId, eventIds)
         return { tickets, orders, events, attending }
       },
     })

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 
 import { ApiError } from "@/api/client"
+import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import type { PublicEvent } from "@/api/events"
 import type { PublicTicketType } from "@/api/inventory"
 import { publicEventRepository } from "@/events/publicEventRepository"
@@ -57,7 +58,12 @@ function ticketAvailabilityLabel(
 }
 
 export function useEventDetailsViewModel(eventId: string) {
-  const eventQuery = useQuery(publicEventRepository.eventQuery(eventId))
+  const session = useSessionViewModel()
+  const sessionId = session.status === "signedIn" ? session.sessionId : null
+  const eventQuery = useQuery({
+    ...publicEventRepository.eventQuery(eventId, sessionId),
+    enabled: session.status !== "restoring",
+  })
   const [now, setNow] = useState(Date.now)
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 15_000)
@@ -66,13 +72,12 @@ export function useEventDetailsViewModel(eventId: string) {
   const event = eventQuery.isError ? undefined : eventQuery.data
   const isViewable =
     event &&
-    event.visibility !== "PRIVATE" &&
     (event.status === "PUBLISHED" || event.status === "CANCELLED")
   const salesMessage = isViewable ? eventSalesMessage(event, now) : null
   const showTickets = !!isViewable && event.status !== "CANCELLED"
 
   const ticketQuery = useQuery(
-    publicEventRepository.ticketTypesQuery(showTickets ? eventId : null)
+    publicEventRepository.ticketTypesQuery(showTickets ? eventId : null, sessionId)
   )
   const ticketTypes = ticketQuery.data?.filter(
     ({ status }) => status !== "HIDDEN"
@@ -82,11 +87,12 @@ export function useEventDetailsViewModel(eventId: string) {
   const availability = useQuery(
     publicEventRepository.availabilityQuery(
       loadAvailability ? eventId : null,
-      event?.venue?.venueLayoutId ?? null
+      event?.venue?.venueLayoutId ?? null,
+      sessionId
     )
   )
 
-  if (eventQuery.isPending) return { status: "loading" } as const
+  if (session.status === "restoring" || eventQuery.isPending) return { status: "loading" } as const
   if (eventQuery.isError) {
     const error = eventQuery.error
     if (error instanceof ApiError && [403, 404].includes(error.status)) {
@@ -177,6 +183,7 @@ export function useEventDetailsViewModel(eventId: string) {
       start: { instant: event.startAt, label: formatTime(event.startAt) },
       end: { instant: event.endAt, label: formatTime(event.endAt) },
       venue: event.venue,
+      refundHoursBeforeStart: event.refundHoursBeforeStart ?? null,
       seatingLabel:
         event.venue?.seatingMode === "ASSIGNED_SEATING"
           ? t("Assigned seating")

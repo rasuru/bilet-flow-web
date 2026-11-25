@@ -90,8 +90,8 @@ export function listSeatAvailability(eventId: string) {
   return requestJson<SeatAvailability[]>(`${eventPath(eventId)}/seat-map`)
 }
 
-export function listPublicTicketTypes(eventId: string) {
-  return requestJson<PublicTicketType[]>(eventTicketTypesPath(eventId))
+export function listPublicTicketTypes(eventId: string, token?: string) {
+  return requestJson<PublicTicketType[]>(eventTicketTypesPath(eventId), { token })
 }
 
 export function listManagedTicketTypes(token: string, eventId: string) {

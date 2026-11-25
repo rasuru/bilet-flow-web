@@ -1,9 +1,21 @@
 import { useEventReturn } from "@/components/site/useEventReturn"
 import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
+import { useState } from "react"
 import { Link } from "wouter"
 import { useHistoryState } from "wouter/use-browser-location"
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
@@ -20,6 +32,7 @@ export function OrderPage({
   orderId: string
 }) {
   const model = useOrderViewModel(sessionId, orderId)
+  const [refundOpen, setRefundOpen] = useState(false)
   const { href: eventReturn } = useEventReturn()
   const state = useHistoryState<{ orderFrom?: string } | null>()
   const eventParent =
@@ -110,8 +123,8 @@ export function OrderPage({
                 {model.pay && (
                   <Button onClick={model.pay} disabled={model.busy}>
                     {model.paying
-                      ? t("Opening Halyk ePay…")
-                      : t("Pay with Halyk ePay")}
+                      ? t("Opening payment…")
+                      : t("Continue to payment")}
                   </Button>
                 )}
                 {model.canCancel && (
@@ -131,6 +144,58 @@ export function OrderPage({
                   {t("Refresh status")}
                 </Button>
               </div>
+              {model.showRefund && (
+                <section className="space-y-3 border-t pt-4" aria-labelledby="order-refund-heading">
+                  <h2 id="order-refund-heading" className="font-semibold">{t("Refund")}</h2>
+                  {model.refundLabel && <p role="status" className="text-sm">{model.refundLabel}</p>}
+                  {model.canRefund && model.refundDeadline && (
+                    <p className="text-sm text-muted-foreground">
+                      {t("Request a full refund for this unused order by {0}.", model.refundDeadline)}
+                    </p>
+                  )}
+                  {!model.canRefund && !model.refundLabel && (
+                    <p className="text-sm text-muted-foreground">{t("Self-service refund is unavailable for this order.")}</p>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {model.canRefund && (
+                      <AlertDialog open={refundOpen} onOpenChange={setRefundOpen}>
+                        <AlertDialogTrigger render={<Button variant="outline" disabled={model.busy} />}>
+                          {t("Request full refund")}
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>{t("Request full refund")}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("Request a refund of {0} for the entire order ({1} tickets). The bank must confirm the refund.", model.total, model.tickets.length)}
+                              {" "}{t("Tickets cannot be used while the bank processes the refund.")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
+                            <AlertDialogAction
+                              disabled={model.busy}
+                              onClick={() => {
+                                setRefundOpen(false)
+                                model.requestRefund()
+                              }}
+                            >
+                              {t("Request full refund")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                    {model.order.refundState !== "REFUNDED" && (
+                      <Link
+                        href={`/support/new?orderId=${encodeURIComponent(orderId)}&category=REFUND`}
+                        className={buttonVariants({ variant: "ghost" })}
+                      >
+                        {t("Get refund help")}
+                      </Link>
+                    )}
+                  </div>
+                </section>
+              )}
               {model.tickets.length > 0 && (
                 <section className="space-y-2 border-t pt-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">

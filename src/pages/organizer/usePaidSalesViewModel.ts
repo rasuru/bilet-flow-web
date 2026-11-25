@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ApiError } from "@/api/client"
-import { openHalykPayment } from "@/checkout/halykPayment"
+import { openPayment } from "@/checkout/openPayment"
+import { useLocation } from "wouter"
 import { paidSalesRepository } from "@/payments/paidSalesRepository"
 import { numberFormat, t } from "@/i18n/locale"
 import { manageEventPath } from "./organizerEventPresentation"
@@ -18,6 +19,7 @@ const itemLabels: Record<string, string> = {
 
 export function usePaidSalesViewModel(sessionId: number, eventId: string) {
   const client = useQueryClient()
+  const [, navigate] = useLocation()
   const query = useQuery(paidSalesRepository.checklistQuery(sessionId, eventId))
   const [terms, setTerms] = useState(false)
   const [verification, setVerification] = useState(false)
@@ -45,11 +47,12 @@ export function usePaidSalesViewModel(sessionId: number, eventId: string) {
         acceptSandboxTerms: terms,
         simulateIdentityAndPayoutVerification: verification,
       })
-      await openHalykPayment(session, `${manageEventPath(eventId)}?activation-return=1`)
+      await openPayment(session, `${manageEventPath(eventId)}?activation-return=1`, navigate)
     },
     onSettled: () => void query.refetch(),
   })
   const active = status === "ACTIVE"
+  const bypassed = checklist?.activationBypassed === true
   const suspended = status === "SUSPENDED"
   const pending = status === "PENDING"
   const hasPaidTickets = checklist?.items.some(item => item.key === "PAID_TICKET_TYPE" && item.done) ?? false
@@ -57,9 +60,9 @@ export function usePaidSalesViewModel(sessionId: number, eventId: string) {
   const canRequest = Boolean(checklist?.readyToRequest && !active && !suspended && !query.isError)
   const canPay = canRequest && terms && verification && !payment.isPending
   return {
-    active, suspended, hasPaidTickets, successOpen,
+    active, bypassed, suspended, hasPaidTickets, successOpen,
     closeSuccess: () => setSuccessOpen(false),
-    showBlock: query.isPending || query.isError || (!active && (hasPaidTickets || pending || suspended)),
+    showBlock: query.isPending || query.isError || (!bypassed && !active && (hasPaidTickets || pending || suspended)),
     loading: query.isPending,
     refreshing: query.isFetching,
     loaded: Boolean(checklist),

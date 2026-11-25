@@ -9,6 +9,7 @@ import {
   createCheckout,
   getCheckout,
   quotePromotion,
+  requestSelfRefund,
   type Checkout,
   type CheckoutRequest,
   type PromoQuoteRequest,
@@ -27,10 +28,17 @@ export function isCheckoutPending(order: Checkout) {
 }
 
 export const checkoutRepository = {
-  promoQuoteQuery(request: PromoQuoteRequest | null) {
+  promoQuoteQuery(request: PromoQuoteRequest | null, sessionId: number | null) {
     return queryOptions({
-      queryKey: ["checkout-promo-quote", request],
-      queryFn: request === null ? skipToken : () => quotePromotion(request),
+      queryKey: ["checkout-promo-quote", sessionId, request],
+      queryFn:
+        request === null
+          ? skipToken
+          : () => sessionId === null
+            ? quotePromotion(request)
+            : sessionRepository.authenticatedRequest(sessionId, (token) =>
+                quotePromotion(request, token)
+              ),
       retry: false,
     })
   },
@@ -83,7 +91,10 @@ export const checkoutRepository = {
           sessionId,
           (token) => getCheckout(token, checkoutId)
         )
-        if (order.status === "COMPLETED" && previous?.status !== "COMPLETED") {
+        if (
+          (order.status === "COMPLETED" && previous?.status !== "COMPLETED") ||
+          (previous && order.refundState !== previous.refundState)
+        ) {
           void attendanceRepository.invalidate(client, sessionId)
         }
         return order
@@ -92,7 +103,9 @@ export const checkoutRepository = {
         count < 2 && (!(error instanceof ApiError) || error.status >= 500),
       refetchInterval: ({ state }) => {
         const order = state.data
-        return order && isCheckoutPending(order) ? 3_000 : false
+        return order && (isCheckoutPending(order) || order.refundState === "PENDING")
+          ? 3_000
+          : false
       },
     })
   },
@@ -108,6 +121,17 @@ export const checkoutRepository = {
     void client.invalidateQueries({
       queryKey: ["public-event", order.eventId, "availability"],
     })
+  },
+
+  async selfRefund(client: QueryClient, sessionId: number, checkoutId: string) {
+    const order = await sessionRepository.authenticatedRequest(
+      sessionId,
+      (token) => requestSelfRefund(token, checkoutId)
+    )
+    const key = checkoutKey(sessionId, checkoutId)
+    await client.cancelQueries({ queryKey: key, exact: true })
+    client.setQueryData(key, order)
+    void attendanceRepository.invalidate(client, sessionId)
   },
 
   paymentSession(sessionId: number, paymentId: string) {

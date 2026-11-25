@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { refundPolicyDescription } from "@/events/refundPolicyPresentation"
 import { FieldError } from "@/components/ui/field"
 import { campaignEventPath } from "@/promotions/campaignLinks"
 import { Spinner } from "@/components/ui/spinner"
@@ -51,7 +52,8 @@ export function EventDetailsPage({ eventId }: { eventId: string }) {
               <h1>{t("Event unavailable")}</h1>
             </CardTitle>
             <CardDescription>
-              {t("This event is no longer available or the link is incorrect.")}
+              {t("This event is no longer available or the link is incorrect.")}{" "}
+              {t("If you were invited, open the link from your invitation email.")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -268,6 +270,12 @@ function EventDetails({
                       {t("Try promo link again")}
                     </Button>
                   )}
+                </div>
+              )}
+              {model.showTickets && (
+                <div className="space-y-1 text-sm">
+                  <h3 className="font-medium">{t("Refund policy")}</h3>
+                  <p className="text-muted-foreground">{refundPolicyDescription(event.refundHoursBeforeStart)}</p>
                 </div>
               )}
               {model.salesMessage && (

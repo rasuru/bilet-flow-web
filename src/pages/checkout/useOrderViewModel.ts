@@ -6,7 +6,8 @@ import {
   checkoutRepository,
   isCheckoutPending,
 } from "@/checkout/checkoutRepository"
-import { openHalykPayment } from "@/checkout/halykPayment"
+import { openPayment } from "@/checkout/openPayment"
+import { useLocation } from "wouter"
 
 const kzt = numberFormat({
   style: "currency",
@@ -23,9 +24,14 @@ function errorMessage(error: unknown, fallback: string) {
 
 export function useOrderViewModel(sessionId: number, orderId: string) {
   const client = useQueryClient()
+  const [, navigate] = useLocation()
   const query = useQuery(checkoutRepository.orderQuery(sessionId, orderId))
   const cancel = useMutation({
     mutationFn: () => checkoutRepository.cancel(client, sessionId, orderId),
+    onError: () => void query.refetch(),
+  })
+  const refund = useMutation({
+    mutationFn: () => checkoutRepository.selfRefund(client, sessionId, orderId),
     onError: () => void query.refetch(),
   })
   const pay = useMutation({
@@ -34,10 +40,7 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
         sessionId,
         paymentId
       )
-      await openHalykPayment(
-        paymentSession,
-        `/orders/${encodeURIComponent(orderId)}`
-      )
+      await openPayment(paymentSession, `/orders/${encodeURIComponent(orderId)}`, navigate)
     },
     onError: () => void query.refetch(),
   })
@@ -52,12 +55,19 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
   }
 
   const pending = isCheckoutPending(order)
-  const busy = pay.isPending || cancel.isPending
+  const busy = pay.isPending || cancel.isPending || refund.isPending
   const paymentId = order.paymentId
   const free = order.amountKzt === 0
   const awaitingPayment = order.status === "AWAITING_PAYMENT"
   const completed = order.status === "COMPLETED"
-  const statusLabel = completed
+  const refundLabel = order.refundState === "PENDING"
+    ? t("Refund pending")
+    : order.refundState === "REFUNDED"
+      ? t("Refunded")
+      : order.refundState === "FAILED"
+        ? t("Refund failed")
+        : null
+  const statusLabel = order.refundState === "REFUNDED" ? t("Refunded") : completed
     ? free
       ? t("Free order confirmed")
       : t("Payment confirmed")
@@ -68,13 +78,22 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
     completed && free
       ? t("Your total was zero. Your tickets were issued immediately.")
       : awaitingPayment && paymentId
-        ? t("Complete payment on Halyk ePay to receive your tickets.")
+        ? t("Complete payment to receive your tickets.")
         : null
 
   return {
     status: "ready",
     statusLabel,
     paymentMessage,
+    refundLabel,
+    showRefund: (!free && completed) || !!order.refundState,
+    refundDeadline: order.selfRefundDeadline
+      ? dateTime.format(new Date(order.selfRefundDeadline))
+      : null,
+    canRefund: order.selfRefundAvailable === true && !query.isError,
+    requestRefund: () => {
+      if (!busy) refund.mutate()
+    },
     tickets: completed ? order.tickets : [],
     order,
     total: kzt.format(order.amountKzt),
@@ -110,10 +129,14 @@ export function useOrderViewModel(sessionId: number, orderId: string) {
     cancelling: cancel.isPending,
     refresh: () => void query.refetch(),
     refreshing: query.isFetching,
-    error: cancel.isError
+    error: refund.isError
+      ? t(refund.error instanceof ApiError
+          ? refund.error.body?.detail ?? refund.error.message
+          : "Could not request the refund.")
+      : cancel.isError
       ? errorMessage(cancel.error, t("Couldn’t cancel your order."))
       : pay.isError
-        ? errorMessage(pay.error, t("Couldn’t open Halyk ePay. Try again."))
+        ? errorMessage(pay.error, t("Could not open the payment. Try again."))
         : query.isError
           ? t("Couldn’t refresh your order status.")
           : null,

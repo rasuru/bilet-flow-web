@@ -14,7 +14,9 @@ import {
 } from "@/pages/account/PasswordResetPages"
 import { AuthPage } from "@/pages/auth/AuthPage"
 import { BuyTicketsPage } from "@/pages/checkout/BuyTicketsPage"
+import { MockCheckoutPage } from "@/pages/checkout/MockCheckoutPage"
 import { OrderPage } from "@/pages/checkout/OrderPage"
+import { AttendeeInvitationPage } from "@/pages/events/AttendeeInvitationPage"
 import { EventDetailsPage } from "@/pages/events/EventDetailsPage"
 import { EventDiscoveryPage, HomePage } from "@/pages/home/HomePage"
 
@@ -44,7 +46,9 @@ type SignedInSession = Extract<
 
 function SignedInRoute({
   children,
+  forInvitation = false,
 }: {
+  forInvitation?: boolean
   children: (session: SignedInSession) => ReactNode
 }) {
   const [path] = useLocation()
@@ -54,6 +58,7 @@ function SignedInRoute({
   if (status === "signedOut") {
     return (
       <AuthPage
+        forInvitation={forInvitation}
         forOrganizer={path === "/organizer" || path.startsWith("/organizer/")}
         creatingEvent={path === "/organizer/events/new"}
       />
@@ -206,6 +211,20 @@ export function App() {
         </SignedInRoute>
       </Route>
       <Route path="/events" component={EventDiscoveryPage} />
+      <Route path="/events/:eventId/invitation">
+        {({ eventId }) => (
+          <SignedInRoute forInvitation>
+            {({ sessionId, account }) => (
+              <AttendeeInvitationPage
+                key={`${sessionId}:${eventId}`}
+                sessionId={sessionId}
+                eventId={eventId}
+                email={account.email}
+              />
+            )}
+          </SignedInRoute>
+        )}
+      </Route>
       <Route path="/events/:eventId/buy">
         {({ eventId }) => <BuyTicketsPage key={eventId} eventId={eventId} />}
       </Route>
@@ -236,6 +255,19 @@ export function App() {
             />
           )}
         </SignedInRoute>
+      </Route>
+      <Route path="/payments/:paymentId/mock">
+        {({ paymentId }) => (
+          <SignedInRoute>
+            {({ sessionId }) => (
+              <MockCheckoutPage
+                key={`${sessionId}:${paymentId}`}
+                sessionId={sessionId}
+                paymentId={paymentId}
+              />
+            )}
+          </SignedInRoute>
+        )}
       </Route>
       <Route path="/orders/:orderId">
         {({ orderId }) => (

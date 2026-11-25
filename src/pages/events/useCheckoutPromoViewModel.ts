@@ -2,6 +2,7 @@ import { t, numberFormat } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 
+import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import type { PromoQuoteRequest } from "@/api/checkouts"
 import { checkoutRepository } from "@/checkout/checkoutRepository"
 
@@ -38,7 +39,9 @@ export function useCheckoutPromoViewModel(
     selections.reduce((sum, item) => sum + item.quantity, 0) <= 100
   const request =
     code && canQuote ? { eventId, promoCode: code, selections } : null
-  const quote = useQuery(checkoutRepository.promoQuoteQuery(request))
+  const session = useSessionViewModel()
+  const sessionId = session.status === "signedIn" ? session.sessionId : null
+  const quote = useQuery(checkoutRepository.promoQuoteQuery(request, sessionId))
   const checking = !!request && (quote.isPending || quote.isFetching)
   const accepted =
     request && !checking && !quote.isError && !checkoutRejection

@@ -48,6 +48,7 @@ export type PublicEvent = {
   status: EventStatus
   startAt: string
   endAt: string
+  refundHoursBeforeStart: number | null
   registrationWindow: {
     mode: RegistrationWindowRequest["mode"]
     startAt: string | null
@@ -145,8 +146,60 @@ export function listPublicEvents({
   )
 }
 
-export function getPublicEvent(eventId: string) {
-  return requestJson<PublicEvent>(eventPath(eventId))
+export function getPublicEvent(eventId: string, token?: string) {
+  return requestJson<PublicEvent>(eventPath(eventId), { token })
+}
+
+export function updateEventRefundPolicy(
+  token: string,
+  eventId: string,
+  hoursBeforeStart: number | null
+) {
+  return requestEmpty(`${eventPath(eventId)}/refund-policy`, {
+    method: "PUT",
+    token,
+    json: { hoursBeforeStart },
+  })
+}
+
+export type AttendeeInvitation = { id: string; email: string; accepted: boolean }
+
+function invitationsPath(eventId: string) {
+  return `${eventPath(eventId)}/attendee-invitations`
+}
+
+export function listAttendeeInvitations(token: string, eventId: string) {
+  return requestJson<AttendeeInvitation[]>(invitationsPath(eventId), { token })
+}
+
+export function inviteAttendee(token: string, eventId: string, email: string) {
+  return requestEmpty(invitationsPath(eventId), {
+    method: "POST",
+    token,
+    json: { email },
+  })
+}
+
+export function resendAttendeeInvitation(token: string, eventId: string, id: string) {
+  return requestEmpty(`${invitationsPath(eventId)}/${encodeURIComponent(id)}/resend`, {
+    method: "POST",
+    token,
+  })
+}
+
+export function revokeAttendeeInvitation(token: string, eventId: string, id: string) {
+  return requestEmpty(`${invitationsPath(eventId)}/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    token,
+  })
+}
+
+export function acceptAttendeeInvitation(token: string, eventId: string, invitation: string) {
+  return requestEmpty(`${invitationsPath(eventId)}/accept`, {
+    method: "POST",
+    token,
+    json: { token: invitation },
+  })
 }
 
 export function listMyEvents(token: string) {

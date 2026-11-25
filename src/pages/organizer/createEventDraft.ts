@@ -27,7 +27,7 @@ export const visibilityDetails = {
   },
   PRIVATE: {
     label: "Private",
-    description: "The public event page is unavailable.",
+    description: "Only people who accept an email invitation can access this event.",
   },
 } satisfies Record<EventVisibility, { label: string; description: string }>
 

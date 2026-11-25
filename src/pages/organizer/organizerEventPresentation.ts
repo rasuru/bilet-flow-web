@@ -74,7 +74,7 @@ export function presentOrganizerEvent(event: ManagedEvent, now: number) {
   const status = eventStatus(event, now)
   const startsAt = Date.parse(event.startAt)
   const publicPath =
-    event.status === "PUBLISHED" && event.visibility !== "PRIVATE"
+    event.status === "PUBLISHED"
       ? `/events/${encodeURIComponent(event.id)}`
       : null
   const actions: ManagedEventAction[] = []

@@ -87,6 +87,10 @@ export function useOrganizerViewModel(sessionId: number, eventId: string) {
     eventSections: event ? [
       { id: "organizer-details", label: t("Event") },
       { id: "organizer-tickets", label: t("Ticket tiers") },
+      { id: "organizer-refund-policy", label: t("Refund policy") },
+      ...(query.data?.visibility === "PRIVATE"
+        ? [{ id: "organizer-invitations", label: t("Attendee invitations") }]
+        : []),
       { id: "organizer-staff", label: t("Event administrators") },
       { id: "organizer-campaigns", label: t("Campaigns") },
       { id: "organizer-analytics", label: t("Analytics") },

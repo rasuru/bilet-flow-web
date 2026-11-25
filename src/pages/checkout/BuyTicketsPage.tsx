@@ -2,6 +2,7 @@ import { useEventReturn } from "@/components/site/useEventReturn"
 import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
 
+import { refundPolicyDescription } from "@/events/refundPolicyPresentation"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
@@ -54,6 +55,9 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
       )}
       {model.status === "ready" && (
         <>
+          {model.showTickets && (
+            <p className="text-sm text-muted-foreground">{refundPolicyDescription(model.event.refundHoursBeforeStart)}</p>
+          )}
           {model.salesMessage && <p role="status">{model.salesMessage}</p>}
           {model.loadingTickets || model.loadingAvailability ? (
             <p role="status" className="flex items-center gap-2 text-sm">

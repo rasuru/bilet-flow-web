@@ -47,7 +47,7 @@ export const ticketRepository = {
         if (!ticket || !eventId) return null
 
         const event = await readIfAvailable(
-          client.fetchQuery(publicEventRepository.eventQuery(eventId))
+          client.fetchQuery(publicEventRepository.eventQuery(eventId, sessionId))
         )
         const layoutId = event?.venue?.venueLayoutId
         const layout =

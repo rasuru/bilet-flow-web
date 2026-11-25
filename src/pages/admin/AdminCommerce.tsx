@@ -17,6 +17,7 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
+import { PaymentProviderSetting } from "./PaymentProviderSetting"
 import { AdminOrderDetails } from "./AdminOrderDetails"
 import { PaymentDetails, PaymentReviewQueue } from "./AdminPaymentReview"
 
@@ -517,6 +518,7 @@ function ActivationDialog({
 export function AdminSettings({ sessionId }: { sessionId: number }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
+      <PaymentProviderSetting sessionId={sessionId} />
       <FeeSettingCard sessionId={sessionId} setting="activation-fee" />
       <FeeSettingCard sessionId={sessionId} setting="processing-fee-rate" />
     </div>
