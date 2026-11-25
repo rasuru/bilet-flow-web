@@ -1,3 +1,4 @@
+import { useEventAccessCode } from "@/events/privateEventAccess"
 import { useEventReturn } from "@/components/site/useEventReturn"
 import { t, numberFormat } from "@/i18n/locale"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -38,6 +39,7 @@ export function useTicketOrderViewModel(
   layout: VenueLayout | null,
   availability: SeatAvailability[]
 ) {
+  const accessCode = useEventAccessCode()
   const [draft, setDraft] = useState<Record<string, Attendee[]>>({})
   const [authMode, setAuthMode] = useState<"login" | "register" | null>(null)
   const [formError, setFormError] = useState<string>()
@@ -99,7 +101,8 @@ export function useTicketOrderViewModel(
   const promo = useCheckoutPromoViewModel(
     eventId,
     campaignToken,
-    promoSelections
+    promoSelections,
+    accessCode
   )
   const subtotal = tickets.reduce(
     (sum, ticket) => sum + (draft[ticket.id]?.length ?? 0) * ticket.amount,
@@ -217,6 +220,7 @@ export function useTicketOrderViewModel(
       {
         eventId,
         selections,
+        ...(accessCode ? { accessCode } : {}),
         ...(promo.appliedCode ? { promoCode: promo.appliedCode } : {}),
       },
       session.account.id
@@ -230,7 +234,7 @@ export function useTicketOrderViewModel(
     try {
       const checkout = await order.mutateAsync(request)
       navigate(`/orders/${encodeURIComponent(checkout.id)}`, {
-        state: { eventReturn },
+        state: { eventReturn, eventAccessCode: request.accessCode },
       })
     } catch (error) {
       if (

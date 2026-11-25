@@ -1,4 +1,4 @@
-import { requestEmpty, requestJson } from "@/api/client"
+import { requestEmpty, requestJson, withQuery } from "@/api/client"
 import { eventPath } from "@/api/events"
 import type { SeatingMode } from "@/api/events"
 
@@ -90,8 +90,8 @@ export function listSeatAvailability(eventId: string) {
   return requestJson<SeatAvailability[]>(`${eventPath(eventId)}/seat-map`)
 }
 
-export function listPublicTicketTypes(eventId: string) {
-  return requestJson<PublicTicketType[]>(eventTicketTypesPath(eventId))
+export function listPublicTicketTypes(eventId: string, access?: string) {
+  return requestJson<PublicTicketType[]>(withQuery(eventTicketTypesPath(eventId), { access }))
 }
 
 export function listManagedTicketTypes(token: string, eventId: string) {

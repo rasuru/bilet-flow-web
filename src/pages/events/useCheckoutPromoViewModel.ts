@@ -19,7 +19,8 @@ const kzt = numberFormat({
 export function useCheckoutPromoViewModel(
   eventId: string,
   token: string | null,
-  selections: PromoQuoteRequest["selections"]
+  selections: PromoQuoteRequest["selections"],
+  accessCode?: string
 ) {
   const link = useCampaignLinkViewModel(eventId, token)
   const linkedCode = link.status === "ready" ? link.code : null
@@ -37,7 +38,7 @@ export function useCheckoutPromoViewModel(
     selections.length <= 30 &&
     selections.reduce((sum, item) => sum + item.quantity, 0) <= 100
   const request =
-    code && canQuote ? { eventId, promoCode: code, selections } : null
+    code && canQuote ? { eventId, promoCode: code, selections, ...(accessCode ? { accessCode } : {}) } : null
   const quote = useQuery(checkoutRepository.promoQuoteQuery(request))
   const checking = !!request && (quote.isPending || quote.isFetching)
   const accepted =

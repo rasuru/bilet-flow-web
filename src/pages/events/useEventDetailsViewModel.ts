@@ -1,3 +1,4 @@
+import { useEventAccessCode } from "@/events/privateEventAccess"
 import { t, dateFormat, numberFormat } from "@/i18n/locale"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
@@ -57,7 +58,8 @@ function ticketAvailabilityLabel(
 }
 
 export function useEventDetailsViewModel(eventId: string) {
-  const eventQuery = useQuery(publicEventRepository.eventQuery(eventId))
+  const accessCode = useEventAccessCode()
+  const eventQuery = useQuery(publicEventRepository.eventQuery(eventId, accessCode))
   const [now, setNow] = useState(Date.now)
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 15_000)
@@ -66,13 +68,13 @@ export function useEventDetailsViewModel(eventId: string) {
   const event = eventQuery.isError ? undefined : eventQuery.data
   const isViewable =
     event &&
-    event.visibility !== "PRIVATE" &&
+    (event.visibility !== "PRIVATE" || !!accessCode) &&
     (event.status === "PUBLISHED" || event.status === "CANCELLED")
   const salesMessage = isViewable ? eventSalesMessage(event, now) : null
   const showTickets = !!isViewable && event.status !== "CANCELLED"
 
   const ticketQuery = useQuery(
-    publicEventRepository.ticketTypesQuery(showTickets ? eventId : null)
+    publicEventRepository.ticketTypesQuery(showTickets ? eventId : null, accessCode)
   )
   const ticketTypes = ticketQuery.data?.filter(
     ({ status }) => status !== "HIDDEN"
@@ -169,7 +171,9 @@ export function useEventDetailsViewModel(eventId: string) {
 
   return {
     status: "ready",
+    accessCode,
     event: {
+      refundPolicy: event.refundPolicy,
       title: event.title,
       category: event.category,
       description: event.description,

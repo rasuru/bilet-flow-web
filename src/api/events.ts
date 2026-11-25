@@ -38,7 +38,12 @@ export type VenueRequest = VenueDetails & { capacity: number } & (
 
 export type AssignStaffRequest = { staffUserId: number; role: "EVENT_ADMIN" }
 
+export type RefundPolicyRequest = { refundsAllowed: boolean; cutoffHoursBeforeStart: number | null; terms: string | null }
+export type RefundPolicy = RefundPolicyRequest & { refundableUntil: string | null; summary: string }
+export type PrivateAccess = { eventId: string; accessCode: string }
+
 export type PublicEvent = {
+  refundPolicy?: RefundPolicy | null
   id: string
   title: string
   description: string | null
@@ -63,6 +68,7 @@ export type PublicEvent = {
 }
 
 export type ManagedEvent = PublicEvent & {
+  privateAccessCode?: string | null
   staff: { userId: number; role: "EVENT_ADMIN"; assignedAt: string }[]
 }
 
@@ -145,8 +151,18 @@ export function listPublicEvents({
   )
 }
 
-export function getPublicEvent(eventId: string) {
-  return requestJson<PublicEvent>(eventPath(eventId))
+export function getPublicEvent(eventId: string, access?: string) {
+  return requestJson<PublicEvent>(withQuery(eventPath(eventId), { access }))
+}
+
+export function saveRefundPolicy(token: string, eventId: string, json: RefundPolicyRequest) {
+  return requestEmpty(eventPath(eventId) + "/refund-policy", { token, method: "PUT", json })
+}
+export function removeRefundPolicy(token: string, eventId: string) {
+  return requestEmpty(eventPath(eventId) + "/refund-policy", { token, method: "DELETE" })
+}
+export function rotatePrivateAccess(token: string, eventId: string) {
+  return requestJson<PrivateAccess>(eventPath(eventId) + "/private-access/rotate", { token, method: "POST" })
 }
 
 export function listMyEvents(token: string) {

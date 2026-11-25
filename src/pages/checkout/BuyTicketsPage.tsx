@@ -1,3 +1,5 @@
+import { useEventAccessCode, withEventAccess } from "@/events/privateEventAccess"
+import { EventRefundPolicy } from "@/pages/events/EventRefundPolicy"
 import { useEventReturn } from "@/components/site/useEventReturn"
 import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
@@ -13,12 +15,13 @@ import { useEventDetailsViewModel } from "@/pages/events/useEventDetailsViewMode
 export function BuyTicketsPage({ eventId }: { eventId: string }) {
   const model = useEventDetailsViewModel(eventId)
   const token = useCampaignToken()
+  const accessCode = useEventAccessCode()
   const { href: eventReturn } = useEventReturn()
 
   return (
     <SitePage width={model.status === "ready" && model.layout ? "wide" : "content"}>
       <BackLink
-        href={campaignEventPath(eventId, token)}
+        href={withEventAccess(campaignEventPath(eventId, token), accessCode)}
         state={{ eventReturn }}
       >
         {t("Back to event")}
@@ -54,6 +57,7 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
       )}
       {model.status === "ready" && (
         <>
+          <EventRefundPolicy policy={model.event.refundPolicy} />
           {model.salesMessage && <p role="status">{model.salesMessage}</p>}
           {model.loadingTickets || model.loadingAvailability ? (
             <p role="status" className="flex items-center gap-2 text-sm">
@@ -90,7 +94,7 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
             )}
           {model.tickets.length > 0 && (
             <TicketOrderForm
-              key={`${eventId}:${token ?? ""}`}
+              key={JSON.stringify([eventId, token, accessCode])}
               layout={model.layout}
               seatAvailability={model.seatAvailability}
               eventId={eventId}

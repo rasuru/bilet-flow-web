@@ -1,3 +1,4 @@
+import { withEventAccess } from "@/events/privateEventAccess"
 import { useEventReturn } from "@/components/site/useEventReturn"
 import { BackLink, PageHeading, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
@@ -21,7 +22,7 @@ export function OrderPage({
 }) {
   const model = useOrderViewModel(sessionId, orderId)
   const { href: eventReturn } = useEventReturn()
-  const state = useHistoryState<{ orderFrom?: string } | null>()
+  const state = useHistoryState<{ orderFrom?: string; eventAccessCode?: string } | null>()
   const eventParent =
     model.status === "ready" && state?.orderFrom !== "/my-tickets"
 
@@ -31,7 +32,7 @@ export function OrderPage({
         state={eventParent ? { eventReturn } : undefined}
         href={
           eventParent
-            ? `/events/${encodeURIComponent(model.order.eventId)}`
+            ? withEventAccess("/events/" + encodeURIComponent(model.order.eventId), state?.eventAccessCode)
             : "/my-tickets"
         }
       >

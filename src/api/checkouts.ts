@@ -2,6 +2,7 @@ import { requestJson } from "@/api/client"
 import type { Ticket } from "@/api/tickets"
 
 export type CheckoutRequest = {
+  accessCode?: string
   eventId: string
   promoCode?: string
   selections: {
@@ -13,6 +14,7 @@ export type CheckoutRequest = {
 }
 
 export type PromoQuoteRequest = {
+  accessCode?: string
   eventId: string
   promoCode: string
   selections: { ticketTypeId: string; quantity: number }[]

@@ -23,20 +23,20 @@ export const publicEventRepository = {
     })
   },
 
-  eventQuery(eventId: string) {
+  eventQuery(eventId: string, access?: string) {
     return queryOptions({
-      queryKey: ["public-event", eventId],
-      queryFn: () => getPublicEvent(eventId),
+      queryKey: access ? ["public-event", eventId, "access", access] : ["public-event", eventId],
+      queryFn: () => getPublicEvent(eventId, access),
       retry: retryPublicRead,
       refetchInterval: 15_000,
     })
   },
 
-  ticketTypesQuery(eventId: string | null) {
+  ticketTypesQuery(eventId: string | null, access?: string) {
     return queryOptions({
-      queryKey: ["public-event", eventId, "ticket-types"],
+      queryKey: ["public-event", eventId, "ticket-types", ...(access ? [access] : [])],
       queryFn:
-        eventId === null ? skipToken : () => listPublicTicketTypes(eventId),
+        eventId === null ? skipToken : () => listPublicTicketTypes(eventId, access),
       retry: retryPublicRead,
       refetchInterval: 10_000,
     })

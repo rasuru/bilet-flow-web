@@ -1,3 +1,5 @@
+import { withEventAccess } from "@/events/privateEventAccess"
+import { EventRefundPolicy } from "@/pages/events/EventRefundPolicy"
 import { useEventReturn } from "@/components/site/useEventReturn"
 import { BackLink, SitePage } from "@/components/site/SitePage"
 import { t } from "@/i18n/locale"
@@ -180,6 +182,7 @@ function EventDetails({
           </CardContent>
         </Card>
 
+        <EventRefundPolicy policy={event.refundPolicy} />
         {event.description && (
           <section className="space-y-2">
             <h2 className="text-lg font-semibold">{t("About the event")}</h2>
@@ -338,13 +341,13 @@ function EventDetails({
               {!model.ticketError &&
                 model.canSelectTickets && (
                   <Link
-                    href={campaignEventPath(
+                    href={withEventAccess(campaignEventPath(
                       eventId,
                       promo.status === "error" && !promo.retry
                         ? null
                         : campaignToken,
                       true
-                    )}
+                    ), model.accessCode)}
                     state={{ eventReturn }}
                     className={buttonVariants({
                       size: "lg",

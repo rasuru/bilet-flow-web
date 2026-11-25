@@ -1,3 +1,4 @@
+import { EventAccessSettings } from "./EventAccessSettings"
 import { BackLink } from "@/components/site/SitePage"
 import { useEffect, useRef } from "react"
 
@@ -98,6 +99,7 @@ export function ManageEventPage({
         )}
         {event && managedEvent && (
           <>
+            <EventAccessSettings key={managedEvent.id} event={managedEvent} sessionId={sessionId} />
             {managedEvent.status !== "CANCELLED" && <PaidSalesActivation vm={paidSales} />}
             {managedEvent.status === "CANCELLED" && (
               <Alert>
