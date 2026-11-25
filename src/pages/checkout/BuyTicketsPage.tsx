@@ -16,7 +16,7 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
   const { href: eventReturn } = useEventReturn()
 
   return (
-    <SitePage width="content">
+    <SitePage width={model.status === "ready" && model.layout ? "wide" : "content"}>
       <BackLink
         href={campaignEventPath(eventId, token)}
         state={{ eventReturn }}
@@ -83,6 +83,10 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
             !model.ticketError &&
             model.tickets.length === 0 && (
               <p>{t("There are no tickets listed for this event.")}</p>
+            )}
+          {!model.loadingTickets && !model.loadingAvailability && !model.ticketError && !model.availabilityError &&
+            model.tickets.length > 0 && !model.canSelectTickets && !model.salesMessage && (
+              <p role="status">{t("No tickets are currently available for purchase.")}</p>
             )}
           {model.tickets.length > 0 && (
             <TicketOrderForm

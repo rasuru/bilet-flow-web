@@ -18,6 +18,9 @@ import {
 import { downloadOperationsReport } from "@/api/operationalReports"
 import {
   listAdminOrders,
+  getAdminOrder,
+  executeAdminOrderAction,
+  type AdminOrderAction,
   listPromotionActivity,
   type AdminOrder,
   type AdminOrderQuery,
@@ -26,7 +29,13 @@ import {
 import {
   listAdminPayments,
   listAdminActivations,
-  suspendPaidSales,
+  moderatePaidSales,
+  listPaymentOperations,
+  getAdminPayment,
+  resolvePaymentOperation,
+  getProcessingFeeRate,
+  updateProcessingFeeRate,
+  type OperationResolutionRequest,
   getActivationFee,
   updateActivationFee,
   type AdminPaymentQuery,
@@ -39,6 +48,7 @@ import {
 } from "@/api/supportAdministration"
 import {
   listAdminUsers,
+  findAdminUserIdentities,
   getAdminUser,
   createAdminUser,
   updateAdminUser,
@@ -54,6 +64,8 @@ import { attendanceRepository } from "@/tickets/attendanceRepository"
 
 const request = sessionRepository.authenticatedRequest
 const pageSize = 20
+
+export type FeeSetting = "activation-fee" | "processing-fee-rate"
 
 function key(sessionId: number, resource: string) {
   return ["admin", sessionId, resource] as const
@@ -191,6 +203,35 @@ export const adminRepository = {
       getAdminSupportCase(token, caseId)
     )
   },
+  order(sessionId: number, orderId: string) {
+    return {
+      ...read(sessionId, "order", orderId, (token) =>
+        getAdminOrder(token, orderId)
+      ),
+      refetchInterval: 15_000,
+    }
+  },
+  async changeOrder(
+    client: QueryClient,
+    sessionId: number,
+    orderId: string,
+    action: AdminOrderAction & { reason?: string }
+  ) {
+    const result = await request(sessionId, (token) =>
+      executeAdminOrderAction(token, orderId, action)
+    )
+    client.setQueryData([...key(sessionId, "order"), orderId], result)
+    await refresh(
+      client,
+      sessionId,
+      "order",
+      "orders",
+      "promotions",
+      "payments",
+      "payment",
+      "payment-operations"
+    )
+  },
   orders(sessionId: number, filters: AdminOrderQuery, page: number) {
     return list(sessionId, "orders", listAdminOrders, filters, page)
   },
@@ -211,6 +252,41 @@ export const adminRepository = {
   ) {
     return list(sessionId, "payments", listAdminPayments, filters, page, size)
   },
+  payment(sessionId: number, paymentId: string) {
+    return {
+      ...read(sessionId, "payment", paymentId, (token) =>
+        getAdminPayment(token, paymentId)
+      ),
+      refetchInterval: 15_000,
+    }
+  },
+  paymentOperations(sessionId: number) {
+    return {
+      ...read(sessionId, "payment-operations", null, listPaymentOperations),
+      refetchInterval: 15_000,
+    }
+  },
+  async resolvePayment(
+    client: QueryClient,
+    sessionId: number,
+    paymentId: string,
+    resolution: OperationResolutionRequest
+  ) {
+    await request(sessionId, (token) =>
+      resolvePaymentOperation(token, paymentId, resolution)
+    )
+    await refresh(
+      client,
+      sessionId,
+      "payment",
+      "payments",
+      "payment-operations",
+      "order",
+      "orders",
+      "promotions",
+      "activations"
+    )
+  },
   activations(
     sessionId: number,
     status: ActivationStatus | undefined,
@@ -219,38 +295,58 @@ export const adminRepository = {
     const filters: OffsetQuery & { status?: ActivationStatus } = { status }
     return list(sessionId, "activations", listAdminActivations, filters, page)
   },
-  async suspendActivation(
+  async moderateActivation(
     client: QueryClient,
     sessionId: number,
     eventId: string,
-    reason: string
+    reason: string,
+    action: "suspend" | "reinstate"
   ) {
     await request(sessionId, (token) =>
-      suspendPaidSales(token, eventId, reason)
+      moderatePaidSales(token, eventId, reason, action)
     )
     await Promise.all([
       refresh(client, sessionId, "activations"),
       refreshEvent(client, sessionId, eventId),
     ])
   },
-  activationFee(sessionId: number) {
-    return read(sessionId, "activation-fee", null, getActivationFee)
+  feeSetting(sessionId: number, setting: FeeSetting) {
+    return read(sessionId, setting, null, async (token) => {
+      if (setting === "activation-fee") {
+        const fee = await getActivationFee(token)
+        return { ...fee, value: fee.amountKzt }
+      }
+      const fee = await getProcessingFeeRate(token)
+      return { ...fee, currency: null, value: fee.ratePercent }
+    })
   },
-  async saveActivationFee(
+  async saveFeeSetting(
     client: QueryClient,
     sessionId: number,
-    amount: string
+    setting: FeeSetting,
+    value: string
   ) {
-    const fee = await request(sessionId, (token) =>
-      updateActivationFee(token, amount)
-    )
-    client.setQueryData([...key(sessionId, "activation-fee"), null], fee)
-    await refresh(client, sessionId, "activation-fee")
+    const fee = await request(sessionId, async (token) => {
+      if (setting === "activation-fee") {
+        const fee = await updateActivationFee(token, value)
+        return { ...fee, value: fee.amountKzt }
+      }
+      const fee = await updateProcessingFeeRate(token, value)
+      return { ...fee, currency: null, value: fee.ratePercent }
+    })
+    client.setQueryData([...key(sessionId, setting), null], fee)
+    await refresh(client, sessionId, setting)
   },
-  users(sessionId: number, page: number) {
-    return read(sessionId, "users", page, async (token) => {
+  commerceUsers(sessionId: number, ids: number[]) {
+    return read(sessionId, "commerce-users", ids, (token) =>
+      findAdminUserIdentities(token, ids.map(String))
+    )
+  },
+  users(sessionId: number, page: number, q: string) {
+    return read(sessionId, "users", { page, q }, async (token) => {
       const data = await listAdminUsers(token, {
         page,
+        q: q || undefined,
         size: pageSize,
         sort: ["id,asc"],
       })
@@ -289,12 +385,12 @@ export const adminRepository = {
       }
       await sessionRepository.restoreSession()
     }
-    await refresh(client, sessionId, "users", "user")
+    await refresh(client, sessionId, "users", "user", "commerce-users")
   },
   async deleteUser(client: QueryClient, sessionId: number, user: AdminUser) {
     await request(sessionId, (token) => deleteAdminUser(token, user.login))
     if (isOwnAccount(sessionId, user)) sessionRepository.signOut()
-    await refresh(client, sessionId, "users", "user")
+    await refresh(client, sessionId, "users", "user", "commerce-users")
   },
   authorities(sessionId: number) {
     return read(sessionId, "authorities", null, listAuthorities)

@@ -68,7 +68,7 @@ export function usePaidSalesViewModel(sessionId: number, eventId: string) {
     pending,
     showChecklist: Boolean(checklist && (hasPaidTickets || active || pending || suspended)),
     showRefresh: pending || query.isError || payment.isError,
-    message: t(active ? "Paid sales are enabled for this event." : suspended ? "Paid sales have been suspended by the platform." : pending ? "Paid sales remain disabled until the activation payment is confirmed." : hasPaidTickets ? "Pay the one-time activation fee to start selling paid tickets." : "Free tickets do not require paid sales activation."),
+    message: t(active ? "Paid sales are enabled for this event." : suspended ? "Paid sales have been suspended by the platform." : pending ? "Attendees cannot purchase paid tickets until the activation payment is confirmed." : hasPaidTickets ? "Activate paid sales to make paid tickets purchasable. Published events with no purchasable tickets are hidden from discovery." : "Free tickets do not require paid sales activation."),
     fee: checklist && !active && !suspended && hasPaidTickets ? kzt.format(checklist.activationFeeKzt) : null,
     feeLabel: t(pending ? "Current activation fee" : "One-time activation fee"),
     items: checklist?.items.filter(item => !item.done && ["EVENT_ACCEPTS_PAID_SALES", "PAID_TICKET_TYPE", "PAYOUT_ACCOUNT_REGISTERED"].includes(item.key)).map(item => ({ key: item.key, done: item.done, label: t(itemLabels[item.key] ?? item.description) })) ?? [],

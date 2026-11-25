@@ -15,6 +15,8 @@ import {
 } from "@/support/supportPresentation"
 import { supportRepository } from "@/support/supportRepository"
 
+import { useSupportResolutionViewModel } from "./useSupportResolutionViewModel"
+
 type StaffAction =
   | { kind: "status"; status: SupportStatus }
   | { kind: "assign"; userId: number }
@@ -23,7 +25,8 @@ type StaffAction =
 export function useSupportCaseViewModel(
   sessionId: number,
   accountId: number,
-  caseId: string
+  caseId: string,
+  platformAdmin: boolean
 ) {
   const client = useQueryClient()
   const [draft, setDraft] = useState("")
@@ -41,7 +44,7 @@ export function useSupportCaseViewModel(
   }, [client, sessionId, caseId, open])
   const managed = useQuery(
     managedEventRepository.mineQuery(
-      staff && attendee && open ? sessionId : null
+      staff && attendee ? sessionId : null
     )
   )
   const send = useMutation({
@@ -66,7 +69,8 @@ export function useSupportCaseViewModel(
       if (action.kind === "assign") setAssignee("")
     },
   })
-  const busy = send.isPending || update.isPending
+  const resolution = useSupportResolutionViewModel(sessionId, caseId, !!staff, !!open, send.isPending || update.isPending)
+  const busy = resolution.busy
   function run(action: StaffAction) {
     if (busy) return
     setValidation(undefined)
@@ -74,6 +78,7 @@ export function useSupportCaseViewModel(
     update.mutate(action)
   }
   return {
+    resolution,
     loading: query.isPending,
     error:
       query.isError && !unavailable
@@ -112,7 +117,16 @@ export function useSupportCaseViewModel(
           : item.assignedSupportUserId
             ? t("User {0}", item.assignedSupportUserId)
             : t("Unassigned"),
-      context: contextLinks(item),
+      context: staff
+        ? [
+            ...(item.eventId && managed.data?.some(event => event.id === item.eventId)
+              ? [{ label: t("Manage event"), href: `/organizer/events/${encodeURIComponent(item.eventId)}` }]
+              : []),
+            ...(platformAdmin && item.eventId
+              ? [{ label: t("Event administration"), href: `/admin/events?eventId=${encodeURIComponent(item.eventId)}` }]
+              : []),
+          ]
+        : contextLinks(item),
       messages: item.messages.map((message) => ({
         ...message,
         authorLabel:

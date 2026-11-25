@@ -40,13 +40,12 @@ export function AdminUsers({ sessionId }: { sessionId: number }) {
           >
             <FilterInput
               id="find-user"
-              label={t("Username")}
-              name="login"
-              required
-              maxLength={50}
+              label={t("Username, name, or email")}
+              name="q"
+              maxLength={254}
             />
             <Button type="submit" variant="outline">
-              {t("Find user")}
+              {t("Search")}
             </Button>
           </form>
           <Button onClick={() => model.select("create")}>
@@ -61,10 +60,15 @@ export function AdminUsers({ sessionId }: { sessionId: number }) {
         items={model.query.data?.items ?? []}
         rowKey={(user) => user.id}
         pagination={model.pagination}
-        empty={t("No users on this page.")}
+        empty={t("No users match this search.")}
         cells={(user) => [
           <div className="min-w-24">
             <div className="font-medium">{user.login}</div>
+            {(user.firstName || user.lastName) && (
+              <div className="text-sm text-muted-foreground">
+                {[user.firstName, user.lastName].filter(Boolean).join(" ")}
+              </div>
+            )}
             <RecordId value={user.id} />
           </div>,
           user.email ?? "—",
@@ -364,4 +368,3 @@ export function AdminAuthorities({ sessionId }: { sessionId: number }) {
     </>
   )
 }
-

@@ -16,22 +16,25 @@ import { Label } from "@/components/ui/label"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
+import { SupportResolutionPanel } from "./SupportResolutionPanel"
 import { useSupportCaseViewModel } from "./useSupportCaseViewModel"
 
 export function SupportCasePage({
   sessionId,
   accountId,
   caseId,
+  platformAdmin,
 }: {
   sessionId: number
   accountId: number
   caseId: string
+  platformAdmin: boolean
 }) {
-  const model = useSupportCaseViewModel(sessionId, accountId, caseId)
+  const model = useSupportCaseViewModel(sessionId, accountId, caseId, platformAdmin)
   const item = model.case
   return (
-    <SitePage width="content">
-      <BackLink href="/support">{t("Support inbox")}</BackLink>
+    <SitePage width={item?.staff ? "wide" : "content"}>
+      <BackLink href={platformAdmin && item?.staff ? "/admin/support" : "/support"}>{t("Support inbox")}</BackLink>
       {model.loading && (
         <p role="status" className="flex items-center gap-2">
           <Spinner /> {t("Loading conversation…")}
@@ -172,7 +175,8 @@ export function SupportCasePage({
               )}
             </CardContent>
           </Card>
-          <Card>
+          <div className={item.staff ? "grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]" : "min-w-0"}>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle>
                 <h2>{t("Conversation")}</h2>
@@ -235,8 +239,11 @@ export function SupportCasePage({
               )}
             </CardContent>
           </Card>
+          {item.staff && <SupportResolutionPanel model={model.resolution} />}
+          </div>
         </>
       )}
     </SitePage>
   )
 }
+

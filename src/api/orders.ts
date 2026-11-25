@@ -1,4 +1,5 @@
 import { requestJson, withQuery } from "@/api/client"
+import type { Payment } from "@/api/payments"
 import type { OffsetQuery } from "@/api/client"
 
 export type OrderStatus = "COMPLETED" | "CANCELLED"
@@ -32,6 +33,56 @@ export type PromotionActivityQuery = EventOrderQuery & {
 }
 
 export type PromotionActivity = AdminOrder & { promotionId: string }
+
+export type AdminOrderAction = {
+  action: "RESEND_TICKET" | "CANCEL_FREE_ORDER" | "REQUEST_REFUND"
+  ticketId: string | null
+}
+
+export type AdminOrderDetail = {
+  summary: AdminOrder
+  eventTitle: string
+  payment: Payment | null
+  actions: AdminOrderAction[]
+  order: {
+    id: string
+    eventId: string
+    status: string
+    ownerUserId: number
+    amountKzt: number
+    paymentId: string | null
+    refundState: string | null
+    refundId: string | null
+    createdAt: string
+    tickets: {
+      id: string
+      ticketTypeId: string
+      seatId: string | null
+      attendeeEmail: string
+      status: string
+    }[]
+  }
+}
+
+function orderPath(id: string) {
+  return `/api/admin/orders/${encodeURIComponent(id)}`
+}
+
+export function getAdminOrder(token: string, id: string) {
+  return requestJson<AdminOrderDetail>(orderPath(id), { token })
+}
+
+export function executeAdminOrderAction(
+  token: string,
+  id: string,
+  json: AdminOrderAction & { reason?: string }
+) {
+  return requestJson<AdminOrderDetail>(`${orderPath(id)}/actions`, {
+    token,
+    method: "POST",
+    json,
+  })
+}
 
 export function listAdminOrders(token: string, query: AdminOrderQuery = {}) {
   return requestJson<AdminOrder[]>(withQuery("/api/admin/orders", query), {

@@ -4,16 +4,14 @@ import { CreditCard, Flag, MessagesSquare } from "lucide-react"
 
 import { adminRepository } from "@/admin/adminRepository"
 
-import { formatAmount, formatDate, label } from "./adminPresentation"
+import { formatDate, label } from "./adminPresentation"
 import { adminQueryView } from "./adminQueryView"
 
 export function useAdminOverviewViewModel(sessionId: number) {
   const reports = useQuery(
     adminRepository.reports(sessionId, { status: "OPEN" }, 0, 5)
   )
-  const payments = useQuery(
-    adminRepository.payments(sessionId, { status: "FAILED" }, 0, 5)
-  )
+  const payments = useQuery(adminRepository.paymentOperations(sessionId))
   const support = useQuery(
     adminRepository.supportCases(sessionId, { escalatedOnly: true }, 0, 5)
   )
@@ -35,16 +33,18 @@ export function useAdminOverviewViewModel(sessionId: number) {
     },
     {
       id: "payments",
-      title: t("Failed payments"),
+      title: t("Payments needing review"),
       icon: CreditCard,
-      href: "/admin/payments?status=FAILED",
-      empty: t("No failed payments."),
+      href: "/admin/payments?queue=review",
+      empty: t("No payments need review."),
       query: adminQueryView(payments),
-      items: payments.data?.items.map((item) => ({
+      items: payments.data?.slice(0, 5).map((item) => ({
         id: item.id,
-        title: formatAmount(item.amountKzt),
-        subtitle: formatDate(item.failedAt),
-        href: `/admin/payments?status=FAILED&paymentId=${encodeURIComponent(item.id)}`,
+        title: item.id,
+        subtitle: item.bankOperation
+          ? label(item.bankOperation)
+          : label(item.status),
+        href: `/admin/payments?queue=review&paymentId=${encodeURIComponent(item.id)}`,
       })),
     },
     {
@@ -63,4 +63,3 @@ export function useAdminOverviewViewModel(sessionId: number) {
     },
   ]
 }
-

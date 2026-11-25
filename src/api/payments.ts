@@ -61,7 +61,8 @@ export type OrganizerRevenue = {
 }
 
 export type OperationResolutionRequest = {
-  expectedOperationId?: string | null
+  expectedOperationId: string | null
+  expectedOperationAt?: string | null
   resolution:
     | "FULL_REFUND_CONFIRMED_COMPLETED"
     | "CLEAR_REVIEW"
@@ -98,6 +99,12 @@ export type AdminPayment = {
   failureReason: string | null
   reviewRequired: boolean
   operationState: string | null
+  refundId: string | null
+  refundStatus: string | null
+  bankOperation: string | null
+  bankOperationId: string | null
+  bankOperationAt: string | null
+  resolutions: OperationResolutionRequest["resolution"][]
   sandbox: boolean
 }
 
@@ -116,6 +123,13 @@ export type ActivationFee = {
   updatedBy: number | null
   updatedAt: string | null
   sandbox: boolean
+}
+
+export type ProcessingFeeRate = Omit<
+  ActivationFee,
+  "amountKzt" | "currency"
+> & {
+  ratePercent: number
 }
 
 export type Payout = {
@@ -151,6 +165,7 @@ export type PayoutRequest = {
 const paymentsPath = "/api/payments"
 const adminPath = `${paymentsPath}/admin`
 const activationFeePath = `${adminPath}/settings/activation-fee`
+const processingFeePath = `${adminPath}/settings/processing-fee-rate`
 const payoutsPath = `${paymentsPath}/payouts`
 
 function paymentPath(paymentId: string) {
@@ -227,6 +242,13 @@ export function listAdminPayments(
   )
 }
 
+export function getAdminPayment(token: string, id: string) {
+  return requestJson<AdminPayment>(
+    `${adminPath}/payments/${encodeURIComponent(id)}`,
+    { token }
+  )
+}
+
 export function listAdminActivations(
   token: string,
   query: ListQuery & { status?: ActivationStatus } = {}
@@ -237,13 +259,14 @@ export function listAdminActivations(
   )
 }
 
-export function suspendPaidSales(
+export function moderatePaidSales(
   token: string,
   eventId: string,
-  reason: string
+  reason: string,
+  action: "suspend" | "reinstate"
 ) {
   return requestJson<ActivationRecord>(
-    `${adminPath}/events/${encodeURIComponent(eventId)}/paid-sales/suspend`,
+    `${adminPath}/events/${encodeURIComponent(eventId)}/paid-sales/${action}`,
     {
       token,
       method: "POST",
@@ -261,6 +284,18 @@ export function updateActivationFee(token: string, amountKzt: string | number) {
     token,
     method: "PUT",
     json: { amountKzt },
+  })
+}
+
+export function getProcessingFeeRate(token: string) {
+  return requestJson<ProcessingFeeRate>(processingFeePath, { token })
+}
+
+export function updateProcessingFeeRate(token: string, ratePercent: string) {
+  return requestJson<ProcessingFeeRate>(processingFeePath, {
+    token,
+    method: "PUT",
+    json: { ratePercent },
   })
 }
 

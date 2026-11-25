@@ -55,6 +55,12 @@ const labels: Record<string, string> = {
   TICKET: "Ticket purchase",
   REQUESTER: "Requester",
   SUPPORT_AGENT: "Support agent",
+  CAPTURE: "Charge",
+  charge: "Charge",
+  VOID: "Void",
+  cancel: "Void",
+  REFUND: "Refund",
+  refund: "Refund",
 }
 
 export function label(value: string) {
@@ -79,4 +85,3 @@ export function filterValue<T extends string>(
 ) {
   return values.find((option) => option === value)
 }
-

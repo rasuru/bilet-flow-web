@@ -35,6 +35,7 @@ export type AdminSupportCaseDetail = {
 export type AdminSupportCaseQuery = OffsetQuery & {
   status?: SupportStatus
   eventId?: string
+  orderId?: string
   escalatedOnly?: boolean
 }
 

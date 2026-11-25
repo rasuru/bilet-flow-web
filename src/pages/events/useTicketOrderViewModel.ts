@@ -107,8 +107,17 @@ export function useTicketOrderViewModel(
   )
 
   const total = promo.amountKzt ?? subtotal
+  const hasValidSelection = Object.entries(draft).some(([, entries]) => entries.length > 0) &&
+    Object.entries(draft).every(([ticketId, entries]) => {
+      if (!entries.length) return true
+      const ticket = tickets.find((item) => item.id === ticketId)
+      return !!ticket && entries.length <= ticket.orderLimit &&
+        (!ticket.seats || entries.every((entry) => ticket.seats?.some((seat) => seat.id === entry.seatId)))
+    })
 
   function setQuantity(ticketId: string, quantity: number) {
+    const ticket = tickets.find((item) => item.id === ticketId)
+    if (!ticket || !Number.isInteger(quantity) || quantity < 0 || quantity > ticket.orderLimit) return
     setDraft((current) => ({
       ...current,
       [ticketId]: Array.from(
@@ -135,7 +144,7 @@ export function useTicketOrderViewModel(
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (order.isPending || (!retryRequest && promo.blocksOrder)) return
+    if (order.isPending || (!retryRequest && (promo.blocksOrder || !hasValidSelection))) return
     if (session.status === "signedOut") {
       setAuthMode("login")
       return
@@ -249,6 +258,7 @@ export function useTicketOrderViewModel(
 
   return {
     promo,
+    canSelectTickets: tickets.some((ticket) => ticket.orderLimit > 0),
     map,
     toggleSeat,
     removeSeat,
@@ -264,7 +274,8 @@ export function useTicketOrderViewModel(
     submit,
     formError,
     isSubmitting: order.isPending,
-    maySubmit: !!retryRequest || !promo.blocksOrder,
+    maySubmit: !!retryRequest || (hasValidSelection && !promo.blocksOrder),
+    selectionUnavailable: !retryRequest && !hasValidSelection && Object.values(draft).some((entries) => entries.length > 0),
     retryingOrder: !!retryRequest,
     session,
     authMode,

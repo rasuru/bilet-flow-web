@@ -56,24 +56,25 @@ export function TicketOrderForm({
   const { session } = model
   const signedIn = session.status === "signedIn"
   const showAuth = session.status === "signedOut" && model.authMode !== null
+  const showSummary = model.canSelectTickets || model.hasSelection || model.retryingOrder
 
   return (
-    <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_19rem]">
-      <Card>
+    <div className={showSummary ? "grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]" : "min-w-0 space-y-6"}>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <h2>{t("Choose tickets")}</h2>
           </CardTitle>
           <CardDescription>{seatingLabel}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form id={formId} onSubmit={model.submit} noValidate>
+        <CardContent className="min-w-0">
+          <form id={formId} onSubmit={model.submit} noValidate className="min-w-0">
             <fieldset
               disabled={model.isSubmitting || model.retryingOrder}
-              className="divide-y"
+              className="min-w-0 divide-y"
             >
               {model.map && (
-                <div className="space-y-3 pb-5">
+                <div className="min-w-0 space-y-3 pb-5">
                   <p className="text-sm text-muted-foreground">{t("Choose seats on the map. Select again to remove a seat.")}</p>
                   <SeatMap model={model.map} onSelect={model.toggleSeat} disabled={model.isSubmitting || model.retryingOrder} />
                   <p className="text-xs text-muted-foreground">{t("Seats are reserved only when you place your order.")}</p>
@@ -228,7 +229,7 @@ export function TicketOrderForm({
           </form>
         </CardContent>
       </Card>
-      <Card>
+      {showSummary && <Card className="min-w-0">
         <CardHeader>
           <CardTitle>
             <h2>{t("Order summary")}</h2>
@@ -356,6 +357,7 @@ export function TicketOrderForm({
                       )}
                 </p>
               )}
+              {model.selectionUnavailable && <FieldError>{t("Ticket availability changed. Update your selection and try again.")}</FieldError>}
               {model.formError && <FieldError>{model.formError}</FieldError>}
               {session.status === "restoring" && (
                 <p role="status">{t("Checking your session…")}</p>
@@ -422,7 +424,7 @@ export function TicketOrderForm({
             </section>
           )}
         </CardContent>
-      </Card>
+      </Card>}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react"
 
+import { adminMessages } from "./adminMessages"
 import { kazakh, russian } from "./messages"
 
 export const languages = {
@@ -77,7 +78,9 @@ export function t(message: string, ...values: (string | number)[]): string {
   const template =
     dictionary && Object.hasOwn(dictionary, message)
       ? dictionary[message]
-      : message
+      : language === "en"
+        ? message
+        : (adminMessages[message]?.[language] ?? message)
   return values.length
     ? template.replace(/\{(\d+)\}/g, (key, index: string) => {
         const value = values[Number(index)]
@@ -139,4 +142,3 @@ export function statusText(status: string) {
     statusMessages[status] ?? words.charAt(0).toUpperCase() + words.slice(1)
   )
 }
-

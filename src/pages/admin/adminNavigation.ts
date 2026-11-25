@@ -62,14 +62,13 @@ export const adminNavigation = [
         id: "payments",
         title: "Payments",
         description:
-          "Inspect ticket payments, activation fees, failures, and refunds.",
+          "Review bank operations and inspect ticket payments, activation fees, and refunds.",
         icon: CreditCard,
       },
       {
         id: "activations",
         title: "Paid sales",
-        description:
-          "Review activations, suspend paid sales, and configure the activation fee.",
+        description: "Review activations and suspend or reinstate paid sales.",
         icon: Settings2,
       },
       {
@@ -97,6 +96,13 @@ export const adminNavigation = [
         description:
           "Manage the authorities available for assignment to users.",
         icon: KeyRound,
+      },
+      {
+        id: "settings",
+        title: "Platform settings",
+        description:
+          "Set the paid-sales activation fee and estimated processing fee rate.",
+        icon: Settings2,
       },
       {
         id: "exports",

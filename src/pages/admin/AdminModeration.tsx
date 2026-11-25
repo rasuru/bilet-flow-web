@@ -437,6 +437,15 @@ export function AdminSupport({ sessionId, params }: SectionProps) {
           value={filters.draft.eventId ?? ""}
           onChange={(e) => filters.change("eventId", e.currentTarget.value)}
         />
+        <FilterInput
+          id="support-order"
+          label={t("Order ID")}
+          pattern={uuidPattern}
+          value={filters.draft.orderId ?? ""}
+          onChange={(e) =>
+            filters.change("orderId", e.currentTarget.value || undefined)
+          }
+        />
         <div className="flex min-h-8 items-center gap-2">
           <Checkbox
             id="escalated-only"
@@ -470,9 +479,18 @@ export function AdminSupport({ sessionId, params }: SectionProps) {
           <span className="whitespace-nowrap">
             {formatDate(item.updatedAt)}
           </span>,
-          <RecordButton onClick={() => select(item.id)}>
-            {t("View case")}
-          </RecordButton>,
+          item.type === "ATTENDEE_SUPPORT" && !item.escalatedAt ? (
+            <Link
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+              href={`/support/${encodeURIComponent(item.id)}`}
+            >
+              {t("Open support workspace")}
+            </Link>
+          ) : (
+            <RecordButton onClick={() => select(item.id)}>
+              {t("View case")}
+            </RecordButton>
+          ),
         ]}
       />
       {selected && (
@@ -513,7 +531,17 @@ function SupportDialog({
                   <RecordId value={item.assignedSupportUserId} />,
                 ],
                 [t("Event ID"), <RecordId value={item.eventId} />],
-                [t("Order ID"), <RecordId value={item.orderId} />],
+                [
+                  t("Order ID"),
+                  item.orderId && (
+                    <Link
+                      className="text-primary underline"
+                      href={`/admin/orders?orderId=${encodeURIComponent(item.orderId)}`}
+                    >
+                      <RecordId value={item.orderId} />
+                    </Link>
+                  ),
+                ],
                 [t("Ticket ID"), <RecordId value={item.ticketId} />],
                 [t("Escalated"), formatDate(item.escalatedAt)],
               ]}
@@ -524,7 +552,7 @@ function SupportDialog({
                 className={buttonVariants({ variant: "outline", size: "sm" })}
                 href={`/support/${encodeURIComponent(item.id)}`}
               >
-                {t("Open conversation")}
+                {t("Open support workspace")}
               </Link>
               <ul className="space-y-2">
                 {query.data?.messages.map((message) => (
@@ -550,4 +578,3 @@ function SupportDialog({
     </AdminDialog>
   )
 }
-

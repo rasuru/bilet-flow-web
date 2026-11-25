@@ -31,7 +31,7 @@ import { OrganizerLayout } from "./OrganizerLayout"
 import { useOrganizerViewModel } from "./useOrganizerViewModel"
 
 const actionDescriptions = {
-  publish: "Publish this event with its current visibility and schedule.",
+  publish: "Publish the event page. Paid tickets remain unavailable until paid sales are activated. Discovery requires at least one purchasable ticket.",
   unpublish: "Take the event off sale and remove its public page.",
   cancel: "Cancellation cannot be undone. New sales and admission will stop, and attendees will be notified. Completed paid orders are not automatically refunded.",
 } satisfies Record<ManagedEventAction, string>

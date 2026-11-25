@@ -148,6 +148,7 @@ export function useSupportListViewModel(
 ) {
   const filters = useAdminFilters<AdminSupportCaseQuery>({
     escalatedOnly: params.get("escalatedOnly") === "true",
+    orderId: params.get("orderId") ?? undefined,
     eventId: params.get("eventId") ?? undefined,
   })
   const [selected, select] = useState(params.get("caseId"))
@@ -173,4 +174,3 @@ export function useAdminSupportCaseViewModel(
     useQuery(adminRepository.supportCase(sessionId, caseId))
   )
 }
-

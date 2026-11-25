@@ -31,6 +31,20 @@ export type TicketType = Omit<TicketTypeDetails, "price"> & {
   available: number | null
 }
 
+export type TicketPurchaseStatus =
+  | "AVAILABLE"
+  | "SALES_NOT_ACTIVE"
+  | "REGISTRATION_CLOSED"
+  | "COMING_SOON"
+  | "SOLD_OUT"
+  | "SALES_CLOSED"
+  | "UNAVAILABLE"
+
+export type PublicTicketType = TicketType & {
+  purchasable: boolean
+  purchaseStatus: TicketPurchaseStatus
+}
+
 export type GeneralAdmissionAvailability = {
   ticketTypeId: string
   totalCapacity: number
@@ -77,7 +91,7 @@ export function listSeatAvailability(eventId: string) {
 }
 
 export function listPublicTicketTypes(eventId: string) {
-  return requestJson<TicketType[]>(eventTicketTypesPath(eventId))
+  return requestJson<PublicTicketType[]>(eventTicketTypesPath(eventId))
 }
 
 export function listManagedTicketTypes(token: string, eventId: string) {
@@ -145,3 +159,4 @@ export function unhideTicketType(token: string, ticketTypeId: string) {
     method: "POST",
   })
 }
+

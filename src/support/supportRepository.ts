@@ -13,6 +13,9 @@ const listKey = (sessionId: number) => ["support", sessionId, "list"] as const
 const detailKey = (sessionId: number, caseId: string) =>
   ["support", sessionId, "case", caseId] as const
 
+const contextKey = (sessionId: number, caseId: string) =>
+  [...detailKey(sessionId, caseId), "context"] as const
+
 function retryRead(count: number, error: Error) {
   return count < 2 && (!(error instanceof ApiError) || error.status >= 500)
 }
@@ -80,6 +83,27 @@ export const supportRepository = {
     }
   },
 
+  contextQuery(sessionId: number, caseId: string, enabled: boolean) {
+    return queryOptions({
+      queryKey: contextKey(sessionId, caseId),
+      queryFn: () => sessionRepository.authenticatedRequest(sessionId, (token) => support.getResolutionContext(token, caseId)),
+      enabled,
+      refetchInterval: 10_000,
+      retry: retryRead,
+    })
+  },
+  async resolve(client: QueryClient, sessionId: number, caseId: string, request: support.ResolutionRequest) {
+    const key = contextKey(sessionId, caseId)
+    await client.cancelQueries({ queryKey: key })
+    try {
+      const saved = await sessionRepository.authenticatedRequest(sessionId, (token) => support.executeResolutionAction(token, caseId, request))
+      await client.cancelQueries({ queryKey: key })
+      client.setQueryData(key, saved)
+      return saved
+    } finally {
+      void client.invalidateQueries({ queryKey: detailKey(sessionId, caseId) })
+    }
+  },
   listQuery(sessionId: number) {
     return queryOptions({
       queryKey: listKey(sessionId),
@@ -164,3 +188,4 @@ export const supportRepository = {
     ])
   },
 }
+

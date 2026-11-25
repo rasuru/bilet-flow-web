@@ -263,6 +263,7 @@ export function App() {
                 accountId={account.id}
                 sessionId={sessionId}
                 caseId={caseId}
+                platformAdmin={account.authorities.includes("ROLE_ADMIN")}
               />
             )}
           </SignedInRoute>
@@ -314,3 +315,4 @@ export function App() {
 }
 
 export default App
+

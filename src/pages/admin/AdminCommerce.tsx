@@ -1,7 +1,9 @@
 import { t } from "@/i18n/locale"
+import { useState } from "react"
 import { Download } from "lucide-react"
 import { Link } from "wouter"
 
+import type { FeeSetting } from "@/admin/adminRepository"
 import type { ActivationRecord } from "@/api/payments"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
@@ -14,6 +16,9 @@ import {
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+
+import { AdminOrderDetails } from "./AdminOrderDetails"
+import { PaymentDetails, PaymentReviewQueue } from "./AdminPaymentReview"
 
 import {
   ActionFeedback,
@@ -39,12 +44,12 @@ import {
   uuidPattern,
 } from "./adminPresentation"
 import {
-  useActivationFeeViewModel,
+  useFeeSettingViewModel,
   useActivationsViewModel,
   useAdminOrdersViewModel,
   useAdminPaymentsViewModel,
   useOperationsExportViewModel,
-  useSuspendActivationViewModel,
+  useModerateActivationViewModel,
 } from "./useCommerceViewModels"
 
 export function AdminOrders({
@@ -56,7 +61,7 @@ export function AdminOrders({
   params: URLSearchParams
   promotedOnly?: boolean
 }) {
-  const { filters, query, selected, select } = useAdminOrdersViewModel(
+  const { filters, query, selected, select, labels } = useAdminOrdersViewModel(
     sessionId,
     params,
     promotedOnly
@@ -128,7 +133,7 @@ export function AdminOrders({
         columns={[
           t("Order ID"),
           t("Status"),
-          promotedOnly ? t("Promotion ID") : t("Event ID"),
+          promotedOnly ? t("Promotion ID") : t("Event"),
           promotedOnly ? t("Discount") : t("Buyer"),
           t("Total"),
           "",
@@ -145,54 +150,38 @@ export function AdminOrders({
         cells={(item) => [
           <RecordId value={item.id} />,
           <StatusBadge value={item.status} />,
-          <RecordId value={promotedOnly ? item.promotionId : item.eventId} />,
           promotedOnly ? (
-            formatAmount(item.discountAmount, item.discountCurrency)
+            <RecordId value={item.promotionId} />
           ) : (
-            <RecordId value={item.ownerId} />
+            <Link
+              className="text-primary hover:underline"
+              href={`/admin/events?eventId=${encodeURIComponent(item.eventId)}`}
+            >
+              {labels.events.get(item.eventId) ?? (
+                <RecordId value={item.eventId} />
+              )}
+            </Link>
           ),
+          promotedOnly
+            ? formatAmount(item.discountAmount, item.discountCurrency)
+            : (labels.users.get(item.ownerId) ?? (
+                <RecordId value={item.ownerId} />
+              )),
           <span className="whitespace-nowrap tabular-nums">
             {formatAmount(item.totalAmount, item.totalCurrency)}
           </span>,
-          <RecordButton onClick={() => select(item)}>
+          <RecordButton onClick={() => select(item.id)}>
             {t("View order")}
           </RecordButton>,
         ]}
       />
       {selected && (
-        <AdminDialog title={t("Order details")} onClose={() => select(null)}>
-          <Details
-            fields={[
-              [t("Order ID"), <RecordId value={selected.id} />],
-              [t("Status"), <StatusBadge value={selected.status} />],
-              [t("Event ID"), <RecordId value={selected.eventId} />],
-              [t("Buyer ID"), selected.ownerId],
-              [
-                t("Total"),
-                formatAmount(selected.totalAmount, selected.totalCurrency),
-              ],
-              [
-                t("Discount"),
-                formatAmount(
-                  selected.discountAmount,
-                  selected.discountCurrency
-                ),
-              ],
-              [t("Promotion ID"), <RecordId value={selected.promotionId} />],
-              [t("Payment ID"), <RecordId value={selected.paymentId} />],
-              [t("Refund ID"), <RecordId value={selected.refundId} />],
-            ]}
-          />
-          <Link
-            href={`/admin/events?eventId=${encodeURIComponent(selected.eventId)}`}
-            className={buttonVariants({
-              variant: "outline",
-              className: "justify-self-start",
-            })}
-          >
-            {t("View event")}
-          </Link>
-        </AdminDialog>
+        <AdminOrderDetails
+          key={selected}
+          sessionId={sessionId}
+          orderId={selected}
+          onClose={() => select(null)}
+        />
       )}
     </>
   )
@@ -205,151 +194,172 @@ export function AdminPayments({
   sessionId: number
   params: URLSearchParams
 }) {
-  const { filters, query, selected, select } = useAdminPaymentsViewModel(
-    sessionId,
-    params
-  )
+  const { filters, query, selected, select, labels } =
+    useAdminPaymentsViewModel(
+      sessionId,
+      params,
+      params.get("queue") !== "review"
+    )
   const { draft, change } = filters
+
+  const review = params.get("queue") === "review"
+  const [notice, setNotice] = useState<string | null>(null)
 
   return (
     <>
-      <Filters onApply={filters.apply} onReset={filters.reset}>
-        <FilterSelect
-          id="payment-status"
-          title={t("Payment status")}
-          values={paymentStatuses}
-          value={draft.status}
-          onChange={(value) => change("status", value)}
-        />
-        <FilterSelect
-          id="payment-purpose"
-          title={t("Purpose")}
-          values={paymentPurposes}
-          value={draft.purpose}
-          onChange={(value) => change("purpose", value)}
-        />
-        <FilterInput
-          id="payment-event"
-          label={t("Event ID")}
-          pattern={uuidPattern}
-          value={draft.eventId ?? ""}
-          onChange={(e) =>
-            change("eventId", e.currentTarget.value || undefined)
-          }
-        />
-        <FilterInput
-          id="payment-payer"
-          label={t("Payer ID")}
-          type="number"
-          min={1}
-          step={1}
-          max={Number.MAX_SAFE_INTEGER}
-          value={draft.payerId ?? ""}
-          onChange={(e) =>
-            change(
-              "payerId",
-              e.currentTarget.value === ""
-                ? undefined
-                : e.currentTarget.valueAsNumber
-            )
-          }
-        />
-      </Filters>
-      <AdminTable
-        caption={t("Payments")}
-        columns={[
-          t("Payment"),
-          t("Status"),
-          t("Amount"),
-          t("Payer"),
-          t("Paid or failed at"),
-          "",
-        ]}
-        items={query.data?.items ?? []}
-        rowKey={(item) => item.id}
-        state={query}
-        empty={t("No payments match these filters.")}
-        pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
-        cells={(item) => [
-          <div className="min-w-36">
-            <div className="font-medium">{label(item.purpose)}</div>
-            <RecordId value={item.id} />
-          </div>,
-          <div className="space-y-1">
-            <StatusBadge value={item.status} />
-            {item.reviewRequired && (
-              <p className="text-xs text-destructive">{t("Review required")}</p>
-            )}
-          </div>,
-          <span className="whitespace-nowrap tabular-nums">
-            {formatAmount(item.amountKzt)}
-          </span>,
-          item.payerId,
-          <span className="whitespace-nowrap">
-            {formatDate(item.failedAt ?? item.paidAt)}
-          </span>,
-          <RecordButton onClick={() => select(item)}>
-            {t("View payment")}
-          </RecordButton>,
-        ]}
-      />
-      {selected && (
-        <AdminDialog title={t("Payment details")} onClose={() => select(null)}>
-          <Details
-            fields={[
-              [t("Payment ID"), <RecordId value={selected.id} />],
-              [t("Status"), <StatusBadge value={selected.status} />],
-              [t("Purpose"), label(selected.purpose)],
-              [
-                t("Environment"),
-                selected.sandbox ? t("Sandbox") : t("Production"),
-              ],
-              [t("Amount"), formatAmount(selected.amountKzt)],
-              [t("Estimated fee"), formatAmount(selected.estimatedFeeKzt)],
-              [t("Event ID"), <RecordId value={selected.eventId} />],
-              [t("Order ID"), <RecordId value={selected.orderId} />],
-              [t("Payer ID"), selected.payerId],
-              [t("Organizer ID"), selected.organizerId],
-              [t("Paid"), formatDate(selected.paidAt)],
-              [t("Failed"), formatDate(selected.failedAt)],
-              [
-                t("Operation state"),
-                selected.operationState ? label(selected.operationState) : null,
-              ],
-              [
-                t("Review required"),
-                selected.reviewRequired ? t("Yes") : t("No"),
-              ],
+      <nav aria-label={t("Payment views")} className="flex flex-wrap gap-2">
+        <Link
+          href="/admin/payments?queue=review"
+          aria-current={review ? "page" : undefined}
+          className={buttonVariants({
+            variant: review ? "default" : "outline",
+          })}
+        >
+          {t("Needs review")}
+        </Link>
+        <Link
+          href="/admin/payments"
+          aria-current={!review ? "page" : undefined}
+          className={buttonVariants({
+            variant: review ? "outline" : "default",
+          })}
+        >
+          {t("All payments")}
+        </Link>
+      </nav>
+      <ActionFeedback error={null} success={notice} />
+      {review ? (
+        <PaymentReviewQueue sessionId={sessionId} select={select} />
+      ) : (
+        <>
+          <Filters onApply={filters.apply} onReset={filters.reset}>
+            <FilterSelect
+              id="payment-status"
+              title={t("Payment status")}
+              values={paymentStatuses}
+              value={draft.status}
+              onChange={(value) => change("status", value)}
+            />
+            <FilterSelect
+              id="payment-purpose"
+              title={t("Purpose")}
+              values={paymentPurposes}
+              value={draft.purpose}
+              onChange={(value) => change("purpose", value)}
+            />
+            <FilterInput
+              id="payment-event"
+              label={t("Event ID")}
+              pattern={uuidPattern}
+              value={draft.eventId ?? ""}
+              onChange={(e) =>
+                change("eventId", e.currentTarget.value || undefined)
+              }
+            />
+            <FilterInput
+              id="payment-payer"
+              label={t("Payer ID")}
+              type="number"
+              min={1}
+              step={1}
+              max={Number.MAX_SAFE_INTEGER}
+              value={draft.payerId ?? ""}
+              onChange={(e) =>
+                change(
+                  "payerId",
+                  e.currentTarget.value === ""
+                    ? undefined
+                    : e.currentTarget.valueAsNumber
+                )
+              }
+            />
+          </Filters>
+          <AdminTable
+            caption={t("Payments")}
+            columns={[
+              t("Payment"),
+              t("Status"),
+              t("Amount"),
+              t("Event"),
+              t("Payer"),
+              t("Paid or failed at"),
+              "",
+            ]}
+            items={query.data?.items ?? []}
+            rowKey={(item) => item.id}
+            state={query}
+            empty={t("No payments match these filters.")}
+            pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
+            cells={(item) => [
+              <div className="min-w-36">
+                <div className="font-medium">{label(item.purpose)}</div>
+                <RecordId value={item.id} />
+              </div>,
+              <div className="space-y-1">
+                <StatusBadge value={item.status} />
+                {item.reviewRequired && (
+                  <p className="text-xs text-destructive">
+                    {t("Review required")}
+                  </p>
+                )}
+              </div>,
+              <span className="whitespace-nowrap tabular-nums">
+                {formatAmount(item.amountKzt)}
+              </span>,
+              item.eventId ? (
+                <Link
+                  className="text-primary hover:underline"
+                  href={`/admin/events?eventId=${encodeURIComponent(item.eventId)}`}
+                >
+                  {labels.events.get(item.eventId) ?? (
+                    <RecordId value={item.eventId} />
+                  )}
+                </Link>
+              ) : (
+                "—"
+              ),
+              labels.users.get(item.payerId) ?? (
+                <RecordId value={item.payerId} />
+              ),
+              <span className="whitespace-nowrap">
+                {formatDate(item.failedAt ?? item.paidAt)}
+              </span>,
+              <RecordButton onClick={() => select(item.id)}>
+                {t("View payment")}
+              </RecordButton>,
             ]}
           />
-          {selected.failureReason && (
-            <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm wrap-anywhere text-destructive">
-              {selected.failureReason}
-            </p>
-          )}
-          {selected.orderId && (
-            <Link
-              href={`/admin/orders?orderId=${encodeURIComponent(selected.orderId)}`}
-              className={buttonVariants({
-                variant: "outline",
-                className: "justify-self-start",
-              })}
-            >
-              {t("View order")}
-            </Link>
-          )}
-        </AdminDialog>
+        </>
+      )}
+      {selected && (
+        <PaymentDetails
+          key={selected}
+          sessionId={sessionId}
+          paymentId={selected}
+          onClose={() => select(null)}
+          onResolved={() => {
+            setNotice(t("Payment resolution recorded."))
+            select(null)
+          }}
+        />
       )}
     </>
   )
 }
 
 export function AdminActivations({ sessionId }: { sessionId: number }) {
-  const { filters, query, selected, select } =
+  const { filters, query, selected, select, labels } =
     useActivationsViewModel(sessionId)
+  const [notice, setNotice] = useState<string | null>(null)
   return (
     <>
-      <ActivationFeeCard sessionId={sessionId} />
+      <Link
+        href="/admin/settings"
+        className={buttonVariants({ variant: "outline" })}
+      >
+        {t("Fee settings")}
+      </Link>
+      <ActionFeedback error={null} success={notice} />
       <Filters onApply={filters.apply} onReset={filters.reset}>
         <FilterSelect
           id="activation-status"
@@ -361,22 +371,25 @@ export function AdminActivations({ sessionId }: { sessionId: number }) {
       </Filters>
       <AdminTable
         caption={t("Paid-sales activations")}
-        columns={[
-          t("Event ID"),
-          t("Status"),
-          t("Organizer"),
-          t("Requested"),
-          "",
-        ]}
+        columns={[t("Event"), t("Status"), t("Organizer"), t("Requested"), ""]}
         items={query.data?.items ?? []}
         rowKey={(item) => item.eventId}
         state={query}
         empty={t("No activations match this filter.")}
         pagination={{ ...filters, hasNext: query.data?.hasNext ?? false }}
         cells={(item) => [
-          <RecordId value={item.eventId} />,
+          <Link
+            className="text-primary hover:underline"
+            href={`/admin/events?eventId=${encodeURIComponent(item.eventId)}`}
+          >
+            {labels.events.get(item.eventId) ?? (
+              <RecordId value={item.eventId} />
+            )}
+          </Link>,
           <StatusBadge value={item.status} />,
-          item.organizerId,
+          labels.users.get(item.organizerId) ?? (
+            <RecordId value={item.organizerId} />
+          ),
           <span className="whitespace-nowrap">
             {formatDate(item.createdAt)}
           </span>,
@@ -390,6 +403,16 @@ export function AdminActivations({ sessionId }: { sessionId: number }) {
           sessionId={sessionId}
           record={selected}
           onClose={() => select(null)}
+          onSuccess={() => {
+            setNotice(
+              t(
+                selected.status === "SUSPENDED"
+                  ? "Paid sales reinstated."
+                  : "Paid sales suspended."
+              )
+            )
+            select(null)
+          }}
         />
       )}
     </>
@@ -400,12 +423,14 @@ function ActivationDialog({
   sessionId,
   record,
   onClose,
+  onSuccess,
 }: {
   sessionId: number
   record: ActivationRecord
   onClose: () => void
+  onSuccess: () => void
 }) {
-  const model = useSuspendActivationViewModel(sessionId, record, onClose)
+  const model = useModerateActivationViewModel(sessionId, record, onSuccess)
   return (
     <AdminDialog
       title={t("Paid-sales activation")}
@@ -416,7 +441,17 @@ function ActivationDialog({
         fields={[
           [t("Event ID"), <RecordId value={record.eventId} />],
           [t("Status"), <StatusBadge value={record.status} />],
-          [t("Payment ID"), <RecordId value={record.paymentId} />],
+          [
+            t("Payment ID"),
+            record.paymentId && (
+              <Link
+                className="text-primary underline"
+                href={`/admin/payments?paymentId=${encodeURIComponent(record.paymentId)}`}
+              >
+                {record.paymentId}
+              </Link>
+            ),
+          ],
           [t("Organizer ID"), record.organizerId],
           [t("Requested"), formatDate(record.createdAt)],
           [t("Suspended"), formatDate(record.suspendedAt)],
@@ -432,11 +467,15 @@ function ActivationDialog({
           {record.suspensionReason}
         </p>
       )}
-      {record.status === "ACTIVE" && (
+      {record.status !== "PENDING" && (
         <form className="grid gap-3 border-t pt-4" onSubmit={model.submit}>
           <Field>
             <FieldLabel htmlFor="activation-reason">
-              {t("Suspension reason")}
+              {t(
+                record.status === "SUSPENDED"
+                  ? "Reinstatement reason"
+                  : "Suspension reason"
+              )}
             </FieldLabel>
             <Textarea
               id="activation-reason"
@@ -448,18 +487,26 @@ function ActivationDialog({
             />
             <FieldDescription>
               {t(
-                "This pauses paid sales for the event. Existing tickets stay valid."
+                record.status === "SUSPENDED"
+                  ? "Reinstatement restores paid sales when registration is open. No new fee is charged."
+                  : "This pauses paid sales for the event. Existing tickets stay valid."
               )}
             </FieldDescription>
           </Field>
           <ActionFeedback error={model.error} />
           <Button
             type="submit"
-            variant="destructive"
+            variant={record.status === "SUSPENDED" ? "default" : "destructive"}
             className="justify-self-end"
             disabled={model.pending}
           >
-            {model.pending ? t("Suspending…") : t("Suspend paid sales")}
+            {model.pending
+              ? t("Saving…")
+              : t(
+                  record.status === "SUSPENDED"
+                    ? "Reinstate paid sales"
+                    : "Suspend paid sales"
+                )}
           </Button>
         </form>
       )}
@@ -467,17 +514,37 @@ function ActivationDialog({
   )
 }
 
-function ActivationFeeCard({ sessionId }: { sessionId: number }) {
-  const model = useActivationFeeViewModel(sessionId)
+export function AdminSettings({ sessionId }: { sessionId: number }) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <FeeSettingCard sessionId={sessionId} setting="activation-fee" />
+      <FeeSettingCard sessionId={sessionId} setting="processing-fee-rate" />
+    </div>
+  )
+}
+
+function FeeSettingCard({
+  sessionId,
+  setting,
+}: {
+  sessionId: number
+  setting: FeeSetting
+}) {
+  const model = useFeeSettingViewModel(sessionId, setting)
+  const activation = setting === "activation-fee"
   const fee = model.query.data
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2>{t("Activation fee")}</h2>
+          <h2>{t(activation ? "Activation fee" : "Processing fee rate")}</h2>
         </CardTitle>
         <CardDescription>
-          {t("Applies to new paid-sales activation requests.")}
+          {t(
+            activation
+              ? "Applies to new paid-sales activation requests."
+              : "Applies to the estimated fee on new ticket payments."
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -486,14 +553,19 @@ function ActivationFeeCard({ sessionId }: { sessionId: number }) {
             <form className="grid gap-3" onSubmit={model.submit}>
               <div className="flex flex-wrap items-end gap-3">
                 <Field className="w-full sm:max-w-56">
-                  <FieldLabel htmlFor="fee-amount">
-                    {model.amountLabel}
+                  <FieldLabel htmlFor={setting}>
+                    {activation
+                      ? t(
+                          "Amount ({0})",
+                          fee.currency === "KZT" ? "₸" : (fee.currency ?? "₸")
+                        )
+                      : t("Rate (%)")}
                   </FieldLabel>
                   <Input
-                    id="fee-amount"
+                    id={setting}
                     inputMode="decimal"
                     required
-                    maxLength={20}
+                    maxLength={activation ? 20 : 5}
                     value={model.value}
                     onChange={(e) => model.change(e.currentTarget.value)}
                     disabled={model.pending}
@@ -562,4 +634,3 @@ export function AdminExports({ sessionId }: { sessionId: number }) {
     </Card>
   )
 }
-
