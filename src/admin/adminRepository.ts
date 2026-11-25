@@ -37,6 +37,9 @@ import {
   updateProcessingFeeRate,
   type OperationResolutionRequest,
   getActivationFee,
+  getPaymentProviderSetting,
+  updatePaymentProviderSetting,
+  type PaymentProvider,
   updateActivationFee,
   type AdminPaymentQuery,
   type ActivationStatus,
@@ -309,6 +312,14 @@ export const adminRepository = {
       refresh(client, sessionId, "activations"),
       refreshEvent(client, sessionId, eventId),
     ])
+  },
+  paymentProvider(sessionId: number) {
+    return read(sessionId, "payment-provider", null, getPaymentProviderSetting)
+  },
+  async changePaymentProvider(client: QueryClient, sessionId: number, provider: PaymentProvider) {
+    const setting = await request(sessionId, (token) => updatePaymentProviderSetting(token, provider))
+    client.setQueryData([...key(sessionId, "payment-provider"), null], setting)
+    await refresh(client, sessionId, "payment-provider")
   },
   feeSetting(sessionId: number, setting: FeeSetting) {
     return read(sessionId, setting, null, async (token) => {

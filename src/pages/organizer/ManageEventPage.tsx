@@ -21,6 +21,7 @@ import { OrganizerAnalyticsPanel } from "./OrganizerAnalyticsPanel"
 import { AttachEventVenue, EditEventDetails } from "./OrganizerEventSettings"
 import { usePaidSalesViewModel } from "./usePaidSalesViewModel"
 import { Badge } from "@/components/ui/badge"
+import { OrganizerAttendeeInvitations, OrganizerRefundPolicy } from "./OrganizerEventAccess"
 import { PaidSalesActivation } from "./PaidSalesActivation"
 import { OrganizerEventStaff } from "./OrganizerEventStaff"
 import { OrganizerTicketTypes } from "./OrganizerTicketTypes"
@@ -67,9 +68,11 @@ export function ManageEventPage({
         >
           {event?.title ?? t("Manage event")}
         </h1>
-        {managedEvent?.status !== "CANCELLED" && paidSales.loaded && paidSales.active && (
+        {managedEvent?.status !== "CANCELLED" && paidSales.loaded && (
+          paidSales.active || (paidSales.bypassed && paidSales.hasPaidTickets)
+        ) && (
           <Badge variant="outline" className="border-green-600/40 bg-green-500/10 leading-none text-green-700 dark:text-green-400">
-            {t("Paid sales activated")}
+            {t(paidSales.bypassed ? "Paid sales enabled for development" : "Paid sales activated")}
           </Badge>
         )}
         </div>
@@ -153,6 +156,16 @@ export function ManageEventPage({
               event={managedEvent}
               notify={model.notify}
             />
+            <OrganizerRefundPolicy
+              sessionId={sessionId}
+              event={managedEvent}
+            />
+            {managedEvent.visibility === "PRIVATE" && (
+              <OrganizerAttendeeInvitations
+                sessionId={sessionId}
+                event={managedEvent}
+              />
+            )}
             <OrganizerEventStaff
               sessionId={sessionId}
               event={managedEvent}

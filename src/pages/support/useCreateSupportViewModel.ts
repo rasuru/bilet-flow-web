@@ -34,7 +34,11 @@ export function useCreateSupportViewModel(sessionId: number) {
     eventContext ? "ATTENDEE_SUPPORT" : "PLATFORM_SUPPORT"
   )
   const [category, setCategory] = useState<SupportCategory>(
-    eventContext ? "EVENT_INFORMATION" : "ACCOUNT"
+    eventContext
+      ? context.orderId && params.get("category") === "REFUND"
+        ? "REFUND"
+        : "EVENT_INFORMATION"
+      : "ACCOUNT"
   )
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")

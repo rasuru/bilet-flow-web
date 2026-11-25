@@ -19,6 +19,32 @@ export type HalykPaymentSession = {
   paymentObject: Record<string, unknown>
 }
 
+export type PaymentSession = HalykPaymentSession | { mockPaymentId: string }
+
+export type PaymentProvider = "HALYK" | "MOCK"
+
+export type PaymentProviderSetting = {
+  provider: PaymentProvider
+  updatedBy: number | null
+  updatedAt: string | null
+}
+
+export type MockPaymentScenario = "SUCCESS" | "FAILURE" | "DELAYED_SUCCESS" | "EXPIRATION"
+
+export type MockCheckout = {
+  amountKzt: number
+  expiresAt: string
+  orderId: string | null
+  eventId: string
+  status: string
+  scenario: MockPaymentScenario | null
+  canChoose: boolean
+  closed: boolean
+  expired: boolean
+  canDelay: boolean
+  delaySeconds: number
+}
+
 export type ActivationRequest = {
   acceptSandboxTerms: boolean
   simulateIdentityAndPayoutVerification: boolean
@@ -51,6 +77,7 @@ export type ActivationChecklist = {
   complete: boolean
   activationFeeKzt: number
   sandbox: boolean
+  activationBypassed?: boolean
 }
 
 export type OrganizerRevenue = {
@@ -185,9 +212,35 @@ export function getPayment(token: string, paymentId: string) {
 }
 
 export function createPaymentSession(token: string, paymentId: string) {
-  return requestJson<HalykPaymentSession>(`${paymentPath(paymentId)}/session`, {
+  return requestJson<PaymentSession>(`${paymentPath(paymentId)}/session`, {
     token,
     method: "POST",
+  })
+}
+
+export function getMockCheckout(token: string, paymentId: string) {
+  return requestJson<MockCheckout>(`${paymentPath(paymentId)}/mock`, { token })
+}
+
+export function chooseMockOutcome(token: string, paymentId: string, scenario: MockPaymentScenario) {
+  return requestJson<MockCheckout>(`${paymentPath(paymentId)}/mock`, {
+    token,
+    method: "POST",
+    json: { scenario },
+  })
+}
+
+const providerSettingPath = `${adminPath}/settings/payment-provider`
+
+export function getPaymentProviderSetting(token: string) {
+  return requestJson<PaymentProviderSetting>(providerSettingPath, { token })
+}
+
+export function updatePaymentProviderSetting(token: string, provider: PaymentProvider) {
+  return requestJson<PaymentProviderSetting>(providerSettingPath, {
+    token,
+    method: "PUT",
+    json: { provider },
   })
 }
 

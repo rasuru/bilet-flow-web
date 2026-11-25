@@ -46,6 +46,8 @@ export type Checkout = {
   paymentId: string | null
   refundState: "PENDING" | "REFUNDED" | "FAILED" | null
   refundId: string | null
+  selfRefundDeadline?: string | null
+  selfRefundAvailable?: boolean
   tickets: IssuedTicket[]
   sandbox: boolean
 }
@@ -56,9 +58,10 @@ function checkoutPath(checkoutId: string) {
   return `${checkoutsPath}/${encodeURIComponent(checkoutId)}`
 }
 
-export function quotePromotion(json: PromoQuoteRequest) {
+export function quotePromotion(json: PromoQuoteRequest, token?: string) {
   return requestJson<PromoQuote>(`${checkoutsPath}/quote`, {
     method: "POST",
+    token,
     json,
   })
 }
@@ -87,6 +90,13 @@ export function getCheckout(token: string, checkoutId: string) {
 
 export function cancelCheckout(token: string, checkoutId: string) {
   return requestJson<Checkout>(`${checkoutPath(checkoutId)}/cancel`, {
+    token,
+    method: "POST",
+  })
+}
+
+export function requestSelfRefund(token: string, checkoutId: string) {
+  return requestJson<Checkout>(`${checkoutPath(checkoutId)}/self-refund`, {
     token,
     method: "POST",
   })

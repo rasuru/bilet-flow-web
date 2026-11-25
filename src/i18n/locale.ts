@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from "react"
 
 import { adminMessages } from "./adminMessages"
+import { eventAccessMessages } from "./eventAccessMessages"
 import { kazakh, russian } from "./messages"
+import { mockPaymentMessages } from "./mockPaymentMessages"
 
 export const languages = {
   en: "English",
@@ -80,7 +82,10 @@ export function t(message: string, ...values: (string | number)[]): string {
       ? dictionary[message]
       : language === "en"
         ? message
-        : (adminMessages[message]?.[language] ?? message)
+        : (mockPaymentMessages[message]?.[language] ??
+          eventAccessMessages[message]?.[language] ??
+          adminMessages[message]?.[language] ??
+          message)
   return values.length
     ? template.replace(/\{(\d+)\}/g, (key, index: string) => {
         const value = values[Number(index)]
