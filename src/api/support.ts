@@ -107,3 +107,29 @@ export function assignSupportCase(
     json: { supportUserId },
   })
 }
+
+export type ResolutionAction = "RESEND_TICKET" | "REVERSE_CHECK_IN" | "CANCEL_FREE_ORDER" | "REQUEST_REFUND"
+export type AvailableResolutionAction = { action: ResolutionAction; ticketId?: string | null }
+export type ResolutionRequest = AvailableResolutionAction & { reason?: string }
+export type ResolutionTicket = { id: string; ticketTypeId: string; seatId: string | null; attendeeEmail: string; status: string }
+export type ResolutionPayment = import("@/api/payments").Payment
+export type ResolutionContext = {
+  caseId: string
+  requesterUserId: number
+  requesterEmail: string | null
+  eventId: string | null
+  event: { title: string; startsAt: string; endsAt: string; venue: string | null; address: string | null; cancelled: boolean; suspended: boolean } | null
+  linkedTicketId: string | null
+  order: { id: string; eventId: string; ownerUserId: number; status: string; amountKzt: number; paymentId: string | null; refundState: string | null; refundId: string | null; createdAt: string; tickets: ResolutionTicket[] } | null
+  payment: ResolutionPayment | null
+  activation: { status: string; payment: ResolutionPayment | null } | null
+  actions: AvailableResolutionAction[]
+  history: { id: string; caseId: string; eventId: string | null; occurredAt: string; actorUserId: number; action: string; details: string | null }[]
+}
+export function getResolutionContext(token: string, caseId: string) {
+  return requestJson<ResolutionContext>(`${casePath(caseId)}/context`, { token })
+}
+export function executeResolutionAction(token: string, caseId: string, json: ResolutionRequest) {
+  return requestJson<ResolutionContext>(`${casePath(caseId)}/actions`, { token, method: "POST", json })
+}
+
