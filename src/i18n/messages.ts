@@ -1283,6 +1283,13 @@ export const russian: Readonly<Record<string, string>> = {
   "Update your password": "Обновить пароль",
   "View all events": "Все мероприятия",
   "Welcome back, {0}": "С возвращением, {0}",
+  "Showing events with tickets available now.": "Показаны события, на которые сейчас можно купить или получить билеты.",
+  "Ticket sales have not opened yet.": "Продажа билетов ещё не открыта.",
+  "No tickets are currently available for purchase.": "Сейчас нет билетов, доступных для покупки.",
+  "You can publish the event now and activate paid sales later. Until activation, paid tickets cannot be purchased. The event will appear in discovery only when at least one ticket is available for purchase.": "Вы можете опубликовать событие сейчас и активировать платные продажи позже. До активации платные билеты недоступны для покупки. Событие появится в каталоге, когда будет доступен хотя бы один билет.",
+  "Publish the event page. Paid tickets remain unavailable until paid sales are activated. Discovery requires at least one purchasable ticket.": "Опубликуйте страницу события. Платные билеты будут недоступны до активации продаж. Для отображения в каталоге нужен хотя бы один доступный билет.",
+  "Attendees cannot purchase paid tickets until the activation payment is confirmed.": "Посетители не смогут купить платные билеты до подтверждения оплаты активации.",
+  "Activate paid sales to make paid tickets purchasable. Published events with no purchasable tickets are hidden from discovery.": "Активируйте платные продажи, чтобы билеты стали доступны для покупки. Опубликованные события без доступных билетов скрыты из каталога.",
 }
 
 export const kazakh: Readonly<Record<string, string>> = {
@@ -2575,6 +2582,12 @@ export const kazakh: Readonly<Record<string, string>> = {
   "Update your password": "Құпиясөзді жаңарту",
   "View all events": "Барлық іс-шаралар",
   "Welcome back, {0}": "Қайта қош келдіңіз, {0}",
+  "Showing events with tickets available now.": "Қазір билет алуға болатын іс-шаралар көрсетілген.",
+  "Ticket sales have not opened yet.": "Билет сату әлі басталған жоқ.",
+  "No tickets are currently available for purchase.": "Қазір сатып алуға қолжетімді билеттер жоқ.",
+  "You can publish the event now and activate paid sales later. Until activation, paid tickets cannot be purchased. The event will appear in discovery only when at least one ticket is available for purchase.": "Іс-шараны қазір жариялап, ақылы билет сатуды кейін іске қосуға болады. Іске қосылғанға дейін ақылы билеттерді сатып алу мүмкін емес. Кемінде бір билет қолжетімді болғанда іс-шара каталогта көрсетіледі.",
+  "Publish the event page. Paid tickets remain unavailable until paid sales are activated. Discovery requires at least one purchasable ticket.": "Іс-шара бетін жариялаңыз. Ақылы билет сату іске қосылғанға дейін ақылы билеттер қолжетімсіз. Каталогта көрсетілу үшін кемінде бір билет қолжетімді болуы керек.",
+  "Attendees cannot purchase paid tickets until the activation payment is confirmed.": "Іске қосу төлемі расталғанға дейін қатысушылар ақылы билеттерді сатып ала алмайды.",
+  "Activate paid sales to make paid tickets purchasable. Published events with no purchasable tickets are hidden from discovery.": "Ақылы билеттерді сатып алу мүмкін болуы үшін сатуды іске қосыңыз. Қолжетімді билеттері жоқ жарияланған іс-шаралар каталогта көрсетілмейді.",
 }
-
 

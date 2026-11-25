@@ -36,7 +36,6 @@ import { useSessionViewModel } from "@/auth/useSessionViewModel"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
@@ -57,7 +56,6 @@ function eventDetailsPath(eventId: string) {
 const defaultFilters = {
   query: "",
   category: "",
-  availableOnly: false,
   sort: "startAt,asc" as "startAt,asc" | "startAt,desc",
 }
 
@@ -141,11 +139,11 @@ function discoveryHref(
   page: number
 ) {
   const params = new URLSearchParams(search)
+  params.delete("availableOnly")
   const values = {
     page: page === 0 ? "" : String(page + 1),
     query: filters.query,
     category: filters.category,
-    availableOnly: filters.availableOnly ? "true" : "",
     sort: filters.sort === defaultFilters.sort ? "" : filters.sort,
   }
   for (const [key, value] of Object.entries(values)) {
@@ -167,7 +165,6 @@ function useEventDiscoveryViewModel() {
   const filters: typeof defaultFilters = {
     query: current.get("query")?.trim() ?? "",
     category: current.get("category")?.trim() ?? "",
-    availableOnly: current.get("availableOnly") === "true",
     sort:
       current.get("sort") === "startAt,desc" ? "startAt,desc" : "startAt,asc",
   }
@@ -179,6 +176,7 @@ function useEventDiscoveryViewModel() {
   const events = useQuery({
     ...publicEventRepository.discoveryQuery({
       ...filters,
+      availableOnly: true,
       page,
       size: pageSize,
     }),
@@ -238,8 +236,6 @@ function useEventDiscoveryViewModel() {
       setFilter("query", event.currentTarget.value),
     changeCategory: (event: ChangeEvent<HTMLInputElement>) =>
       setFilter("category", event.currentTarget.value),
-    changeAvailability: (checked: boolean | "indeterminate") =>
-      setFilter("availableOnly", checked === true),
     changeSort: (event: ChangeEvent<HTMLSelectElement>) =>
       setFilter(
         "sort",
@@ -412,16 +408,9 @@ export function EventDiscoveryPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Field orientation="horizontal" className="mr-auto w-auto">
-                <Checkbox
-                  id="discovery-available"
-                  checked={viewModel.draft.availableOnly}
-                  onCheckedChange={viewModel.changeAvailability}
-                />
-                <FieldLabel htmlFor="discovery-available">
-                  {t("Tickets available now")}
-                </FieldLabel>
-              </Field>
+              <p className="mr-auto text-sm text-muted-foreground">
+                {t("Showing events with tickets available now.")}
+              </p>
               <Button
                 type="button"
                 variant="ghost"
@@ -612,7 +601,7 @@ function useHomeViewModel() {
     select: toAttendeeOverview,
   })
   const discovery = useQuery({
-    ...publicEventRepository.discoveryQuery({ page: 0, size: previewSize }),
+    ...publicEventRepository.discoveryQuery({ page: 0, size: previewSize, availableOnly: true }),
     select: toResults,
   })
   const [, navigate] = useLocation()
@@ -979,3 +968,4 @@ export function HomePage() {
     </SitePage>
   )
 }
+

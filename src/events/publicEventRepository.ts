@@ -19,6 +19,7 @@ export const publicEventRepository = {
       queryKey: ["public-events", params],
       queryFn: () => listPublicEvents(params),
       retry: retryPublicRead,
+      refetchInterval: 30_000,
     })
   },
 
@@ -27,6 +28,7 @@ export const publicEventRepository = {
       queryKey: ["public-event", eventId],
       queryFn: () => getPublicEvent(eventId),
       retry: retryPublicRead,
+      refetchInterval: 15_000,
     })
   },
 

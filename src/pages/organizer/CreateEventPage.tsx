@@ -200,7 +200,7 @@ export function CreateEventPage({ sessionId }: { sessionId: number }) {
                     <Alert className="border-amber-500/40 bg-amber-50 text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
                       <AlertDescription>
                         <strong className="mb-1 block">{t("Paid sales require activation")}</strong>
-                        <span>{t("A one-time activation fee applies to events with paid tickets. You can save or publish now and activate paid sales from event management. Paid tickets cannot be purchased until activation is complete.")}</span>
+                        <span>{t("You can publish the event now and activate paid sales later. Until activation, paid tickets cannot be purchased. The event will appear in discovery only when at least one ticket is available for purchase.")}</span>
                       </AlertDescription>
                     </Alert>
                   )}

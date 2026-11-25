@@ -336,7 +336,7 @@ function EventDetails({
                 </ul>
               )}
               {!model.ticketError &&
-                model.tickets.some((ticket) => ticket.orderLimit > 0) && (
+                model.canSelectTickets && (
                   <Link
                     href={campaignEventPath(
                       eventId,

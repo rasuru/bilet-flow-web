@@ -84,6 +84,10 @@ export function BuyTicketsPage({ eventId }: { eventId: string }) {
             model.tickets.length === 0 && (
               <p>{t("There are no tickets listed for this event.")}</p>
             )}
+          {!model.loadingTickets && !model.loadingAvailability && !model.ticketError && !model.availabilityError &&
+            model.tickets.length > 0 && !model.canSelectTickets && !model.salesMessage && (
+              <p role="status">{t("No tickets are currently available for purchase.")}</p>
+            )}
           {model.tickets.length > 0 && (
             <TicketOrderForm
               key={`${eventId}:${token ?? ""}`}

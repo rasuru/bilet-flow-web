@@ -56,9 +56,10 @@ export function TicketOrderForm({
   const { session } = model
   const signedIn = session.status === "signedIn"
   const showAuth = session.status === "signedOut" && model.authMode !== null
+  const showSummary = model.canSelectTickets || model.hasSelection || model.retryingOrder
 
   return (
-    <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_19rem]">
+    <div className={showSummary ? "grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_19rem]" : "space-y-6"}>
       <Card>
         <CardHeader>
           <CardTitle>
@@ -228,7 +229,7 @@ export function TicketOrderForm({
           </form>
         </CardContent>
       </Card>
-      <Card>
+      {showSummary && <Card>
         <CardHeader>
           <CardTitle>
             <h2>{t("Order summary")}</h2>
@@ -356,6 +357,7 @@ export function TicketOrderForm({
                       )}
                 </p>
               )}
+              {model.selectionUnavailable && <FieldError>{t("Ticket availability changed. Update your selection and try again.")}</FieldError>}
               {model.formError && <FieldError>{model.formError}</FieldError>}
               {session.status === "restoring" && (
                 <p role="status">{t("Checking your session…")}</p>
@@ -422,7 +424,7 @@ export function TicketOrderForm({
             </section>
           )}
         </CardContent>
-      </Card>
+      </Card>}
     </div>
   )
 }
