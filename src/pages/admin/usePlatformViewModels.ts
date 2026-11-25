@@ -11,14 +11,13 @@ import { adminQueryView } from "./adminQueryView"
 export function useAdminUsersViewModel(sessionId: number) {
   const [page, setPage] = useState(0)
   const [selected, select] = useState<{ login: string } | "create" | null>(null)
-  const query = useQuery(adminRepository.users(sessionId, page))
+  const [term, setTerm] = useState("")
+  const query = useQuery(adminRepository.users(sessionId, page, term))
 
   function find(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const login = String(new FormData(event.currentTarget).get("login") ?? "")
-      .trim()
-      .toLowerCase()
-    if (login) select({ login })
+    setTerm(String(new FormData(event.currentTarget).get("q") ?? "").trim())
+    setPage(0)
   }
 
   return {
@@ -163,4 +162,3 @@ export function useAuthoritiesViewModel(sessionId: number) {
     },
   }
 }
-

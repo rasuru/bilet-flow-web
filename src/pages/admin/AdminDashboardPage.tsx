@@ -13,6 +13,7 @@ import {
   AdminExports,
   AdminOrders,
   AdminPayments,
+  AdminSettings,
 } from "./AdminCommerce"
 import { AdminEventReports, AdminEvents, AdminSupport } from "./AdminModeration"
 import { AdminOverview } from "./AdminOverview"
@@ -168,6 +169,8 @@ function AdminSectionContent({
       return <AdminUsers sessionId={sessionId} />
     case "authorities":
       return <AdminAuthorities sessionId={sessionId} />
+    case "settings":
+      return <AdminSettings sessionId={sessionId} />
     case "exports":
       return <AdminExports sessionId={sessionId} />
   }

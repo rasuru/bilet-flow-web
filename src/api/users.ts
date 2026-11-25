@@ -54,8 +54,18 @@ export function searchUsers(token: string, query: string) {
   )
 }
 
-export function listAdminUsers(token: string, query: PageQuery = {}) {
+export function listAdminUsers(
+  token: string,
+  query: PageQuery & { q?: string } = {}
+) {
   return requestPage<AdminUser>(withQuery("/api/admin/users", query), token)
+}
+
+export function findAdminUserIdentities(token: string, ids: readonly string[]) {
+  return requestJson<PublicUser[]>(
+    withQuery("/api/admin/user-identities", { ids }),
+    { token }
+  )
 }
 
 export function getAdminUser(token: string, login: string) {
